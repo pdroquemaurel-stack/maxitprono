@@ -2,8 +2,7 @@ def test_home_page_shows_app_name(client):
     response = client.get("/")
     assert response.status_code == 200
     assert "MaxitProno" in response.text
-    assert "Bientôt" in response.text  # français par défaut
-    assert "Inscription" in response.text  # joueur non connecté
+    assert "Inscription" in response.text  # français par défaut
 
 
 def test_health_returns_ok(client):

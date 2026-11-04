@@ -15,7 +15,21 @@
 
   <section class="card">
     <h2>{{ t('profile_history') }}</h2>
-    <p class="lead">{{ t('profile_history_soon') }}</p>
+    {% for prediction in history %}
+      {% set match = prediction.match %}
+      <div class="history-row">
+        <span class="history-date">{{ format_date_time(match.kickoff_at, tz) }}</span>
+        <span class="history-teams">{{ match.home_team }} - {{ match.away_team }}</span>
+        <span class="history-scores">
+          {{ prediction.home_score }}-{{ prediction.away_score }}
+          {% if match.status == 'cancelled' %}<small>({{ t('status_cancelled') }})</small>
+          {% elif match.home_score is not none %}<small>({{ t('final_score') }} {{ match.home_score }}-{{ match.away_score }})</small>
+          {% endif %}
+        </span>
+      </div>
+    {% else %}
+      <p class="lead">{{ t('profile_history_empty') }}</p>
+    {% endfor %}
   </section>
 
   <form method="post" action="/logout">

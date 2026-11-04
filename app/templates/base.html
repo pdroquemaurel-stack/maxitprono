@@ -10,6 +10,7 @@
   <header class="topbar">
     <a href="/" class="brand">{{ t('app_name') }}</a>
     <nav>
+      <a href="/matches">{{ t('matches_title') }}</a>
       {% if user %}
         <a href="/profile">{{ user.nickname }}</a>
       {% else %}
@@ -21,6 +22,7 @@
     {% block content %}{% endblock %}
   </main>
   <footer class="footer"><a href="/rules">{{ t('rules_title') }}</a></footer>
+  <script src="/static/js/timezone.js"></script>
   {% block scripts %}{% endblock %}
 </body>
 </html>

@@ -1,0 +1,45 @@
+{# Carte d'un match. Variables : match, back (page de retour), et le contexte match_context #}
+{% set prediction = predictions.get(match.id) %}
+{% set is_open = match.id in open_ids %}
+<article class="match" id="m{{ match.id }}">
+  <div class="match-head">
+    <time datetime="{{ match.kickoff_at.isoformat() }}">{{ format_time(match.kickoff_at, tz) }}</time>
+    {% if match.status == 'live' %}<span class="badge live">{{ t('status_live') }}</span>
+    {% elif match.status == 'postponed' %}<span class="badge">{{ t('status_postponed') }}</span>
+    {% elif match.status == 'cancelled' %}<span class="badge">{{ t('status_cancelled') }}</span>
+    {% elif not is_open and match.status == 'scheduled' %}<span class="badge">{{ t('prediction_closed') }}</span>
+    {% endif %}
+  </div>
+
+  {% if is_open and user %}
+    <form class="match-row" method="post" action="/matches/{{ match.id }}/prediction">
+      <input type="hidden" name="back" value="{{ back }}">
+      <span class="team home">{{ match.home_team }}</span>
+      <input class="score" name="home_score" type="number" inputmode="numeric" min="0" max="20"
+             required value="{{ prediction.home_score if prediction else '' }}"
+             aria-label="{{ t('score_of') }} {{ match.home_team }}">
+      <span class="dash">-</span>
+      <input class="score" name="away_score" type="number" inputmode="numeric" min="0" max="20"
+             required value="{{ prediction.away_score if prediction else '' }}"
+             aria-label="{{ t('score_of') }} {{ match.away_team }}">
+      <span class="team away">{{ match.away_team }}</span>
+      <button class="small" type="submit">{{ t('prediction_update') if prediction else t('prediction_submit') }}</button>
+    </form>
+  {% else %}
+    <div class="match-row">
+      <span class="team home">{{ match.home_team }}</span>
+      <span class="final">
+        {% if match.home_score is not none %}{{ match.home_score }} - {{ match.away_score }}{% else %}-{% endif %}
+      </span>
+      <span class="team away">{{ match.away_team }}</span>
+    </div>
+    {% if prediction %}
+      <p class="my-prediction">{{ t('my_prediction') }} : {{ prediction.home_score }} - {{ prediction.away_score }}</p>
+    {% elif is_open %}
+      <p class="my-prediction"><a href="/login">{{ t('login_to_predict') }}</a></p>
+    {% endif %}
+  {% endif %}
+
+  {% if saved_id == match.id %}<p class="notice">{{ t('prediction_saved') }}</p>{% endif %}
+  {% if error_id == match.id and error %}<p class="alert" role="alert">{{ t(error) }}</p>{% endif %}
+</article>

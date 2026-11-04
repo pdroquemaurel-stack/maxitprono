@@ -3,6 +3,19 @@
 {% block content %}
   {% if user %}
     <h1>{{ t('home_hello') }} {{ user.nickname }} !</h1>
+    {% if to_predict %}
+      <p class="lead">{{ t('home_to_predict').format(count=to_predict) }}</p>
+    {% endif %}
+    <section class="card competition">
+      <h2>{{ t('home_next_matches') }}</h2>
+      {% for match in matches %}
+        <p class="competition-name">{{ match.competition.name }} · {{ format_day(match.kickoff_at.astimezone(tz).date(), today) }}</p>
+        {% with back = '/' %}{% include "_match_card.html" %}{% endwith %}
+      {% else %}
+        <p>{{ t('matches_none') }}</p>
+      {% endfor %}
+    </section>
+    <p><a class="button secondary" href="/matches">{{ t('home_all_matches') }}</a></p>
   {% else %}
     <h1>{{ t('app_name') }}</h1>
     <p class="lead">{{ t('home_welcome') }}</p>
@@ -10,6 +23,6 @@
       <a class="button" href="/register">{{ t('register_title') }}</a>
       <a class="button secondary" href="/login">{{ t('nav_login') }}</a>
     </p>
+    <p><a href="/matches">{{ t('home_all_matches') }}</a></p>
   {% endif %}
-  <section class="card">{{ t('home_coming_soon') }}</section>
 {% endblock %}

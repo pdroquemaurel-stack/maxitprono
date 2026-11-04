@@ -9,6 +9,8 @@ from app.db import get_db
 from app.i18n.countries import COUNTRY_CODES
 from app.models import User
 from app.models.types import utc_now
+from app.routes.matches import prediction_history
+from app.services.timezones import resolve_timezone
 from app.services.accounts import MAX_AVATAR_BYTES, avatar_mime, decode_data_url, validate_country
 from app.templating import templates
 
@@ -102,8 +104,13 @@ def logout():
 # --- Profil ---
 
 @router.get("/profile")
-def profile(request: Request, user: User = Depends(require_user)):
-    return templates.TemplateResponse(request, "profile.html", {"user": user})
+def profile(request: Request, db: Session = Depends(get_db), user: User = Depends(require_user)):
+    return templates.TemplateResponse(request, "profile.html", profile_context(request, db, user))
+
+
+def profile_context(request: Request, db: Session, user: User, error: str | None = None) -> dict:
+    return {"user": user, "error": error, "history": prediction_history(db, user),
+            "tz": resolve_timezone(request.cookies.get("tz"))}
 
 
 @router.post("/profile")
@@ -114,7 +121,8 @@ def profile_submit(request: Request, db: Session = Depends(get_db),
     error = error or validate_country(country_code, COUNTRY_CODES)
     if error:
         return templates.TemplateResponse(request, "profile.html",
-                                          {"user": user, "error": error}, status_code=400)
+                                          profile_context(request, db, user, error),
+                                          status_code=400)
     user.country_code = country_code
     if avatar:
         user.avatar, user.avatar_mime = avatar, mime

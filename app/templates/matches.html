@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}{{ t('matches_title') }} · {{ t('app_name') }}{% endblock %}
+{% block content %}
+  <h1>{{ t('matches_title') }}</h1>
+  {% for day, competitions in days %}
+    <section class="day">
+      <h2>{{ format_day(day, today) }}</h2>
+      {% for competition, matches in competitions %}
+        <div class="card competition">
+          <h3>{{ competition.name }}</h3>
+          {% for match in matches %}
+            {% with back = '/matches' %}{% include "_match_card.html" %}{% endwith %}
+          {% endfor %}
+        </div>
+      {% endfor %}
+    </section>
+  {% else %}
+    <p class="card">{{ t('matches_none') }}</p>
+  {% endfor %}
+{% endblock %}

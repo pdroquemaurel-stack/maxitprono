@@ -119,3 +119,72 @@ button.secondary, .button.secondary {
   object-fit: cover;
   flex-shrink: 0;
 }
+
+/* Navigation */
+.topbar nav { display: flex; gap: 1rem; font-weight: 400; }
+
+/* Matchs */
+.day + .day { margin-top: 1.25rem; }
+
+h3, .competition-name {
+  font-size: 0.85rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin: 0 0 0.25rem;
+}
+
+.competition + .competition { margin-top: 0.75rem; }
+
+.match { padding: 0.6rem 0; border-top: 1px solid #eee; }
+
+.match:first-of-type { border-top: none; }
+
+.match-head { display: flex; gap: 0.5rem; align-items: center; font-size: 0.85rem; color: var(--muted); }
+
+.match-row {
+  display: grid;
+  grid-template-columns: 1fr 3rem auto 3rem 1fr;
+  gap: 0.4rem;
+  align-items: center;
+  margin-top: 0.25rem;
+}
+
+.match-row .team { font-weight: 600; overflow-wrap: anywhere; }
+
+.match-row .home { text-align: right; }
+
+.match-row .score { text-align: center; padding: 0.5rem 0.2rem; }
+
+.match-row .final { grid-column: 2 / 5; text-align: center; font-weight: 700; }
+
+.match-row button { grid-column: 1 / -1; margin-top: 0.35rem; }
+
+.my-prediction { margin: 0.25rem 0 0; font-size: 0.9rem; text-align: center; color: var(--muted); }
+
+.match .notice, .match .alert { margin: 0.4rem 0 0; font-size: 0.9rem; }
+
+.badge {
+  background: #eee;
+  border-radius: 1rem;
+  padding: 0 0.5rem;
+  font-size: 0.75rem;
+}
+
+.badge.live { background: #d93025; color: #fff; }
+
+/* Historique */
+.history-row {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0 0.75rem;
+  padding: 0.4rem 0;
+  border-top: 1px solid #eee;
+  font-size: 0.9rem;
+}
+
+.history-date { color: var(--muted); }
+
+.history-scores { grid-column: 2; font-weight: 600; }
+
+.history-scores small { font-weight: 400; color: var(--muted); }
