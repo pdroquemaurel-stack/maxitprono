@@ -536,9 +536,68 @@ body { padding-bottom: calc(var(--tabbar-height) + env(safe-area-inset-bottom));
   align-items: center;
 }
 
-.match-grid .team { font-weight: 700; font-size: 16px; overflow-wrap: anywhere; }
+.match-grid .team {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  font-weight: 700;
+  font-size: 16px;
+  overflow-wrap: anywhere;
+}
 
-.match-grid .home { text-align: right; }
+.match-grid .home { align-items: flex-end; text-align: right; }
+
+/* Écusson : logo par-dessus les initiales, qui restent visibles s'il manque */
+.crest {
+  position: relative;
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--neutral-bg);
+  color: var(--muted);
+  font-family: var(--font-title);
+  font-weight: 800;
+  font-size: 12px;
+  overflow: hidden;
+}
+
+.crest img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: var(--surface);
+}
+
+/* Ligne des pourcentages « 1 x % · N x % · 2 x % » */
+.probs {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px 18px;
+  margin: 8px 0 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.probs b { color: var(--ink); font-weight: 700; }
+
+.probs-source { flex-basis: 100%; text-align: center; font-size: 12px; }
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
 
 .match-grid .dash { text-align: center; color: var(--placeholder); }
 
@@ -611,7 +670,18 @@ a.card.result { display: block; color: var(--ink); font-weight: 400; text-decora
 
 .final-row { display: grid; grid-template-columns: 1fr auto 1fr; gap: 12px; align-items: center; }
 
-.final-row .team { font-weight: 700; font-size: 16px; overflow-wrap: anywhere; text-align: center; }
+.final-row .team {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 16px;
+  overflow-wrap: anywhere;
+  text-align: center;
+}
+
+.final-row .crest { width: 44px; height: 44px; }
 
 .final-score { font-size: 48px; line-height: 1; }
 

@@ -12,6 +12,7 @@ from app.models import Competition, Match, Prediction, User
 from app.models.types import utc_now
 from app.services.deadlines import is_prediction_open
 from app.services.predictions import save_prediction
+from app.services.probabilities import match_probabilities
 from app.services.timezones import group_by_day_and_competition, resolve_timezone
 from app.templating import templates
 
@@ -42,6 +43,27 @@ def predictions_by_match(db: Session, user: User | None, match_ids: list[int]) -
     return {p.match_id: p for p in db.scalars(query)}
 
 
+def probabilities_by_match(db: Session, matches: list[Match]) -> dict:
+    """{match_id: Probabilities} ; les matchs sans pourcentages sont absents.
+
+    Une seule requête pour les pronostics des matchs sans pourcentages du fournisseur.
+    """
+    without_provider = [m.id for m in matches if m.prob_home is None]
+    scores: dict[int, list[tuple[int, int]]] = {}
+    if without_provider:
+        rows = db.execute(select(Prediction.match_id, Prediction.home_score, Prediction.away_score)
+                          .where(Prediction.match_id.in_(without_provider)))
+        for match_id, home, away in rows:
+            scores.setdefault(match_id, []).append((home, away))
+    result = {}
+    for m in matches:
+        probabilities = match_probabilities(m.prob_home, m.prob_draw, m.prob_away,
+                                            scores.get(m.id, []))
+        if probabilities:
+            result[m.id] = probabilities
+    return result
+
+
 def match_context(request: Request, db: Session, user: User | None, matches: list[Match],
                   now: datetime) -> dict:
     """Données communes aux pages qui affichent des cartes de match."""
@@ -52,6 +74,7 @@ def match_context(request: Request, db: Session, user: User | None, matches: lis
         "tz": tz,
         "today": now.astimezone(tz).date(),
         "predictions": predictions_by_match(db, user, [m.id for m in matches]),
+        "probabilities": probabilities_by_match(db, matches),
         "open_ids": {m.id for m in matches if is_prediction_open(m.status, m.kickoff_at, now)},
         "saved_count": _int_or_none(request.query_params.get("saved")),
         "entered": {},  # valeurs saisies, réaffichées en cas d'erreur

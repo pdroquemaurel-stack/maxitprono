@@ -20,6 +20,9 @@ class FakeProvider:
         self.fail = fail
         self.calls = []
 
+    def get_probabilities(self, match_id):
+        return None
+
     def get_matches(self, competition_id, season, date_from, date_to):
         self.calls.append((competition_id, date_from, date_to))
         if self.fail:
@@ -81,7 +84,7 @@ def test_fixtures_imports_matches(client, provider):
     response = client.post("/internal/sync?task=fixtures", headers=AUTH)
     assert response.status_code == 200
     assert response.json() == {"task": "fixtures", "provider": "football_data",
-                               "matches": 1, "predictions_scored": 0}
+                               "matches": 1, "probabilities": 0, "predictions_scored": 0}
     assert [call[0] for call in provider.calls] == ["FL1"]
 
 

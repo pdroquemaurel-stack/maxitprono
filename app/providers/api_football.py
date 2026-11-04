@@ -13,6 +13,7 @@ from app.models import ApiCallLog
 from app.models.match import MatchStatus
 from app.providers import API_FOOTBALL
 from app.providers.base import ProviderError, save_call_log
+from app.services.probabilities import round_to_100
 
 BASE_URL = "https://v3.football.api-sports.io"
 
@@ -85,6 +86,11 @@ class ApiFootballClient:
         items = self.get_fixtures(competition_id, season, date_from.isoformat(),
                                   date_to.isoformat())
         return [parse_fixture(item) for item in items]
+
+    def get_probabilities(self, match_id: str) -> tuple[int, int, int] | None:
+        """Un appel par match (endpoint /predictions)."""
+        items = self._get("predictions", {"fixture": match_id})
+        return parse_prediction_percent(items[0]) if items else None
 
     # --- Appels bruts ---
 
@@ -170,6 +176,18 @@ def parse_fixture(item: dict) -> dict:
         "home_score": goals["home"],
         "away_score": goals["away"],
     }
+
+
+def parse_prediction_percent(item: dict) -> tuple[int, int, int] | None:
+    """Pourcentages de /predictions (« 45% »), ramenés à une somme de 100."""
+    percent = (item.get("predictions") or {}).get("percent") or {}
+    try:
+        values = [float(str(percent[k]).rstrip("%")) for k in ("home", "draw", "away")]
+    except (KeyError, ValueError):
+        return None
+    if sum(values) <= 0:
+        return None
+    return tuple(round_to_100(values))
 
 
 def parse_league(item: dict) -> dict:

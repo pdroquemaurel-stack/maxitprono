@@ -16,7 +16,7 @@
   </p>
 
   <div class="match-grid">
-    <span class="team home">{{ match.home_team }}</span>
+    <span class="team home">{% with url = match.home_logo_url, name = match.home_team %}{% include "_crest.html" %}{% endwith %}<span class="team-name">{{ match.home_team }}</span></span>
     {% if is_open and user %}
       {# Valeurs : saisie refusée à réafficher, sinon pronostic enregistré #}
       {% set home_value = typed[0] if typed else (prediction.home_score if prediction else '') %}
@@ -36,8 +36,19 @@
       <span class="dash" aria-hidden="true">–</span>
       <span class="score-box {{ away_class }}">{{ prediction.away_score if prediction else '–' }}</span>
     {% endif %}
-    <span class="team away">{{ match.away_team }}</span>
+    <span class="team away">{% with url = match.away_logo_url, name = match.away_team %}{% include "_crest.html" %}{% endwith %}<span class="team-name">{{ match.away_team }}</span></span>
   </div>
+
+  {% set probs = probabilities.get(match.id) %}
+  {% if probs %}
+    <p class="probs">
+      <span class="visually-hidden">{{ t('probs_label').format(home=match.home_team, away=match.away_team, h=probs.home, d=probs.draw, a=probs.away) }}</span>
+      {% if probs.source == 'players' %}<span class="probs-source">{{ t('probs_players') }}</span>{% endif %}
+      <span aria-hidden="true">{{ t('prob_home') }} <b>{{ probs.home }} %</b></span>
+      <span aria-hidden="true">{{ t('prob_draw') }} <b>{{ probs.draw }} %</b></span>
+      <span aria-hidden="true">{{ t('prob_away') }} <b>{{ probs.away }} %</b></span>
+    </p>
+  {% endif %}
 
   {% if match.home_score is not none and match.status in ('live', 'finished') %}
     <p class="match-foot">{{ t('final_score_label') if match.status == 'finished' else t('live_score_label') }}
@@ -47,7 +58,6 @@
   {% elif not is_open and prediction is none and user %}
     <p class="match-foot">{{ t('no_prediction') }}</p>
   {% endif %}
-  {# Plus tard (étape 7) : ligne des pourcentages 1 / N / 2 #}
 
   {% if error %}<p class="alert" role="alert">{{ t(error) }}</p>{% endif %}
 </article>

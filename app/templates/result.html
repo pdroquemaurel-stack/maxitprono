@@ -12,13 +12,13 @@
 
   <section class="card-dark final-card">
     <div class="final-row">
-      <span class="team">{{ match.home_team }}</span>
+      <span class="team">{% with url = match.home_logo_url, name = match.home_team %}{% include "_crest.html" %}{% endwith %}{{ match.home_team }}</span>
       {% if match.home_score is not none %}
         <span class="final-score">{% with home = match.home_score, away = match.away_score %}{% include "_score.html" %}{% endwith %}</span>
       {% else %}
         <span class="final-score">–</span>
       {% endif %}
-      <span class="team">{{ match.away_team }}</span>
+      <span class="team">{% with url = match.away_logo_url, name = match.away_team %}{% include "_crest.html" %}{% endwith %}{{ match.away_team }}</span>
     </div>
 
     {% if match.status == 'cancelled' and prediction %}

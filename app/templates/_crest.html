@@ -1,0 +1,6 @@
+{# Écusson d'équipe : logo du fournisseur, initiales en dessous si pas de logo ou s'il ne charge pas.
+   Variables : url, name #}
+<span class="crest" aria-hidden="true">
+  <span class="crest-initials">{{ team_initials(name) }}</span>
+  {%- if url %}<img src="{{ url }}" alt="" width="36" height="36" loading="lazy" decoding="async" onerror="this.remove()">{% endif -%}
+</span>

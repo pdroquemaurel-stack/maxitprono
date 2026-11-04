@@ -1,7 +1,7 @@
 """Lance l'import des matchs à la main, chez le fournisseur choisi (DATA_PROVIDER).
 
 Usage :
-  python -m scripts.run_import                     # J-3 à J+14, saisons en cours
+  python -m scripts.run_import                     # J-3 à J+14 + pourcentages 1/N/2
   python -m scripts.run_import --season 2024 --from 2024-08-16 --to 2024-08-31
   python -m scripts.run_import --scores            # mise à jour des matchs en cours
 
@@ -12,6 +12,7 @@ from datetime import date
 
 from app.db import SessionLocal
 from app.jobs.import_matches import import_matches, import_upcoming_matches, update_live_scores
+from app.jobs.import_probabilities import import_probabilities
 from app.jobs.score_predictions import score_finished_matches
 from app.models.types import utc_now
 from app.providers import make_provider
@@ -37,6 +38,7 @@ def main() -> None:
                 print(f"Matchs importés : {count}")
             else:
                 print(f"Matchs importés : {import_upcoming_matches(db, provider, date.today())}")
+                print(f"Pourcentages 1/N/2 : {import_probabilities(db, provider, utc_now())}")
         except ProviderError as exc:
             print(f"Arrêt : {exc}")
         # Calcul des points après chaque import, même partiel

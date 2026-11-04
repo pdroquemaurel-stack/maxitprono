@@ -37,5 +37,9 @@ class Match(Base):
     home_score: Mapped[int | None] = mapped_column(Integer)
     away_score: Mapped[int | None] = mapped_column(Integer)
     synced_at: Mapped[datetime | None] = mapped_column(UTCDateTime)  # dernière mise à jour API
+    # Pourcentages 1 / N / 2 prédits par le fournisseur (somme = 100), vides s'il n'en donne pas
+    prob_home: Mapped[int | None] = mapped_column(Integer)
+    prob_draw: Mapped[int | None] = mapped_column(Integer)
+    prob_away: Mapped[int | None] = mapped_column(Integer)
 
     competition: Mapped[Competition] = relationship()

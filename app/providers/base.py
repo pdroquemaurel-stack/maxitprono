@@ -30,6 +30,11 @@ class FootballProvider(Protocol):
         """Matchs d'une compétition entre deux dates (incluses)."""
         ...
 
+    def get_probabilities(self, match_id: str) -> tuple[int, int, int] | None:
+        """Pourcentages 1 / N / 2 prédits (somme = 100), ou None si le fournisseur
+        n'en donne pas. Sans appel réseau quand le fournisseur ne les propose pas."""
+        ...
+
 
 def save_call_log(db: Session, log: ApiCallLog, error: str = "") -> None:
     """Enregistre l'appel tout de suite : il doit rester journalisé même si la suite échoue."""

@@ -131,5 +131,10 @@
   "result_winner": "Ton prono : {score}, bon vainqueur",
   "result_missed": "Ton prono : {score}",
   "result_cancelled": "Match annulé : ton prono ne compte pas.",
-  "result_no_prediction": "Tu n'avais pas pronostiqué ce match."
+  "result_no_prediction": "Tu n'avais pas pronostiqué ce match.",
+  "prob_home": "1",
+  "prob_draw": "N",
+  "prob_away": "2",
+  "probs_players": "Tendance des joueurs",
+  "probs_label": "Victoire {home} {h} %, nul {d} %, victoire {away} {a} %"
 }

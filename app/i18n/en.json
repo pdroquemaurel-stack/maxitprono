@@ -131,5 +131,10 @@
   "result_winner": "Your prediction: {score}, right winner",
   "result_missed": "Your prediction: {score}",
   "result_cancelled": "Match cancelled: your prediction does not count.",
-  "result_no_prediction": "You did not predict this match."
+  "result_no_prediction": "You did not predict this match.",
+  "prob_home": "1",
+  "prob_draw": "X",
+  "prob_away": "2",
+  "probs_players": "Players' trend",
+  "probs_label": "{home} win {h}%, draw {d}%, {away} win {a}%"
 }

@@ -170,3 +170,11 @@ def test_parse_competition():
 def test_parse_competition_without_current_season():
     s = parse_competition({**COMPETITION_ITEM, "currentSeason": None})
     assert (s["season"], s["is_current"]) == (None, False)
+
+
+def test_get_probabilities_makes_no_call(db):
+    def handler(request):
+        raise AssertionError("aucun appel attendu")
+
+    assert make_client(db, handler).get_probabilities("497410") is None
+    assert db.query(ApiCallLog).count() == 0

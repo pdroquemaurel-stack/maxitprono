@@ -1,6 +1,7 @@
 """Déclenchement des synchronisations par la GitHub Action (.github/workflows/sync.yml).
 
-POST /internal/sync?task=fixtures : import des matchs de J-3 à J+14 (1 fois par jour)
+POST /internal/sync?task=fixtures : import des matchs de J-3 à J+14 et des pourcentages
+                                    1 / N / 2 du fournisseur (1 fois par jour)
 POST /internal/sync?task=scores   : mise à jour des matchs en cours (toutes les 10 min),
                                     sans aucun appel API s'il n'y en a pas
 Les points des matchs terminés sont calculés après chaque synchronisation.
@@ -18,6 +19,7 @@ from sqlalchemy.orm import Session
 from app import config
 from app.db import get_db
 from app.jobs.import_matches import import_upcoming_matches, update_live_scores
+from app.jobs.import_probabilities import import_probabilities
 from app.jobs.score_predictions import score_finished_matches
 from app.models.types import utc_now
 from app.providers import make_provider
@@ -51,6 +53,7 @@ def sync(task: Literal["fixtures", "scores"], authorization: str = Header(""),
         provider = provider_factory(db)
         if task == "fixtures":
             result["matches"] = import_upcoming_matches(db, provider, date.today())
+            result["probabilities"] = import_probabilities(db, provider, utc_now())
         else:
             result["matches"] = update_live_scores(db, provider, utc_now())
     except ProviderError as exc:

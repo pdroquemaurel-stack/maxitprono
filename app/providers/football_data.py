@@ -63,6 +63,10 @@ class FootballDataClient:
         items = self._get(f"competitions/{competition_id}/matches", params)["matches"]
         return [parse_match(item) for item in items]
 
+    def get_probabilities(self, match_id: str) -> None:
+        """Pas de prédictions ni de cotes sur l'offre gratuite : aucun appel."""
+        return None
+
     def _get(self, path: str, params: dict) -> dict:
         log = ApiCallLog(provider=self.name, endpoint=path,
                          params=json.dumps(params, sort_keys=True))

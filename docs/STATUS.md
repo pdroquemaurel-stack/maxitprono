@@ -1,6 +1,6 @@
 # MaxitProno — État des lieux
 
-Mis à jour le 4 novembre 2026, après la PARTIE 2 étape 3 (synchronisation par `/internal/sync` + GitHub Action).
+Mis à jour le 4 novembre 2026, après la PARTIE 2 étape 4 (pourcentages 1/N/2 et écussons).
 
 ## 1. Avancement des étapes (SPEC §12)
 
@@ -12,9 +12,9 @@ Mis à jour le 4 novembre 2026, après la PARTIE 2 étape 3 (synchronisation par
 | 4 | Pronostics + clôture 10 min | **Fait** | `app/models/prediction.py`, `app/services/deadlines.py`, `app/services/predictions.py`, `app/routes/matches.py`, `matches.html`, `_match_card.html` |
 | 5 | Points + classements + départage | **Fait** | `app/services/scoring.py`, `app/services/ranking.py`, `app/services/leaderboards.py`, `app/jobs/score_predictions.py`, `app/routes/leaderboard.py`, `app/routes/results.py` |
 | 6 | Ligues privées + lien de partage | **À faire** | Emplacements réservés dans `home.html` (sélecteur de ligue) et `result.html` (pronos de la ligue) ; aucune table `leagues` |
-| 7 | Pourcentages 1/N/2 | **À faire** | Emplacement réservé dans `_match_card.html` ; aucun champ en base |
+| 7 | Pourcentages 1/N/2 | **Fait** | `app/services/probabilities.py`, `app/jobs/import_probabilities.py`, `Match.prob_home/draw/away`, `get_probabilities` des fournisseurs, `_match_card.html` |
 | 8 | Back-office admin + KPIs | **À faire** | Remplacé provisoirement par `scripts/activate_competition.py` ; barème figé dans `ScoringRules()` |
-| 9 | Traductions FR/EN, page d'erreur, finitions mobile | **Partiel** | `app/i18n/fr.json` et `en.json` complets (133 clés chacun, mêmes clés) ; mais la langue est figée sur `DEFAULT_LANGUAGE` (`app/templating.py`), pas de choix par le joueur ; pas de page « erreur réseau + réessayer » (`_error.html` n'est qu'un message de formulaire) |
+| 9 | Traductions FR/EN, page d'erreur, finitions mobile | **Partiel** | `app/i18n/fr.json` et `en.json` complets (138 clés chacun, mêmes clés) ; mais la langue est figée sur `DEFAULT_LANGUAGE` (`app/templating.py`), pas de choix par le joueur ; pas de page « erreur réseau + réessayer » (`_error.html` n'est qu'un message de formulaire) |
 
 Hors découpage : `scripts/seed_demo.py` (données de démo sans API) ; gestion du fuseau horaire du joueur (`app/services/timezones.py`, `static/js/timezone.js`, cookie `tz`).
 
@@ -29,6 +29,7 @@ Hors découpage : `scripts/seed_demo.py` (données de démo sans API) ; gestion 
 - **Pas de table « équipes »** (choix assumé pour le POC) : noms et logos stockés à plat dans `matches`.
 - **Changement de fournisseur** : `scripts/reset_football_data.py`. Simulation par défaut ; avec `--yes`, supprime les compétitions des autres fournisseurs, leurs matchs (y compris ceux ajoutés à la main) et les pronostics sur ces matchs, puis enregistre les compétitions du fournisseur actif (inactives). Joueurs, journal des appels et démo conservés (démo supprimée avec `--include-demo`). La base locale contient encore 12 compétitions API-Football (22 matchs, 0 prono) : le script n'a été lancé qu'en simulation.
 - **Synchronisation automatique** : `POST /internal/sync?task=fixtures|scores` (`app/routes/internal.py`), protégée par `Authorization: Bearer <SYNC_TOKEN>` (401 si jeton faux, 503 si `SYNC_TOKEN` vide, 502 avec le message si le fournisseur échoue). Points calculés après chaque passage. Appelée par `.github/workflows/sync.yml` : `fixtures` à 04:00 UTC, `scores` toutes les 10 min (aucun appel API sans match en cours), plus un lancement manuel. Testée en local de bout en bout le 4 novembre 2026 (14 matchs de Ligue 1 importés).
+- **Pourcentages 1/N/2** : prédictions du fournisseur (API-Football `/predictions`, 1 appel par match, au plus 20 par import quotidien, matchs des 3 prochains jours) stockées dans `matches.prob_*` ; football-data.org n'en a pas (aucun appel). À défaut, **tendance des joueurs** calculée à l'affichage à partir de 5 pronostics, visible avant la clôture, avec la mention « Tendance des joueurs ». Arrondi à 100 % par la méthode du plus fort reste.
 - **En local** : scripts manuels (`check_coverage`, `run_import`, `run_import --scores`).
 
 ## 3. Déploiement
@@ -48,17 +49,17 @@ Socle en place (`app/static/css/style.css`) : variables de couleur, polices Outf
 | Écran | État |
 |-------|------|
 | Accueil (Ma ligue) | **Partiel** : podium et carte « matchs sans prono » conformes ; manquent sélecteur de ligue, fil d'activité, bouton d'invitation WhatsApp (dépendent de l'étape 6) |
-| Pronos (saisie directe) | **Conforme** : cases de score colorées, état « Ferme dans… », bouton collé en bas ; manquent la ligne 1/N/2 (étape 7) et les écussons |
-| Match clôturé | **Partiel** : carte score final et bandeau du prono conformes ; manquent les pronos des membres de la ligue (étape 6) |
+| Pronos (saisie directe) | **Conforme** : cases de score colorées, état « Ferme dans… », bouton collé en bas, ligne 1/N/2, écussons 36 px au-dessus des noms |
+| Match clôturé | **Partiel** : carte score final (avec écussons 44 px) et bandeau du prono conformes ; manquent les pronos des membres de la ligue (étape 6) |
 | Classements | **Conforme** (liste, onglets pleine largeur) ; onglet « ligue » absent |
 | Résultats | Conforme au style général (pas de maquette dédiée) |
 | Profil, connexion, inscription, règles | Composants de base (cartes, formulaires, boutons) ; pas de maquette dédiée |
 
-Écussons d'équipes : URL stockées en base mais **jamais affichées** (ni logo, ni initiales de repli).
+Écussons d'équipes (`_crest.html`) : logo du fournisseur chargé en différé (`loading="lazy"`), directement depuis le site du fournisseur (pas de copie locale) ; initiales en dessous (`app/services/teams.py`), visibles s'il n'y a pas de logo ou s'il ne charge pas. Affichés sur les cartes de pronos et l'écran « Match clôturé », pas encore dans la liste des résultats.
 
 ## 5. Tests
 
-`pytest` (via `.venv`, **Python 3.12.3**) : **278 tests passent, 0 échec**, 1 avertissement (dépréciation `httpx` dans le TestClient de Starlette).
+`pytest` (via `.venv`, **Python 3.12.3**) : **319 tests passent, 0 échec**, 1 avertissement (dépréciation `httpx` dans le TestClient de Starlette).
 
 ## 6. Incohérences et dettes
 

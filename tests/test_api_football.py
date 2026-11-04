@@ -145,3 +145,32 @@ def test_parse_league_without_current_season_takes_last():
     s = parse_league({**LEAGUE_ITEM, "seasons": [{"year": 2023}, {"year": 2024}]})
     assert (s["season"], s["is_current"]) == (2024, False)
     assert "pronos non" in s["coverage"]
+
+
+# --- Pourcentages 1 / N / 2 ---
+
+def test_get_probabilities_calls_predictions_for_the_fixture(db):
+    seen = {}
+
+    def handler(request):
+        seen["path"], seen["params"] = request.url.path, dict(request.url.params)
+        return ok_response([{"predictions": {"percent": {"home": "45%", "draw": "45%", "away": "10%"}}}])
+
+    assert make_client(db, handler).get_probabilities("1001") == (45, 45, 10)
+    assert (seen["path"], seen["params"]) == ("/predictions", {"fixture": "1001"})
+
+
+def test_get_probabilities_without_prediction(db):
+    assert make_client(db, lambda r: ok_response([])).get_probabilities("1001") is None
+
+
+@pytest.mark.parametrize("percent, expected", [
+    ({"home": "50%", "draw": "25%", "away": "25%"}, (50, 25, 25)),
+    ({"home": "33%", "draw": "33%", "away": "33%"}, (34, 33, 33)),  # ramené à 100
+    ({"home": "0%", "draw": "0%", "away": "0%"}, None),
+    ({"home": "50%"}, None),
+    ({"home": "n/a", "draw": "1%", "away": "1%"}, None),
+])
+def test_parse_prediction_percent(percent, expected):
+    from app.providers.api_football import parse_prediction_percent
+    assert parse_prediction_percent({"predictions": {"percent": percent}}) == expected

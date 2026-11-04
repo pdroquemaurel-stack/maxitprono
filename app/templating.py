@@ -8,6 +8,7 @@ from app.i18n import closing_when, format_date_time, format_day, format_time, tr
 from app.i18n.countries import country_name, country_options
 from app.services.avatars import initials
 from app.services.score_colors import score_classes
+from app.services.teams import team_initials
 
 templates = Jinja2Templates(directory=Path(__file__).parent / "templates")
 templates.env.globals["t"] = translate
@@ -20,3 +21,4 @@ templates.env.globals["format_date_time"] = format_date_time
 templates.env.globals["score_classes"] = score_classes
 templates.env.globals["closing_when"] = closing_when
 templates.env.globals["initials"] = initials
+templates.env.globals["team_initials"] = team_initials
