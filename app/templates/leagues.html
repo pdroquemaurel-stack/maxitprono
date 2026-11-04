@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}{{ t('leagues_title') }} · {{ t('app_name') }}{% endblock %}
+{% block content %}
+  <h1>{{ t('leagues_title') }}</h1>
+  {% if notice %}<p class="notice" role="status">{{ t(notice) }}</p>{% endif %}
+  {% include "_error.html" %}
+
+  {% if leagues %}
+    <ul class="card list-card">
+      {% for league, count in leagues %}
+        <li>
+          <a class="league-row" href="/leagues/{{ league.id }}">
+            <span class="league-badge">{{ initials(league.name) }}</span>
+            <span class="player">
+              <strong>{{ league.name }}</strong>
+              <small>{{ t('league_members_one') if count == 1 else t('league_members_many').format(count=count) }}{% if league.owner_id == user.id %} · {{ t('league_admin') }}{% endif %}</small>
+            </span>
+            <span aria-hidden="true">›</span>
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="lead">{{ t('leagues_empty') }}</p>
+  {% endif %}
+
+  <form class="card form" method="post" action="/leagues/join">
+    <h2>{{ t('league_join_title') }}</h2>
+    <label for="code">{{ t('field_league_code') }}</label>
+    <input id="code" name="code" value="{{ form.code or '' }}" required maxlength="12"
+           autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="K7PM4X">
+    <button type="submit">{{ t('league_join_submit') }}</button>
+  </form>
+
+  <form class="card form" method="post" action="/leagues">
+    <h2>{{ t('league_create_title') }}</h2>
+    <label for="name">{{ t('field_league_name') }}</label>
+    <input id="name" name="name" value="{{ form.name or '' }}" required minlength="3" maxlength="40"
+           autocomplete="off" placeholder="{{ t('league_name_placeholder') }}">
+    <button type="submit" class="secondary">{{ t('league_create_submit') }}</button>
+  </form>
+{% endblock %}

@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}{{ league.name }} · {{ t('app_name') }}{% endblock %}
+{% block content %}
+  <header class="back-head">
+    <a href="/leagues" aria-label="{{ t('leagues_title') }}">
+      <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
+    </a>
+    <span>{{ t('leagues_title') }}</span>
+  </header>
+  {% if notice %}<p class="notice" role="status">{{ t(notice) }}</p>{% endif %}
+  {% include "_error.html" %}
+
+  <section class="card-dark league-card">
+    <h1>{{ league.name }}</h1>
+    <p>{{ t('league_members_count').format(count=members|length, max=max_members) }}</p>
+    <p class="league-code">{{ t('field_league_code') }} <strong>{{ league.code }}</strong></p>
+  </section>
+
+  {% include "_invite.html" %}
+
+  <section class="card">
+    <h2>{{ t('league_members_title') }}</h2>
+    <ul class="member-list">
+      {% for member in members %}
+        {% set is_me = member.user_id == user.id %}
+        <li class="rank-row{% if is_me %} me{% endif %}">
+          <span class="initials">{{ initials(member.user.nickname) }}</span>
+          <span class="player">
+            <strong>{{ t('home_me') if is_me else member.user.nickname }}</strong>
+            {% if member.user_id == league.owner_id %}<small>{{ t('league_admin') }}</small>{% endif %}
+          </span>
+          {% if is_owner and not is_me %}
+            <form method="post" action="/leagues/{{ league.id }}/members/{{ member.user_id }}/remove"
+                  onsubmit='return confirm({{ t("league_remove_confirm").format(name=member.user.nickname)|tojson }})'>
+              <button type="submit" class="link-button">{{ t('league_remove') }}</button>
+            </form>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  </section>
+
+  {% if is_owner %}
+    <details class="danger-zone">
+      <summary>{{ t('league_delete') }}</summary>
+      <form method="post" action="/leagues/{{ league.id }}/delete">
+        <p>{{ t('league_delete_warning') }}</p>
+        <input type="hidden" name="confirm" value="yes">
+        <button type="submit" class="danger">{{ t('league_delete_submit') }}</button>
+      </form>
+    </details>
+  {% else %}
+    <form method="post" action="/leagues/{{ league.id }}/leave"
+          onsubmit='return confirm({{ t("league_leave_confirm")|tojson }})'>
+      <button type="submit" class="secondary">{{ t('league_leave') }}</button>
+    </form>
+  {% endif %}
+{% endblock %}

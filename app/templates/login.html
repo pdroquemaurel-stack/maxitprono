@@ -4,6 +4,7 @@
   <h1>{{ t('nav_login') }}</h1>
   {% include "_error.html" %}
   <form class="card form" method="post" action="/login">
+    <input type="hidden" name="next" value="{{ next or '/' }}">
     <label for="nickname">{{ t('field_nickname') }}</label>
     <input id="nickname" name="nickname" value="{{ form.nickname or '' }}" required
            autocomplete="username">
@@ -14,5 +15,5 @@
 
     <button type="submit">{{ t('login_submit') }}</button>
   </form>
-  <p>{{ t('login_no_account') }} <a href="/register">{{ t('register_title') }}</a></p>
+  <p>{{ t('login_no_account') }} <a href="/register{% if next and next != '/' %}?next={{ next|urlencode }}{% endif %}">{{ t('register_title') }}</a></p>
 {% endblock %}

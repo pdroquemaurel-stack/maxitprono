@@ -4,6 +4,7 @@
   <h1>{{ t('register_title') }}</h1>
   {% include "_error.html" %}
   <form class="card form" method="post" action="/register" enctype="multipart/form-data">
+    <input type="hidden" name="next" value="{{ next or '/' }}">
     <label for="nickname">{{ t('field_nickname') }}</label>
     <input id="nickname" name="nickname" value="{{ form.nickname or '' }}" required
            minlength="3" maxlength="20" pattern="[A-Za-z0-9_\-]{3,20}" autocomplete="username">
@@ -26,6 +27,6 @@
 
     <button type="submit">{{ t('register_submit') }}</button>
   </form>
-  <p>{{ t('register_already') }} <a href="/login">{{ t('nav_login') }}</a></p>
+  <p>{{ t('register_already') }} <a href="/login{% if next and next != '/' %}?next={{ next|urlencode }}{% endif %}">{{ t('nav_login') }}</a></p>
 {% endblock %}
 {% block scripts %}<script src="/static/js/avatar.js" defer></script>{% endblock %}

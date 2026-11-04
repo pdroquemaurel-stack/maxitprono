@@ -12,6 +12,7 @@ from app.models.types import utc_now
 from app.routes.matches import prediction_history
 from app.services.timezones import resolve_timezone
 from app.services.accounts import MAX_AVATAR_BYTES, avatar_mime, decode_data_url, validate_country
+from app.services.redirects import safe_next
 from app.templating import templates
 
 router = APIRouter()
@@ -45,16 +46,17 @@ def read_avatar(avatar_data: str, avatar_file: UploadFile | None) -> tuple[bytes
 
 @router.get("/register")
 def register_form(request: Request, user: User | None = Depends(current_user)):
+    next_url = safe_next(request.query_params.get("next"))
     if user:
-        return redirect("/")
-    return templates.TemplateResponse(request, "register.html", {"form": {}})
+        return redirect(next_url)
+    return templates.TemplateResponse(request, "register.html", {"form": {}, "next": next_url})
 
 
 @router.post("/register")
 def register_submit(request: Request, db: Session = Depends(get_db),
                     nickname: str = Form(""), pin: str = Form(""), country_code: str = Form(""),
                     rules_accepted: bool = Form(False), avatar_data: str = Form(""),
-                    avatar_file: UploadFile | None = File(None)):
+                    avatar_file: UploadFile | None = File(None), next: str = Form("/")):
     avatar, mime, error = read_avatar(avatar_data, avatar_file)
     result = pin_auth.AuthResult(error=error)
     if error is None:
@@ -62,12 +64,13 @@ def register_submit(request: Request, db: Session = Depends(get_db),
     if result.error:
         form = {"nickname": nickname, "country_code": country_code, "rules_accepted": rules_accepted}
         return templates.TemplateResponse(request, "register.html",
-                                          {"form": form, "error": result.error}, status_code=400)
+                                          {"form": form, "error": result.error,
+                                           "next": safe_next(next)}, status_code=400)
     if avatar:
         user = db.get(User, result.user_id)
         user.avatar, user.avatar_mime = avatar, mime
         db.commit()
-    response = redirect("/")
+    response = redirect(safe_next(next))
     start_session(response, result.user_id)
     return response
 
@@ -76,20 +79,21 @@ def register_submit(request: Request, db: Session = Depends(get_db),
 
 @router.get("/login")
 def login_form(request: Request, user: User | None = Depends(current_user)):
+    next_url = safe_next(request.query_params.get("next"))
     if user:
-        return redirect("/")
-    return templates.TemplateResponse(request, "login.html", {"form": {}})
+        return redirect(next_url)
+    return templates.TemplateResponse(request, "login.html", {"form": {}, "next": next_url})
 
 
 @router.post("/login")
 def login_submit(request: Request, db: Session = Depends(get_db),
-                 nickname: str = Form(""), pin: str = Form("")):
+                 nickname: str = Form(""), pin: str = Form(""), next: str = Form("/")):
     result = pin_auth.login(db, nickname, pin, utc_now())
     if result.error:
         return templates.TemplateResponse(request, "login.html",
-                                          {"form": {"nickname": nickname}, "error": result.error},
-                                          status_code=400)
-    response = redirect("/")
+                                          {"form": {"nickname": nickname}, "error": result.error,
+                                           "next": safe_next(next)}, status_code=400)
+    response = redirect(safe_next(next))
     start_session(response, result.user_id)
     return response
 

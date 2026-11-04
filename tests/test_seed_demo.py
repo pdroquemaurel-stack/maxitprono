@@ -97,3 +97,23 @@ def test_demo_players_predict_open_matches_of_active_competitions(db):
     reset(db)
     assert db.query(Prediction).count() == 0
     assert db.query(Match).count() == 3  # les matchs réels restent
+
+
+def test_reset_removes_demo_leagues_and_memberships(db):
+    from app.models import League, LeagueMember
+    from app.services import league_store
+    paul = User(nickname="Paul", nickname_key="paul", pin_hash="x", country_code="CM",
+                rules_accepted_at=NOW)
+    db.add(paul)
+    db.commit()
+    seed(db, NOW, random.Random(1))
+    samuel = db.query(User).filter_by(nickname_key="demo_samuel").one()
+    demo_league = league_store.create_league(db, samuel, "Ligue démo", NOW).league
+    league_store.join_league(db, demo_league, paul, NOW)
+    paul_league = league_store.create_league(db, paul, "Ligue de Paul", NOW).league
+    league_store.join_league(db, paul_league, samuel, NOW)
+
+    reset(db)
+
+    assert [l.name for l in db.query(League)] == ["Ligue de Paul"]
+    assert [m.user_id for m in db.query(LeagueMember)] == [paul.id]

@@ -1,6 +1,6 @@
 # MaxitProno — État des lieux
 
-Mis à jour le 4 novembre 2026, après la PARTIE 2 étape 4 (pourcentages 1/N/2 et écussons).
+Mis à jour le 4 novembre 2026, pendant l'étape 5 de la PARTIE 2 (ligues privées : 5a faite, 5b et 5c à venir).
 
 ## 1. Avancement des étapes (SPEC §12)
 
@@ -11,10 +11,10 @@ Mis à jour le 4 novembre 2026, après la PARTIE 2 étape 4 (pourcentages 1/N/2 
 | 3 | Comptes joueurs (pseudo + PIN, profil, règlement) | **Fait** | `app/auth/` (`pin_auth.py`, `session.py`), `app/services/accounts.py`, `app/services/avatars.py`, `app/routes/accounts.py`, templates `register/login/profile/rules` |
 | 4 | Pronostics + clôture 10 min | **Fait** | `app/models/prediction.py`, `app/services/deadlines.py`, `app/services/predictions.py`, `app/routes/matches.py`, `matches.html`, `_match_card.html` |
 | 5 | Points + classements + départage | **Fait** | `app/services/scoring.py`, `app/services/ranking.py`, `app/services/leaderboards.py`, `app/jobs/score_predictions.py`, `app/routes/leaderboard.py`, `app/routes/results.py` |
-| 6 | Ligues privées + lien de partage | **À faire** | Emplacements réservés dans `home.html` (sélecteur de ligue) et `result.html` (pronos de la ligue) ; aucune table `leagues` |
+| 6 | Ligues privées + lien de partage | **Partiel** (5a faite) | Tables `leagues` + `league_members`, `app/services/leagues.py` (règles pures), `app/services/league_store.py`, `app/routes/leagues.py`, templates `leagues`, `league`, `join`, `_invite`. Reste : accueil « Ma ligue » + classement de ligue (5b), pronos de la ligue sur « Match clôturé » (5c) |
 | 7 | Pourcentages 1/N/2 | **Fait** | `app/services/probabilities.py`, `app/jobs/import_probabilities.py`, `Match.prob_home/draw/away`, `get_probabilities` des fournisseurs, `_match_card.html` |
 | 8 | Back-office admin + KPIs | **À faire** | Remplacé provisoirement par `scripts/activate_competition.py` ; barème figé dans `ScoringRules()` |
-| 9 | Traductions FR/EN, page d'erreur, finitions mobile | **Partiel** | `app/i18n/fr.json` et `en.json` complets (138 clés chacun, mêmes clés) ; mais la langue est figée sur `DEFAULT_LANGUAGE` (`app/templating.py`), pas de choix par le joueur ; pas de page « erreur réseau + réessayer » (`_error.html` n'est qu'un message de formulaire) |
+| 9 | Traductions FR/EN, page d'erreur, finitions mobile | **Partiel** | `app/i18n/fr.json` et `en.json` complets (179 clés chacun, mêmes clés) ; mais la langue est figée sur `DEFAULT_LANGUAGE` (`app/templating.py`), pas de choix par le joueur ; pas de page « erreur réseau + réessayer » (`_error.html` n'est qu'un message de formulaire) |
 
 Hors découpage : `scripts/seed_demo.py` (données de démo sans API ; les joueurs fictifs pronostiquent aussi les matchs ouverts des compétitions actives, réels compris, pour afficher la tendance 1/N/2 ; `--reset` supprime ces pronostics) ; gestion du fuseau horaire du joueur (`app/services/timezones.py`, `static/js/timezone.js`, cookie `tz`).
 
@@ -31,6 +31,16 @@ Hors découpage : `scripts/seed_demo.py` (données de démo sans API ; les joueu
 - **Synchronisation automatique** : `POST /internal/sync?task=fixtures|scores` (`app/routes/internal.py`), protégée par `Authorization: Bearer <SYNC_TOKEN>` (401 si jeton faux, 503 si `SYNC_TOKEN` vide, 502 avec le message si le fournisseur échoue). Points calculés après chaque passage. Appelée par `.github/workflows/sync.yml` : `fixtures` à 04:00 UTC, `scores` toutes les 10 min (aucun appel API sans match en cours), plus un lancement manuel. Testée en local de bout en bout le 4 novembre 2026 (14 matchs de Ligue 1 importés).
 - **Pourcentages 1/N/2** : prédictions du fournisseur (API-Football `/predictions`, 1 appel par match, au plus 20 par import quotidien, matchs des 3 prochains jours) stockées dans `matches.prob_*` ; football-data.org n'en a pas (aucun appel). À défaut, **tendance des joueurs** calculée à l'affichage à partir de 5 pronostics, visible avant la clôture, avec la mention « Tendance des joueurs ». Arrondi à 100 % par la méthode du plus fort reste.
 - **En local** : scripts manuels (`check_coverage`, `run_import`, `run_import --scores`).
+
+## 2 bis. Ligues privées (étape 5a)
+
+- **Création** par un joueur, qui en devient admin et membre. Nom de 3 à 40 caractères, **code d'invitation** de 6 caractères sans 0/O/1/I/L (ex. `K7PM4X`), tapé librement (minuscules, espaces, tirets acceptés).
+- **Limites** : 100 membres par ligue (constante `MAX_MEMBERS`, en attendant le back-office), 10 ligues par joueur.
+- **Rejoindre** : par code (`/leagues`) ou par lien `/join/{code}`. Le lien affiche la ligue et un bouton ; l'adhésion se fait toujours par **POST** (les aperçus de lien de WhatsApp ne font jamais adhérer). Sans compte : inscription ou connexion puis **retour au lien** (paramètre `next`, limité aux chemins du site).
+- **Partage** : bouton « Inviter des potes par WhatsApp » (`wa.me` + message), partage natif du téléphone s'il existe (`static/js/share.js`). `render.yaml` démarre uvicorn avec `--forwarded-allow-ips='*'` pour que les liens partagés soient en https.
+- **Admin** : retire un membre, supprime la ligue (confirmation) ; ne peut pas la quitter. Un membre peut la quitter. Un non-membre reçoit une 404.
+- **Décisions pour 5b** : classement de la ligue limité aux matchs commencés **après l'adhésion** de chaque joueur (`league_members.joined_at`) ; fil d'activité « a rejoint la ligue » et « a trouvé le score exact ».
+- Après connexion demandée par une page, retour à cette page (`/login?next=…`).
 
 ## 3. Déploiement
 
@@ -59,7 +69,7 @@ Socle en place (`app/static/css/style.css`) : variables de couleur, polices Outf
 
 ## 5. Tests
 
-`pytest` (via `.venv`, **Python 3.12.3**) : **320 tests passent, 0 échec**, 1 avertissement (dépréciation `httpx` dans le TestClient de Starlette).
+`pytest` (via `.venv`, **Python 3.12.3**) : **369 tests passent, 0 échec**, 1 avertissement (dépréciation `httpx` dans le TestClient de Starlette).
 
 ## 6. Incohérences et dettes
 

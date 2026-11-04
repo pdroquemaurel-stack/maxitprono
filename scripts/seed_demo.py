@@ -22,7 +22,7 @@ from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 
 from app.jobs.score_predictions import score_finished_matches
-from app.models import Competition, Match, Prediction, User
+from app.models import Competition, League, LeagueMember, Match, Prediction, User
 from app.models.match import MatchStatus
 from app.models.types import utc_now
 from app.providers import DEMO
@@ -183,10 +183,15 @@ def finish_open_matches(db: Session, now: datetime, rng: random.Random) -> int:
 # --- Suppression ---
 
 def reset(db: Session) -> None:
-    """Supprime la compétition démo, ses matchs, les joueurs fictifs et leurs pronostics."""
+    """Supprime la compétition démo, ses matchs, les joueurs fictifs, leurs pronostics,
+    leurs adhésions et les ligues qu'ils ont créées."""
     competition = _find_demo_competition(db)
     demo_user_ids = select(User.id).where(User.nickname_key.startswith(DEMO_PREFIX))
     db.execute(delete(Prediction).where(Prediction.user_id.in_(demo_user_ids)))
+    demo_league_ids = select(League.id).where(League.owner_id.in_(demo_user_ids))
+    db.execute(delete(LeagueMember).where(LeagueMember.league_id.in_(demo_league_ids)))
+    db.execute(delete(League).where(League.owner_id.in_(demo_user_ids)))
+    db.execute(delete(LeagueMember).where(LeagueMember.user_id.in_(demo_user_ids)))
     if competition is not None:
         match_ids = select(Match.id).where(Match.competition_id == competition.id)
         db.execute(delete(Prediction).where(Prediction.match_id.in_(match_ids)))

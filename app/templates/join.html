@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}{{ league.name if league else t('league_join_title') }} · {{ t('app_name') }}{% endblock %}
+{% block content %}
+  {% include "_error.html" %}
+  {% if league %}
+    <section class="card-dark league-card">
+      <p>{{ t('join_invited') }}</p>
+      <h1>{{ league.name }}</h1>
+      <p>{{ t('league_members_one') if member_count == 1 else t('league_members_many').format(count=member_count) }} · {{ t('join_created_by').format(name=league.owner.nickname) }}</p>
+    </section>
+    {% if user %}
+      <form method="post" action="/join/{{ league.code }}">
+        <button type="submit">{{ t('join_submit') }}</button>
+      </form>
+    {% else %}
+      <p class="lead">{{ t('join_need_account') }}</p>
+      <a class="button" href="/register?next={{ next|urlencode }}">{{ t('register_title') }}</a>
+      <a class="button secondary" href="/login?next={{ next|urlencode }}">{{ t('nav_login') }}</a>
+    {% endif %}
+  {% else %}
+    <a class="button secondary" href="/leagues">{{ t('leagues_title') }}</a>
+  {% endif %}
+{% endblock %}

@@ -71,7 +71,7 @@ def test_login_with_wrong_pin(client):
 def test_profile_requires_login(client):
     response = client.get("/profile", follow_redirects=False)
     assert response.status_code == 303
-    assert response.headers["location"] == "/login"
+    assert response.headers["location"] == "/login?next=/profile"  # retour au profil ensuite
 
 
 def test_forged_cookie_is_ignored(client):

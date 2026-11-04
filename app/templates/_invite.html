@@ -1,0 +1,6 @@
+{# Bouton d'invitation : partage natif du téléphone s'il existe, sinon WhatsApp.
+   Variables : join_url, share_text, whatsapp_url #}
+<a class="invite-button" href="{{ whatsapp_url }}" target="_blank" rel="noopener"
+   data-share-text="{{ share_text }}">{{ t('league_invite_whatsapp') }}</a>
+<p class="small invite-link">{{ t('league_invite_link') }} <span>{{ join_url }}</span></p>
+<script src="/static/js/share.js" defer></script>
