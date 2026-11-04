@@ -4,14 +4,18 @@ Usage :
   python -m scripts.run_import                     # J-3 à J+14, saisons en cours
   python -m scripts.run_import --season 2024 --from 2024-08-16 --to 2024-08-31
   python -m scripts.run_import --scores            # mise à jour des matchs en cours
+
+Après chaque import, les points des matchs terminés sont calculés.
 """
 import argparse
 from datetime import date
 
 from app.db import SessionLocal
 from app.jobs.import_matches import import_matches, import_upcoming_matches, update_live_scores
+from app.jobs.score_predictions import score_finished_matches
 from app.models.types import utc_now
 from app.providers.api_football import ApiFootballError, make_client
+from app.services.scoring import ScoringRules
 
 
 def main() -> None:
@@ -34,6 +38,8 @@ def main() -> None:
                 print(f"Matchs importés : {import_upcoming_matches(db, client, date.today())}")
         except ApiFootballError as exc:
             print(f"Arrêt : {exc}")
+        # Calcul des points après chaque import, même partiel
+        print(f"Pronostics calculés : {score_finished_matches(db, ScoringRules(), utc_now())}")
 
 
 if __name__ == "__main__":

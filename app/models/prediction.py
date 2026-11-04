@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import ForeignKey, Integer, UniqueConstraint
+from sqlalchemy import Boolean, ForeignKey, Integer, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db import Base
@@ -21,5 +21,10 @@ class Prediction(Base):
     away_score: Mapped[int] = mapped_column(Integer)
     created_at: Mapped[datetime] = mapped_column(UTCDateTime, default=utc_now)
     updated_at: Mapped[datetime] = mapped_column(UTCDateTime, default=utc_now)
+    # Résultat, rempli quand le match est terminé. points vide = non compté (match annulé)
+    points: Mapped[int | None] = mapped_column(Integer)
+    is_exact: Mapped[bool] = mapped_column(Boolean, default=False)  # départage n°2
+    is_winner: Mapped[bool] = mapped_column(Boolean, default=False)  # départage n°3
+    scored_at: Mapped[datetime | None] = mapped_column(UTCDateTime)
 
     match: Mapped[Match] = relationship()
