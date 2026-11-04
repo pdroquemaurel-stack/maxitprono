@@ -1,6 +1,10 @@
-<tr{% if user and player.user_id == user.id %} class="me"{% endif %}>
-  <td class="rank">{{ player.rank }}</td>
-  <td class="player">{{ player.nickname }}</td>
-  <td class="num">{{ player.exacts }}</td>
-  <td class="num points">{{ player.points }}</td>
-</tr>
+{% set is_me = user and player.user_id == user.id %}
+<li class="rank-row{% if is_me %} me{% endif %}">
+  <span class="rank{% if player.rank == 1 %} first{% endif %}">{{ player.rank }}</span>
+  <span class="initials">{{ initials(player.nickname) }}</span>
+  <span class="player">
+    <strong>{{ t('home_me') if is_me else player.nickname }}</strong>
+    <small>{{ t('leaderboard_exacts_one' if player.exacts <= 1 else 'leaderboard_exacts_many').format(count=player.exacts) }}</small>
+  </span>
+  <span class="points">{{ player.points }} <small>{{ t('leaderboard_points') }}</small></span>
+</li>

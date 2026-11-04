@@ -256,62 +256,99 @@ body { padding-bottom: calc(var(--tabbar-height) + env(safe-area-inset-bottom));
 
 .history-scores small { font-weight: 400; color: var(--muted); }
 
-/* Onglets en pilules */
+/* Onglets en pilules : les 4 tiennent sur la largeur d'un téléphone */
 .tabs {
-  display: flex;
-  gap: 6px;
-  overflow-x: auto;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: 4px;
   margin: 0 0 12px;
+  padding: 4px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
 }
 
 .tabs a {
-  display: inline-flex;
+  display: flex;
   align-items: center;
+  justify-content: center;
   min-height: 44px;
-  padding: 0 16px;
-  border-radius: 22px;
-  border: 1px solid var(--border);
-  background: var(--surface);
+  padding: 0 6px;
+  border-radius: 12px;
   color: var(--muted);
   text-decoration: none;
   white-space: nowrap;
-  font-size: 15px;
+  font-size: 14px;
 }
 
-.tabs a.active { color: var(--orange-text); border-color: var(--orange-text); }
+.tabs a.active { background: var(--orange-soft); color: var(--orange-text); }
 
-/* Classements (écran refait à l'étape 5) */
+/* Classements */
 .filter { display: flex; gap: 8px; align-items: end; flex-wrap: wrap; margin-bottom: 8px; }
 
 .filter label { width: 100%; font-weight: 600; }
 
 .filter select { flex: 1; width: auto; min-width: 0; }
 
-.filter button { width: auto; margin-top: 0; }
+.filter button { width: auto; min-height: 44px; margin-top: 0; padding: 0 16px; }
 
 .week-nav { display: flex; justify-content: space-between; align-items: center; font-weight: 700; }
 
 .week-nav a { font-size: 24px; text-decoration: none; padding: 0 12px; }
 
-.ranking { width: 100%; border-collapse: collapse; }
+/* Liste du classement */
+.ranking { margin: 0; padding: 4px 12px; list-style: none; }
 
-.ranking th { text-align: left; color: var(--muted); font-weight: 400; font-size: 13px; }
+.rank-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 60px;
+  padding: 8px 4px;
+  border-top: 1px solid var(--border);
+}
 
-.ranking td { padding: 8px 4px; border-top: 1px solid var(--border); }
+.rank-row:first-child { border-top: none; }
 
-.ranking .rank { width: 40px; color: var(--muted); }
+.rank-row.me {
+  margin: 4px -8px;
+  padding: 8px 12px;
+  border: 2px solid var(--orange);
+  border-radius: 14px;
+}
 
-.ranking .player { overflow-wrap: anywhere; }
+.rank-row.me + .rank-row { border-top: none; }
 
-.ranking .num { text-align: right; width: 56px; }
+.rank-row .rank {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  color: var(--muted);
+  font-family: var(--font-title);
+  font-weight: 700;
+}
 
-.ranking .points { font-family: var(--font-title); font-weight: 800; }
+.rank-row .rank.first { background: var(--orange); color: #000; }
 
-.ranking tr.me td { background: var(--orange-soft); font-weight: 700; }
+.rank-row .player { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 
-.ranking tr.gap td { text-align: center; color: var(--muted); border-top: none; }
+.rank-row .player strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-.my-rank { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; }
+.rank-row .player small { color: var(--muted); font-size: 12px; }
+
+.rank-row .points { font-family: var(--font-title); font-weight: 800; font-size: 18px; white-space: nowrap; }
+
+.rank-row .points small { font-family: var(--font-text); font-weight: 600; font-size: 12px; color: var(--muted); }
+
+.ranking .gap { text-align: center; color: var(--muted); padding: 4px 0; }
+
+.my-line { margin: 0 0 12px; }
+
 
 /* Score coloré « x – y » (chiffres en Outfit) */
 .score-digits { font-family: var(--font-title); font-weight: 800; white-space: nowrap; }

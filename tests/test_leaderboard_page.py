@@ -60,8 +60,10 @@ def test_player_outside_top_is_shown_at_the_bottom(client, db_session, monkeypat
 
     text = client.get("/leaderboard").text
 
-    assert 'class="me"' in text and "Paul" in text
+    assert 'class="rank-row me"' in text and "<strong>Toi</strong>" in text
     assert 'class="gap"' in text
+    assert '<span class="rank first">1</span>' in text  # Ali, en tête
+    assert "0 score exact" in text
 
 
 def test_country_tab_defaults_to_player_country(client, db_session):

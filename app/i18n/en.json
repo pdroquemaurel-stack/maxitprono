@@ -85,8 +85,6 @@
   "leaderboard_next_week": "Next week",
   "leaderboard_week_range": "From {start} to {end}",
   "leaderboard_points": "Pts",
-  "leaderboard_exacts": "Exact",
-  "leaderboard_exacts_long": "Exact scores",
   "leaderboard_empty": "No ranking yet: it will appear after the first finished matches.",
   "leaderboard_tiebreak_link": "How are ties broken?",
   "my_rank": "Your rank: {rank} of {total} · {points} pts",
@@ -125,5 +123,7 @@
   "predictions_saved_one": "1 prediction saved.",
   "predictions_saved": "{count} predictions saved.",
   "predictions_saved_none": "Nothing to save: fill in both boxes for at least one match.",
-  "predictions_some_errors": "Some predictions were not saved: check the flagged matches."
+  "predictions_some_errors": "Some predictions were not saved: check the flagged matches.",
+  "leaderboard_exacts_one": "{count} exact score",
+  "leaderboard_exacts_many": "{count} exact scores"
 }

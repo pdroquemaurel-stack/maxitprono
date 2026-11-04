@@ -85,8 +85,6 @@
   "leaderboard_next_week": "Semaine suivante",
   "leaderboard_week_range": "Du {start} au {end}",
   "leaderboard_points": "Pts",
-  "leaderboard_exacts": "Exacts",
-  "leaderboard_exacts_long": "Scores exacts",
   "leaderboard_empty": "Pas encore de classement : il apparaîtra après les premiers matchs terminés.",
   "leaderboard_tiebreak_link": "Comment sont départagés les ex æquo ?",
   "my_rank": "Ton rang : {rank} sur {total} · {points} pts",
@@ -125,5 +123,7 @@
   "predictions_saved_one": "1 prono enregistré.",
   "predictions_saved": "{count} pronos enregistrés.",
   "predictions_saved_none": "Rien à enregistrer : remplis les deux cases d'au moins un match.",
-  "predictions_some_errors": "Certains pronos n'ont pas été enregistrés : regarde les matchs signalés."
+  "predictions_some_errors": "Certains pronos n'ont pas été enregistrés : regarde les matchs signalés.",
+  "leaderboard_exacts_one": "{count} score exact",
+  "leaderboard_exacts_many": "{count} scores exacts"
 }
