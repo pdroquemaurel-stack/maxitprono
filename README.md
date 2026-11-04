@@ -42,6 +42,15 @@ python -m scripts.run_import --scores         # mise à jour des matchs en cours
 python -m scripts.run_import --season 2024 --from 2024-08-16 --to 2024-08-31
 ```
 
+Changement de fournisseur : modifier `DATA_PROVIDER`, puis
+
+```bash
+python -m scripts.reset_football_data         # simulation : liste ce qui serait supprimé
+python -m scripts.reset_football_data --yes   # supprime les données de l'ancien fournisseur
+                                              # (pronos compris, joueurs et démo conservés)
+                                              # puis enregistre les compétitions du nouveau
+```
+
 ## Données de démo (tests sans l'API)
 
 ```bash
