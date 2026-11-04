@@ -49,3 +49,15 @@ def test_group_by_day_then_competition():
     first_day = days[0][1]
     assert [(c.name, len(items)) for c, items in first_day] == [("Champions League", 1),
                                                                 ("Ligue 1", 2)]
+
+
+def test_falls_back_to_utc_without_timezone_database(monkeypatch):
+    from datetime import UTC
+
+    import app.services.timezones as timezones
+
+    def missing(name):
+        raise timezones.ZoneInfoNotFoundError(name)
+
+    monkeypatch.setattr(timezones, "ZoneInfo", missing)
+    assert timezones.resolve_timezone("Africa/Douala") == UTC
