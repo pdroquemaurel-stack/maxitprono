@@ -20,3 +20,13 @@ def test_render_postgres_urls_use_psycopg_driver():
 def test_other_urls_are_unchanged():
     assert normalize_database_url("sqlite:///./x.db") == "sqlite:///./x.db"
     assert normalize_database_url("postgresql+psycopg://h/db") == "postgresql+psycopg://h/db"
+
+
+def test_secure_cookies_off_by_default(monkeypatch):
+    monkeypatch.delenv("SECURE_COOKIES", raising=False)
+    assert load_settings().secure_cookies is False
+
+
+def test_secure_cookies_enabled_from_env(monkeypatch):
+    monkeypatch.setenv("SECURE_COOKIES", "true")
+    assert load_settings().secure_cookies is True
