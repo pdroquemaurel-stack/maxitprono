@@ -1,7 +1,7 @@
 from datetime import datetime
 from enum import StrEnum
 
-from sqlalchemy import ForeignKey, Integer, String
+from sqlalchemy import ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db import Base
@@ -19,9 +19,13 @@ class MatchStatus(StrEnum):
 
 class Match(Base):
     __tablename__ = "matches"
+    __table_args__ = (UniqueConstraint("provider", "external_id",
+                                       name="uq_matches_provider_external_id"),)
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    api_id: Mapped[int | None] = mapped_column(Integer, unique=True)  # vide si ajouté à la main
+    # Fournisseur et identifiant chez lui : vides si le match est ajouté à la main ou de démo
+    provider: Mapped[str | None] = mapped_column(String(20))
+    external_id: Mapped[str | None] = mapped_column(String(40))
     competition_id: Mapped[int] = mapped_column(ForeignKey("competitions.id"), index=True)
     season: Mapped[int | None] = mapped_column(Integer)  # saison API, vide si ajouté à la main
     home_team: Mapped[str] = mapped_column(String(120))

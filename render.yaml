@@ -29,5 +29,10 @@ services:
         value: fr
       - key: SECURE_COOKIES
         value: "true"
+      # Fournisseur de données foot : football_data (POC) ou api_football (production)
+      - key: DATA_PROVIDER
+        value: football_data
+      - key: FOOTBALL_DATA_API_KEY
+        sync: false  # à saisir dans le tableau de bord Render
       - key: API_FOOTBALL_KEY
         sync: false  # à saisir dans le tableau de bord Render

@@ -24,6 +24,8 @@ def normalize_database_url(url: str) -> str:
 @dataclass(frozen=True)
 class Settings:
     database_url: str
+    data_provider: str  # football_data (POC) ou api_football, voir app/providers/
+    football_data_api_key: str
     api_football_key: str
     secret_key: str
     default_language: str
@@ -33,6 +35,8 @@ class Settings:
 def load_settings() -> Settings:
     return Settings(
         database_url=normalize_database_url(os.getenv("DATABASE_URL") or DEFAULT_DATABASE_URL),
+        data_provider=os.getenv("DATA_PROVIDER", "football_data"),
+        football_data_api_key=os.getenv("FOOTBALL_DATA_API_KEY", ""),
         api_football_key=os.getenv("API_FOOTBALL_KEY", ""),
         secret_key=os.getenv("SECRET_KEY", "dev-secret-change-me"),
         default_language=os.getenv("DEFAULT_LANGUAGE", "fr"),

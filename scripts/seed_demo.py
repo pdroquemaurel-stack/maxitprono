@@ -23,11 +23,12 @@ from app.jobs.score_predictions import score_finished_matches
 from app.models import Competition, Match, Prediction, User
 from app.models.match import MatchStatus
 from app.models.types import utc_now
+from app.providers import DEMO
 from app.services.accounts import hash_pin
 from app.services.deadlines import is_prediction_open
 from app.services.scoring import ScoringRules
 
-DEMO_COMPETITION_API_ID = 999_999  # identifiant fictif, hors des plages API-Football
+DEMO_COMPETITION_ID = "demo"  # identifiant chez le « fournisseur » démo
 DEMO_COMPETITION_NAME = "Démo"
 DEMO_PREFIX = "demo_"
 DEMO_PIN = "0000"
@@ -41,11 +42,16 @@ PAST_COUNT = 10  # matchs terminés sur les 2 dernières semaines
 
 # --- Création ---
 
+def _find_demo_competition(db: Session) -> Competition | None:
+    return db.scalar(select(Competition).where(Competition.provider == DEMO,
+                                               Competition.external_id == DEMO_COMPETITION_ID))
+
+
 def demo_competition(db: Session) -> Competition:
-    competition = db.scalar(select(Competition)
-                            .where(Competition.api_id == DEMO_COMPETITION_API_ID))
+    competition = _find_demo_competition(db)
     if competition is None:
-        competition = Competition(api_id=DEMO_COMPETITION_API_ID, name=DEMO_COMPETITION_NAME,
+        competition = Competition(provider=DEMO, external_id=DEMO_COMPETITION_ID,
+                                  name=DEMO_COMPETITION_NAME,
                                   country="World", is_active=True)
         db.add(competition)
         db.commit()
@@ -159,8 +165,7 @@ def finish_open_matches(db: Session, now: datetime, rng: random.Random) -> int:
 
 def reset(db: Session) -> None:
     """Supprime la compétition démo, ses matchs, les joueurs fictifs et leurs pronostics."""
-    competition = db.scalar(select(Competition)
-                            .where(Competition.api_id == DEMO_COMPETITION_API_ID))
+    competition = _find_demo_competition(db)
     demo_user_ids = select(User.id).where(User.nickname_key.startswith(DEMO_PREFIX))
     db.execute(delete(Prediction).where(Prediction.user_id.in_(demo_user_ids)))
     if competition is not None:

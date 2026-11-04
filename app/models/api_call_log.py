@@ -8,11 +8,12 @@ from app.models.types import UTCDateTime, utc_now
 
 
 class ApiCallLog(Base):
-    """Un appel à API-Football, pour suivre la consommation du quota."""
+    """Un appel à un fournisseur de données foot, pour suivre la consommation du quota."""
 
     __tablename__ = "api_call_logs"
 
     id: Mapped[int] = mapped_column(primary_key=True)
+    provider: Mapped[str] = mapped_column(String(20), default="")
     endpoint: Mapped[str] = mapped_column(String(60))
     params: Mapped[str] = mapped_column(Text, default="")  # JSON
     status_code: Mapped[int | None] = mapped_column(Integer)

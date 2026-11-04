@@ -13,8 +13,8 @@ BEFORE = KICKOFF - timedelta(hours=2)
 
 @pytest.fixture
 def setup(db):
-    competition = Competition(api_id=61, name="Ligue 1", season=2026, is_active=True)
-    match = Match(api_id=1, competition=competition, home_team="A", away_team="B",
+    competition = Competition(provider="api_football", external_id="61", name="Ligue 1", season=2026, is_active=True)
+    match = Match(provider="api_football", external_id="1", competition=competition, home_team="A", away_team="B",
                   kickoff_at=KICKOFF)
     user = User(nickname="Paul", nickname_key="paul", pin_hash="x", country_code="CM",
                 rules_accepted_at=BEFORE)

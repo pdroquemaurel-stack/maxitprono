@@ -25,7 +25,9 @@ La charte visuelle est dans docs/DESIGN.md, avec les maquettes dans docs/design/
 - CSS simple, mobile-first, page légère (réseaux 3G)
 - Tâches planifiées : APScheduler dans le process de l'app (suffisant pour le POC)
 - Tests : pytest
-- Données foot : API-Football (https://www.api-football.com), clé dans `API_FOOTBALL_KEY`
+- Données foot : fournisseur choisi par `DATA_PROVIDER`, derrière l'interface `app/providers/base.py` :
+  football-data.org (`football_data`, POC, clé `FOOTBALL_DATA_API_KEY`) ou
+  API-Football (`api_football`, clé `API_FOOTBALL_KEY`)
 - Hébergement POC : Render (web service) + Postgres managé
 
 ## Structure attendue
@@ -37,7 +39,7 @@ app/
   models/            # tables
   routes/            # pages joueur + back-office admin
   services/          # logique métier pure (scoring, ranking, deadlines)
-  providers/         # client API-Football (seul endroit qui appelle l'API)
+  providers/         # clients des fournisseurs foot (seul endroit qui appelle une API foot)
   auth/              # authentification, interchangeable (POC puis Max it)
   templates/         # Jinja2
   static/            # css, js, images

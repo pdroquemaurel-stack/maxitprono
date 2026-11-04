@@ -22,7 +22,7 @@ def add_match(db, hours_from_now, home="Lions", away="Étalons", status=MatchSta
               active=True, score=(None, None), name="Ligue 1"):
     competition = db.query(Competition).filter_by(name=name).first()
     if competition is None:
-        competition = Competition(api_id=hash(name) % 10000, name=name, is_active=active)
+        competition = Competition(provider="api_football", external_id=str(hash(name) % 10000), name=name, is_active=active)
     match = Match(competition=competition, home_team=home, away_team=away, status=status,
                   kickoff_at=utc_now() + timedelta(hours=hours_from_now),
                   home_score=score[0], away_score=score[1])

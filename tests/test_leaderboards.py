@@ -13,8 +13,8 @@ MONDAY = datetime(2026, 11, 2, 18, 0, tzinfo=UTC)
 @pytest.fixture
 def world(db):
     """Deux compétitions, trois joueurs (2 au Cameroun, 1 au Burkina)."""
-    ligue1 = Competition(api_id=61, name="Ligue 1", is_active=True)
-    can = Competition(api_id=6, name="CAN", is_active=True)
+    ligue1 = Competition(provider="api_football", external_id="61", name="Ligue 1", is_active=True)
+    can = Competition(provider="api_football", external_id="6", name="CAN", is_active=True)
     users = [User(nickname=n, nickname_key=n.lower(), pin_hash="x", country_code=c,
                   rules_accepted_at=MONDAY, created_at=MONDAY + timedelta(minutes=i))
              for i, (n, c) in enumerate([("Ali", "CM"), ("Bea", "CM"), ("Cyr", "BF")])]

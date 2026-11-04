@@ -1,4 +1,4 @@
-"""Lance l'import des matchs à la main.
+"""Lance l'import des matchs à la main, chez le fournisseur choisi (DATA_PROVIDER).
 
 Usage :
   python -m scripts.run_import                     # J-3 à J+14, saisons en cours
@@ -14,7 +14,8 @@ from app.db import SessionLocal
 from app.jobs.import_matches import import_matches, import_upcoming_matches, update_live_scores
 from app.jobs.score_predictions import score_finished_matches
 from app.models.types import utc_now
-from app.providers.api_football import ApiFootballError, make_client
+from app.providers import make_provider
+from app.providers.base import ProviderError
 from app.services.scoring import ScoringRules
 
 
@@ -27,16 +28,16 @@ def main() -> None:
     args = parser.parse_args()
 
     with SessionLocal() as db:
-        client = make_client(db)
         try:
+            provider = make_provider(db)
             if args.scores:
-                print(f"Matchs mis à jour : {update_live_scores(db, client, utc_now())}")
+                print(f"Matchs mis à jour : {update_live_scores(db, provider, utc_now())}")
             elif args.date_from and args.date_to:
-                count = import_matches(db, client, args.date_from, args.date_to, args.season)
+                count = import_matches(db, provider, args.date_from, args.date_to, args.season)
                 print(f"Matchs importés : {count}")
             else:
-                print(f"Matchs importés : {import_upcoming_matches(db, client, date.today())}")
-        except ApiFootballError as exc:
+                print(f"Matchs importés : {import_upcoming_matches(db, provider, date.today())}")
+        except ProviderError as exc:
             print(f"Arrêt : {exc}")
         # Calcul des points après chaque import, même partiel
         print(f"Pronostics calculés : {score_finished_matches(db, ScoringRules(), utc_now())}")

@@ -14,7 +14,7 @@ RULES = ScoringRules()
 
 @pytest.fixture
 def make_match(db):
-    competition = Competition(api_id=61, name="Ligue 1", season=2026, is_active=True)
+    competition = Competition(provider="api_football", external_id="61", name="Ligue 1", season=2026, is_active=True)
     user = User(nickname="Paul", nickname_key="paul", pin_hash="x", country_code="CM",
                 rules_accepted_at=KICKOFF)
     db.add_all([competition, user])

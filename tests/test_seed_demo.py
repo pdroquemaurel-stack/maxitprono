@@ -19,7 +19,7 @@ def test_seed_creates_players_matches_and_a_ranking(db):
 
     assert result["players"] == 6
     assert len(open_matches(db)) == UPCOMING_COUNT
-    assert all(m.api_id is None for m in db.query(Match))  # jamais touchés par l'import
+    assert all(m.external_id is None for m in db.query(Match))  # jamais touchés par l'import
     assert len(leaderboard(db)) == 6
 
 
@@ -50,7 +50,7 @@ def test_finish_scores_real_player_prediction(db):
 
 
 def test_reset_removes_only_demo_data(db):
-    real = Competition(api_id=61, name="Ligue 1")
+    real = Competition(provider="api_football", external_id="61", name="Ligue 1")
     paul = User(nickname="Paul", nickname_key="paul", pin_hash="x", country_code="CM",
                 rules_accepted_at=NOW)
     db.add_all([real, paul])
