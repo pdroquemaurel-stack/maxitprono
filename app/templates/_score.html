@@ -1,0 +1,3 @@
+{# Score coloré « x – y ». Variables : home, away (entiers) #}
+{% set home_class, away_class = score_classes(home, away) %}
+<span class="score-digits"><span class="{{ home_class }}">{{ home }}</span><span class="dash">–</span><span class="{{ away_class }}">{{ away }}</span></span>

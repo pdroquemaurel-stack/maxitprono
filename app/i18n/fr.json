@@ -97,5 +97,14 @@
   "leaderboard_tiebreak_link": "Comment sont départagés les ex æquo ?",
   "my_rank": "Ton rang : {rank} sur {total} · {points} pts",
   "not_ranked_yet": "Pas encore classé : pronostique un match pour entrer au classement.",
-  "home_see_leaderboard": "Voir les classements"
+  "home_see_leaderboard": "Voir les classements",
+  "nav_label": "Navigation principale",
+  "nav_league": "Ma ligue",
+  "nav_predictions": "Pronos",
+  "nav_leaderboard": "Classements",
+  "nav_results": "Résultats",
+  "nav_profile": "Profil",
+  "results_title": "Résultats",
+  "results_none": "Aucun match terminé ces 14 derniers jours.",
+  "results_no_prediction": "Pas de prono sur ce match."
 }

@@ -204,23 +204,41 @@ input:focus, select:focus, button:focus-visible, a:focus-visible {
 .lose { color: var(--lose); }
 .draw { color: var(--draw); }
 
-/* Bandeau du haut (remplacé par la barre de navigation à l'étape suivante) */
-.topbar {
+/* Barre de navigation fixée en bas : 5 onglets */
+:root { --tabbar-height: 64px; }
+
+body { padding-bottom: calc(var(--tabbar-height) + env(safe-area-inset-bottom)); }
+
+.tabbar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px 16px;
+  height: calc(var(--tabbar-height) + env(safe-area-inset-bottom));
+  padding-bottom: env(safe-area-inset-bottom);
   background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  font-family: var(--font-title);
-  font-weight: 800;
+  border-top: 1px solid var(--border);
 }
 
-.topbar a { color: var(--ink); text-decoration: none; }
+.tabbar a {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-width: 0;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+}
 
-.topbar nav { display: flex; gap: 16px; font-family: var(--font-text); font-weight: 600; }
+.tabbar a span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
 
-.footer { text-align: center; padding: 16px; font-size: 13px; }
+.tabbar a.active { color: var(--orange-text); }
 
 /* Matchs (écran refait à l'étape 4) */
 .day + .day { margin-top: 20px; }
@@ -329,3 +347,46 @@ input:focus, select:focus, button:focus-visible, a:focus-visible {
 .ranking tr.gap td { text-align: center; color: var(--muted); border-top: none; }
 
 .my-rank { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; }
+
+/* Score coloré « x – y » (chiffres en Outfit) */
+.score-digits { font-family: var(--font-title); font-weight: 800; white-space: nowrap; }
+
+.score-digits .dash { color: var(--placeholder); margin: 0 4px; }
+
+/* Ligne d'en-tête d'une carte : compétition · date à gauche, état à droite */
+.card-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 0 0 8px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.muted { color: var(--muted); }
+
+/* Résultats */
+.result-row {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 12px;
+  align-items: center;
+}
+
+.result-row .team { font-weight: 700; overflow-wrap: anywhere; }
+
+.result-row .home { text-align: right; }
+
+.result-score { font-size: 26px; font-family: var(--font-title); font-weight: 800; }
+
+.result-mine {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin: 10px 0 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.result-mine .score-digits { font-size: 17px; }

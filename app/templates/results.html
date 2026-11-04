@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}{{ t('results_title') }} · {{ t('app_name') }}{% endblock %}
+{% block content %}
+  <h1>{{ t('results_title') }}</h1>
+  {% for match in matches %}
+    {% set prediction = predictions.get(match.id) %}
+    <article class="card result" id="m{{ match.id }}">
+      <p class="card-meta">
+        <span>{{ match.competition.name }} · {{ format_day(match.kickoff_at.astimezone(tz).date(), today) }}</span>
+        {% if match.status == 'cancelled' %}<span>{{ t('status_cancelled') }}</span>{% endif %}
+      </p>
+      <div class="result-row">
+        <span class="team home">{{ match.home_team }}</span>
+        {% if match.home_score is not none %}
+          <span class="result-score">{% with home = match.home_score, away = match.away_score %}{% include "_score.html" %}{% endwith %}</span>
+        {% else %}
+          <span class="result-score">–</span>
+        {% endif %}
+        <span class="team away">{{ match.away_team }}</span>
+      </div>
+      {% if prediction %}
+        <p class="result-mine">
+          <span>{{ t('my_prediction') }}</span>
+          {% with home = prediction.home_score, away = prediction.away_score %}{% include "_score.html" %}{% endwith %}
+          {% include "_points_badge.html" %}
+        </p>
+      {% elif user %}
+        <p class="result-mine muted">{{ t('results_no_prediction') }}</p>
+      {% endif %}
+    </article>
+  {% else %}
+    <p class="card lead">{{ t('results_none') }}</p>
+  {% endfor %}
+{% endblock %}

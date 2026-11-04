@@ -1,0 +1,6 @@
+{# Badge de points d'un pronostic compté. Variable : prediction #}
+{% if prediction.points is not none %}
+  <span class="badge points {{ 'exact' if prediction.is_exact else 'winner' if prediction.is_winner else '' }}">
+    {{ '+%d' % prediction.points if prediction.points else '0' }}
+  </span>
+{% endif %}
