@@ -1,7 +1,7 @@
 """Liste des matchs, saisie des pronostics, historique du joueur."""
 from datetime import datetime, timedelta
 
-from fastapi import APIRouter, Depends, Form, Request
+from fastapi import APIRouter, Depends, Request
 from fastapi.responses import RedirectResponse
 from sqlalchemy import select
 from sqlalchemy.orm import Session, joinedload
@@ -20,7 +20,6 @@ router = APIRouter()
 DAYS_AHEAD = 7
 RECENT_WINDOW = timedelta(hours=3)  # garde visibles les matchs en cours ou juste finis
 HISTORY_LIMIT = 50
-SAFE_RETURN_PAGES = ("/", "/matches")
 
 
 # --- Lectures en base ---
@@ -49,23 +48,29 @@ def match_context(request: Request, db: Session, user: User | None, matches: lis
     tz = resolve_timezone(request.cookies.get("tz"))
     return {
         "user": user,
+        "now": now,
         "tz": tz,
         "today": now.astimezone(tz).date(),
         "predictions": predictions_by_match(db, user, [m.id for m in matches]),
         "open_ids": {m.id for m in matches if is_prediction_open(m.status, m.kickoff_at, now)},
-        "saved_id": _int_or_none(request.query_params.get("saved")),
-        "error_id": _int_or_none(request.query_params.get("match")),
-        "error": _error_key(request.query_params.get("error")),
+        "saved_count": _int_or_none(request.query_params.get("saved")),
+        "entered": {},  # valeurs saisies, réaffichées en cas d'erreur
+        "errors": {},  # {match_id: clé d'erreur}
     }
-
-
-def _error_key(value: str | None) -> str | None:
-    """N'accepte dans l'URL que des clés d'erreur, pas du texte libre."""
-    return value if value and value.startswith("error_") and value.isidentifier() else None
 
 
 def _int_or_none(value: str | None) -> int | None:
     return int(value) if value and value.isdigit() else None
+
+
+def submitted_scores(form) -> dict[int, tuple[str, str]]:
+    """{match_id: (domicile, extérieur)} lus dans les champs home_<id> et away_<id>."""
+    scores = {}
+    for key in form.keys():
+        if key.startswith("home_") and key[5:].isdigit():
+            match_id = int(key[5:])
+            scores[match_id] = (form.get(key, ""), form.get(f"away_{match_id}", ""))
+    return scores
 
 
 # --- Pages ---
@@ -73,21 +78,41 @@ def _int_or_none(value: str | None) -> int | None:
 @router.get("/matches")
 def matches_page(request: Request, db: Session = Depends(get_db),
                  user: User | None = Depends(current_user)):
+    return render_matches(request, db, user)
+
+
+def render_matches(request: Request, db: Session, user: User | None,
+                   entered: dict | None = None, errors: dict | None = None,
+                   saved_count: int | None = None):
     now = utc_now()
     matches = upcoming_matches(db, now)
     context = match_context(request, db, user, matches, now)
     context["days"] = group_by_day_and_competition(matches, context["tz"])
+    context["to_predict"] = sum(1 for m_id in context["open_ids"] if m_id not in context["predictions"])
+    context["entered"], context["errors"] = entered or {}, errors or {}
+    if saved_count:
+        context["saved_count"] = saved_count
     return templates.TemplateResponse(request, "matches.html", context)
 
 
-@router.post("/matches/{match_id}/prediction")
-def submit_prediction(match_id: int, db: Session = Depends(get_db),
-                      user: User = Depends(require_user), home_score: str = Form(""),
-                      away_score: str = Form(""), back: str = Form("/matches")):
-    error = save_prediction(db, user.id, match_id, home_score, away_score, utc_now())
-    back = back if back in SAFE_RETURN_PAGES else "/matches"
-    query = f"error={error}&match={match_id}" if error else f"saved={match_id}"
-    return RedirectResponse(f"{back}?{query}#m{match_id}", status_code=303)
+@router.post("/matches/predictions")
+async def submit_predictions(request: Request, db: Session = Depends(get_db),
+                             user: User = Depends(require_user)):
+    """Enregistre en une fois tous les pronostics saisis dans la liste."""
+    entered = submitted_scores(await request.form())
+    now = utc_now()
+    saved, errors = 0, {}
+    for match_id, (home, away) in entered.items():
+        if not home.strip() and not away.strip():
+            continue  # match laissé vide : rien à faire
+        error = save_prediction(db, user.id, match_id, home, away, now)
+        if error:
+            errors[match_id] = error
+        else:
+            saved += 1
+    if errors:
+        return render_matches(request, db, user, entered, errors, saved)
+    return RedirectResponse(f"/matches?saved={saved}", status_code=303)
 
 
 def matches_to_predict(db: Session, user: User, now: datetime) -> list[Match]:

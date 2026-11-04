@@ -19,13 +19,13 @@
       {% set match = prediction.match %}
       <div class="history-row">
         <span class="history-date">{{ format_date_time(match.kickoff_at, tz) }}</span>
-        <span class="history-teams">{{ match.home_team }} - {{ match.away_team }}</span>
+        <span class="history-teams">{{ match.home_team }} – {{ match.away_team }}</span>
         <span class="history-scores">
-          {{ prediction.home_score }}-{{ prediction.away_score }}
-          {% if match.status == 'cancelled' %}<small>({{ t('status_cancelled') }})</small>
-          {% elif match.home_score is not none %}<small>({{ t('final_score') }} {{ match.home_score }}-{{ match.away_score }})</small>
+          {% with home = prediction.home_score, away = prediction.away_score %}{% include "_score.html" %}{% endwith %}
+          {% if match.status == 'cancelled' %}<small>{{ t('status_cancelled') }}</small>
+          {% elif match.home_score is not none %}<small>{{ t('final_score') }} {{ match.home_score }}–{{ match.away_score }}</small>
           {% endif %}
-          {% if prediction.points is not none %}<span class="badge points">+{{ prediction.points }} {{ t('leaderboard_points') }}</span>{% endif %}
+          {% include "_points_badge.html" %}
         </span>
       </div>
     {% else %}

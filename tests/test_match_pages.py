@@ -36,9 +36,9 @@ def login(client):
                                    "rules_accepted": "true"})
 
 
-def predict(client, match, home="2", away="1", back="/matches"):
-    return client.post(f"/matches/{match.id}/prediction",
-                       data={"home_score": home, "away_score": away, "back": back},
+def predict(client, match, home="2", away="1"):
+    return client.post("/matches/predictions",
+                       data={f"home_{match.id}": home, f"away_{match.id}": away},
                        follow_redirects=False)
 
 
@@ -68,10 +68,10 @@ def test_submit_prediction_then_update_it(client, db_session):
     login(client)
     response = predict(client, match)
     assert response.status_code == 303
-    assert response.headers["location"] == f"/matches?saved={match.id}#m{match.id}"
+    assert response.headers["location"] == "/matches?saved=1"
     page = client.get(response.headers["location"]).text
-    assert "Pronostic enregistré" in page
-    assert 'value="2"' in page and "Modifier" in page
+    assert "1 prono enregistré" in page
+    assert 'value="2"' in page and "Enregistré" in page
 
     predict(client, match, "0", "0")
     assert db_session.query(Prediction).count() == 1
@@ -79,27 +79,52 @@ def test_submit_prediction_then_update_it(client, db_session):
     assert db_session.query(Prediction).one().home_score == 0
 
 
+def test_save_several_predictions_at_once_and_skip_empty_ones(client, db_session):
+    first, second, empty = add_match(db_session, 24), add_match(db_session, 30), add_match(db_session, 36)
+    login(client)
+    response = client.post("/matches/predictions", follow_redirects=False, data={
+        f"home_{first.id}": "2", f"away_{first.id}": "1",
+        f"home_{second.id}": "0", f"away_{second.id}": "3",
+        f"home_{empty.id}": "", f"away_{empty.id}": "",
+    })
+    assert response.headers["location"] == "/matches?saved=2"
+    assert db_session.query(Prediction).count() == 2
+
+
+def test_one_bad_match_does_not_block_the_others(client, db_session):
+    good, bad = add_match(db_session, 24, home="Bons"), add_match(db_session, 30, home="Mauvais")
+    login(client)
+    response = client.post("/matches/predictions", data={
+        f"home_{good.id}": "1", f"away_{good.id}": "1",
+        f"home_{bad.id}": "3", f"away_{bad.id}": "",
+    })
+    assert response.status_code == 200  # page réaffichée, pas de redirection
+    assert "Score invalide" in response.text
+    assert "1 prono enregistré" in response.text
+    assert 'value="3"' in response.text  # la saisie refusée est conservée
+    assert db_session.query(Prediction).one().match_id == good.id
+
+
 def test_prediction_refused_after_deadline(client, db_session):
     match = add_match(db_session, 0.1)  # coup d'envoi dans 6 minutes : clôturé
     login(client)
-    response = predict(client, match)
-    page = client.get(response.headers["location"]).text
+    page = predict(client, match).text
     assert "Trop tard" in page
     assert db_session.query(Prediction).count() == 0
 
 
-def test_closed_match_shows_no_form(client, db_session):
-    add_match(db_session, 0.1)
+def test_closed_match_shows_no_input(client, db_session):
+    match = add_match(db_session, 0.1)
     login(client)
     page = client.get("/matches").text
     assert "Clôturé" in page
-    assert "home_score" not in page
+    assert f'name="home_{match.id}"' not in page
 
 
 def test_invalid_score_shows_error(client, db_session):
     match = add_match(db_session, 24)
     login(client)
-    page = client.get(predict(client, match, "abc", "1").headers["location"]).text
+    page = predict(client, match, "abc", "1").text
     assert "Score invalide" in page
 
 
@@ -110,18 +135,20 @@ def test_prediction_requires_login(client, db_session):
     assert response.headers["location"] == "/login"
 
 
-def test_back_page_cannot_redirect_elsewhere(client, db_session):
-    match = add_match(db_session, 24)
+def test_saved_prediction_is_colored_and_closing_time_shown(client, db_session):
+    add_match(db_session, 24, home="Lions")
+    saved = add_match(db_session, 30, home="Aigles")
     login(client)
-    response = predict(client, match, back="https://evil.example")
-    assert response.headers["location"].startswith("/matches?")
+    predict(client, saved, "1", "1")
+    page = client.get("/matches").text
+    assert "score-box draw" in page
+    assert "Ferme " in page  # le match sans prono affiche sa clôture
+    assert "1 à faire" in page
 
 
-def test_error_text_from_url_is_not_displayed(client, db_session):
-    match = add_match(db_session, 24)
-    login(client)
-    page = client.get(f"/matches?error=<script>&match={match.id}").text
-    assert "<script>" not in page
+def test_bad_saved_parameter_is_ignored(client, db_session):
+    add_match(db_session, 24)
+    assert client.get("/matches?saved=<script>").status_code == 200
 
 
 def test_home_shows_matches_to_predict(client, db_session):
@@ -131,11 +158,11 @@ def test_home_shows_matches_to_predict(client, db_session):
     page = client.get("/").text
     assert "2 matchs sans prono" in page
     assert "Le premier ferme demain" in page or "Le premier ferme dans" in page
-    predict(client, first, back="/")
+    predict(client, first)
     page = client.get("/").text
     assert "1 match sans prono" in page
-    predict(client, add_match(db_session, 72), back="/")
-    predict(client, db_session.query(Match).filter_by(home_team="Aigles").one(), back="/")
+    predict(client, add_match(db_session, 72))
+    predict(client, db_session.query(Match).filter_by(home_team="Aigles").one())
     assert "Tous tes pronos sont faits" in client.get("/").text
 
 
@@ -153,5 +180,6 @@ def test_profile_shows_history_with_final_score(client, db_session):
     match.status, match.home_score, match.away_score = MatchStatus.FINISHED, 3, 1
     db_session.commit()
     page = client.get("/profile").text
-    assert "Lions - Étalons" in page
-    assert "score final 3-1" in page
+    assert "Lions – Étalons" in page
+    assert "score final 3–1" in page
+    assert '<span class="win">2</span>' in page

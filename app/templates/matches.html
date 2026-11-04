@@ -1,20 +1,39 @@
 {% extends "base.html" %}
 {% block title %}{{ t('matches_title') }} · {{ t('app_name') }}{% endblock %}
 {% block content %}
-  <h1>{{ t('matches_title') }}</h1>
-  {% for day, competitions in days %}
-    <section class="day">
-      <h2>{{ format_day(day, today) }}</h2>
-      {% for competition, matches in competitions %}
-        <div class="card competition">
-          <h3>{{ competition.name }}</h3>
-          {% for match in matches %}
-            {% with back = '/matches' %}{% include "_match_card.html" %}{% endwith %}
-          {% endfor %}
-        </div>
+  <header class="page-head">
+    <h1>{{ t('matches_title') }}</h1>
+    {% if user and to_predict %}<span class="badge todo">{{ t('todo_count').format(count=to_predict) }}</span>{% endif %}
+  </header>
+
+  {% if saved_count is not none %}
+    <p class="notice" role="status">
+      {{ t('predictions_saved_one') if saved_count == 1 else t('predictions_saved').format(count=saved_count) if saved_count else t('predictions_saved_none') }}
+    </p>
+  {% endif %}
+  {% if errors %}<p class="alert" role="alert">{{ t('predictions_some_errors') }}</p>{% endif %}
+
+  {% if days %}
+    <form method="post" action="/matches/predictions" class="predictions-form">
+      {% for day, competitions in days %}
+        <h2 class="day-title">{{ format_day(day, today) }}</h2>
+        {% for competition, matches in competitions %}
+          {% for match in matches %}{% include "_match_card.html" %}{% endfor %}
+        {% endfor %}
       {% endfor %}
-    </section>
+
+      {% if open_ids %}
+        <div class="sticky-action">
+          {% if user %}
+            <button type="submit">{{ t('predictions_submit') }}</button>
+          {% else %}
+            <a class="button" href="/login">{{ t('login_to_predict') }}</a>
+          {% endif %}
+        </div>
+      {% endif %}
+    </form>
   {% else %}
-    <p class="card">{{ t('matches_none') }}</p>
-  {% endfor %}
+    <p class="card lead">{{ t('matches_none') }}</p>
+  {% endif %}
 {% endblock %}
+{% block scripts %}<script src="/static/js/score-colors.js" defer></script>{% endblock %}

@@ -240,41 +240,6 @@ body { padding-bottom: calc(var(--tabbar-height) + env(safe-area-inset-bottom));
 
 .tabbar a.active { color: var(--orange-text); }
 
-/* Matchs (écran refait à l'étape 4) */
-.day + .day { margin-top: 20px; }
-
-.competition-name { font-size: 13px; color: var(--muted); margin: 0 0 4px; }
-
-.competition + .competition { margin-top: 12px; }
-
-.match { padding: 10px 0; border-top: 1px solid var(--border); }
-
-.match:first-of-type { border-top: none; }
-
-.match-head { display: flex; gap: 8px; align-items: center; font-size: 13px; color: var(--muted); }
-
-.match-row {
-  display: grid;
-  grid-template-columns: 1fr 44px auto 44px 1fr;
-  gap: 8px;
-  align-items: center;
-  margin-top: 4px;
-}
-
-.match-row .team { font-weight: 700; overflow-wrap: anywhere; }
-
-.match-row .home { text-align: right; }
-
-.match-row .score { text-align: center; padding: 8px 2px; font-family: var(--font-title); font-size: 22px; }
-
-.match-row .final { grid-column: 2 / 5; text-align: center; font-family: var(--font-title); font-weight: 800; }
-
-.match-row button { grid-column: 1 / -1; margin-top: 6px; }
-
-.my-prediction { margin: 4px 0 0; font-size: 13px; text-align: center; color: var(--muted); }
-
-.match .notice, .match .alert { margin: 6px 0 0; font-size: 13px; }
-
 /* Historique */
 .history-row {
   display: grid;
@@ -287,7 +252,7 @@ body { padding-bottom: calc(var(--tabbar-height) + env(safe-area-inset-bottom));
 
 .history-date { color: var(--muted); font-size: 13px; }
 
-.history-scores { grid-column: 2; font-weight: 700; }
+.history-scores { grid-column: 2; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 
 .history-scores small { font-weight: 400; color: var(--muted); }
 
@@ -509,3 +474,90 @@ body { padding-bottom: calc(var(--tabbar-height) + env(safe-area-inset-bottom));
 
 /* Accueil sans compte */
 .welcome-card h1 { margin: 4px 0 0; }
+
+/* Page Pronos */
+.page-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+
+.page-head h1 { margin: 8px 0 12px; }
+
+.page-head .badge { padding: 6px 12px; border-radius: 12px; }
+
+.day-title { margin: 16px 0 8px; font-size: 17px; }
+
+.day-title:first-child { margin-top: 4px; }
+
+.match-card + .match-card { margin-top: 10px; }
+
+.match-card .closing { color: var(--orange-text); font-weight: 600; }
+
+.match-card.has-error { border-color: var(--lose); }
+
+.match-grid {
+  display: grid;
+  grid-template-columns: 1fr 44px 16px 44px 1fr;
+  gap: 6px;
+  align-items: center;
+}
+
+.match-grid .team { font-weight: 700; font-size: 16px; overflow-wrap: anywhere; }
+
+.match-grid .home { text-align: right; }
+
+.match-grid .dash { text-align: center; color: var(--placeholder); }
+
+/* Case de score : vide (gris), puis gagnant / perdant / nul */
+.score-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 48px;
+  min-height: 0;
+  padding: 0;
+  border: 1.5px solid var(--empty-border);
+  border-radius: 12px;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-title);
+  font-weight: 800;
+  font-size: 22px;
+  text-align: center;
+}
+
+.score-box::placeholder { color: var(--placeholder); }
+
+span.score-box { color: var(--placeholder); }
+
+.score-box.win { color: var(--win); border-color: var(--win); background: var(--win-bg); }
+.score-box.lose { color: var(--lose); border-color: var(--lose); background: var(--lose-bg); }
+.score-box.draw { color: var(--draw); border-color: var(--draw); background: var(--draw-bg); }
+
+.match-foot {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 0 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.match-foot .score-digits { font-size: 17px; }
+
+.match-card .alert { margin: 10px 0 0; font-size: 13px; }
+
+/* Bouton collé en bas, au-dessus de la barre de navigation */
+.predictions-form { padding-bottom: 88px; }
+
+.sticky-action {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: calc(var(--tabbar-height) + env(safe-area-inset-bottom));
+  z-index: 9;
+  padding: 10px 16px;
+  background: var(--bg);
+  border-top: 1px solid var(--border);
+}
+
+.sticky-action button, .sticky-action .button { max-width: 40rem; margin: 0 auto; }
