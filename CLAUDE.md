@@ -7,6 +7,7 @@ Ensuite, il sera intégré dans la super app Max it (Orange) comme mini app TCMP
 au format **web-view** : le site doit donc rester un site web classique.
 
 La spécification fonctionnelle complète est dans `docs/SPEC.md`. La lire avant toute tâche.
+La charte visuelle est dans docs/DESIGN.md, avec les maquettes dans docs/design/. Toute interface doit la respecter.
 
 ## Règles de code (importantes)
 - Code **simple et lisible** avant tout. Pas d'optimisation prématurée, pas d'abstraction inutile.
