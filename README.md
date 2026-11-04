@@ -34,3 +34,11 @@ python -m scripts.run_import --scores         # mise à jour des matchs en cours
 # Offre gratuite (saisons 2022-2024 uniquement) :
 python -m scripts.run_import --season 2024 --from 2024-08-16 --to 2024-08-31
 ```
+
+## Données de démo (tests sans l'API)
+
+```bash
+python -m scripts.seed_demo            # matchs à venir + joueurs fictifs (PIN 0000) + classements
+python -m scripts.seed_demo --finish   # termine les matchs démo ouverts et calcule les points
+python -m scripts.seed_demo --reset    # supprime les données démo
+```
