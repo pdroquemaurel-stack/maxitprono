@@ -76,6 +76,8 @@ python -m scripts.reset_football_data --yes   # supprime les données de l'ancie
 
 ```bash
 python -m scripts.seed_demo            # matchs à venir + joueurs fictifs (PIN 0000) + classements
+                                       # les joueurs fictifs pronostiquent aussi les matchs ouverts
+                                       # (démo et réels) : la « Tendance des joueurs » s'affiche
 python -m scripts.seed_demo --finish   # termine les matchs démo ouverts et calcule les points
 python -m scripts.seed_demo --reset    # supprime les données démo
 ```

@@ -2,7 +2,9 @@
 
 Crée une compétition « Démo », des matchs à venir à pronostiquer, des joueurs
 fictifs (pseudos « demo_… », PIN 0000) et des matchs passés déjà notés pour
-remplir les classements. Les matchs démo n'ont pas d'identifiant API :
+remplir les classements. Les joueurs fictifs pronostiquent aussi tous les matchs
+encore ouverts des compétitions actives (démo et réelles) : la ligne « Tendance
+des joueurs » s'affiche donc partout. Les matchs démo n'ont pas d'identifiant API :
 les imports ne les touchent jamais.
 
 Usage :
@@ -131,13 +133,30 @@ def add_upcoming_matches(db: Session, competition: Competition, now: datetime,
     return missing
 
 
+def predict_open_matches(db: Session, players: list[User], now: datetime,
+                         rng: random.Random) -> int:
+    """Les joueurs fictifs pronostiquent les matchs ouverts des compétitions actives.
+
+    Renvoie le nombre de matchs concernés. Supprimés avec --reset.
+    """
+    matches = db.scalars(select(Match).join(Match.competition)
+                         .where(Competition.is_active.is_(True), Match.kickoff_at > now))
+    open_matches = [m for m in matches if is_prediction_open(m.status, m.kickoff_at, now)]
+    for match in open_matches:
+        _predict_for_players(db, players, match, rng)
+    db.commit()
+    return len(open_matches)
+
+
 def seed(db: Session, now: datetime, rng: random.Random) -> dict:
     competition = demo_competition(db)
     players = demo_players(db, now)
     past = add_past_matches(db, competition, players, now, rng)
     upcoming = add_upcoming_matches(db, competition, now, rng)
+    predicted = predict_open_matches(db, players, now, rng)
     scored = score_finished_matches(db, ScoringRules(), now)
-    return {"players": len(players), "past": past, "upcoming": upcoming, "scored": scored}
+    return {"players": len(players), "past": past, "upcoming": upcoming,
+            "predicted": predicted, "scored": scored}
 
 
 # --- Fin des matchs ouverts ---
@@ -197,7 +216,8 @@ def main() -> None:
             result = seed(db, utc_now(), rng)
             print(f"Joueurs fictifs : {result['players']} (PIN {DEMO_PIN}) · "
                   f"matchs passés ajoutés : {result['past']} · "
-                  f"matchs à venir ajoutés : {result['upcoming']}")
+                  f"matchs à venir ajoutés : {result['upcoming']} · "
+                  f"matchs ouverts pronostiqués : {result['predicted']}")
 
 
 if __name__ == "__main__":
