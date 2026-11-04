@@ -30,6 +30,7 @@ class Settings:
     secret_key: str
     default_language: str
     secure_cookies: bool  # cookie envoyé seulement en HTTPS (vrai sur Render)
+    sync_token: str  # jeton de POST /internal/sync ; vide = route désactivée
 
 
 def load_settings() -> Settings:
@@ -41,6 +42,7 @@ def load_settings() -> Settings:
         secret_key=os.getenv("SECRET_KEY", "dev-secret-change-me"),
         default_language=os.getenv("DEFAULT_LANGUAGE", "fr"),
         secure_cookies=os.getenv("SECURE_COOKIES", "false").lower() == "true",
+        sync_token=os.getenv("SYNC_TOKEN", ""),
     )
 
 

@@ -30,3 +30,13 @@ def test_secure_cookies_off_by_default(monkeypatch):
 def test_secure_cookies_enabled_from_env(monkeypatch):
     monkeypatch.setenv("SECURE_COOKIES", "true")
     assert load_settings().secure_cookies is True
+
+
+def test_sync_token_empty_by_default(monkeypatch):
+    monkeypatch.delenv("SYNC_TOKEN", raising=False)
+    assert load_settings().sync_token == ""
+
+
+def test_data_provider_defaults_to_football_data(monkeypatch):
+    monkeypatch.delenv("DATA_PROVIDER", raising=False)
+    assert load_settings().data_provider == "football_data"

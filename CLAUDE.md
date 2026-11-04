@@ -23,7 +23,9 @@ La charte visuelle est dans docs/DESIGN.md, avec les maquettes dans docs/design/
 - PostgreSQL (SQLite accepté en local)
 - Pages rendues côté serveur avec Jinja2 + un peu de JavaScript natif (pas de React)
 - CSS simple, mobile-first, page légère (réseaux 3G)
-- Tâches planifiées : APScheduler dans le process de l'app (suffisant pour le POC)
+- Tâches planifiées : pas de planificateur dans l'app. La GitHub Action
+  `.github/workflows/sync.yml` appelle `POST /internal/sync?task=fixtures|scores`
+  (protégée par `SYNC_TOKEN`) ; en local, scripts manuels (`scripts/run_import.py`)
 - Tests : pytest
 - Données foot : fournisseur choisi par `DATA_PROVIDER`, derrière l'interface `app/providers/base.py` :
   football-data.org (`football_data`, POC, clé `FOOTBALL_DATA_API_KEY`) ou
@@ -58,6 +60,7 @@ Le reste de l'app ne dépend que d'un `user_id` interne, jamais du mode de login
 - Lancer en local : `uvicorn app.main:app --reload`
 - Tests : `pytest`
 - Migration : `alembic revision --autogenerate -m "..."` puis `alembic upgrade head`
+- Synchro locale : `python -m scripts.run_import` (matchs) et `python -m scripts.run_import --scores`
 
 ## Façon de travailler
 - Avant une fonctionnalité non triviale : proposer un plan court, attendre mon accord.

@@ -24,6 +24,27 @@ Le fichier `render.yaml` décrit la base Postgres et le web service.
 
 Vérification : `https://<nom-du-service>.onrender.com/health` doit répondre `{"status":"ok"}`.
 
+## Synchronisation automatique (GitHub Action)
+
+`.github/workflows/sync.yml` appelle `POST /internal/sync` : import des matchs
+1 fois par jour (04:00 UTC) et scores toutes les 10 minutes. Les points sont
+calculés après chaque passage.
+
+1. Générer un jeton : `python -c "import secrets; print(secrets.token_urlsafe(32))"`.
+2. Render → service → Environment : `SYNC_TOKEN` = ce jeton.
+3. GitHub → Settings → Secrets and variables → Actions :
+   secret `SYNC_TOKEN` (même valeur) et variable `APP_URL` (`https://<nom-du-service>.onrender.com`).
+4. Onglet Actions → « Synchronisation foot » → Run workflow, pour tester.
+
+Appel à la main :
+
+```bash
+curl -X POST -H "Authorization: Bearer $SYNC_TOKEN" "$APP_URL/internal/sync?task=fixtures"
+```
+
+Bon à savoir : GitHub peut retarder les tâches planifiées de quelques minutes
+aux heures chargées, et les suspend après 60 jours sans commit sur le dépôt.
+
 ## Données foot
 
 Le fournisseur est choisi par `DATA_PROVIDER` :

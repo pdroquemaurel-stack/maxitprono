@@ -36,3 +36,6 @@ services:
         sync: false  # à saisir dans le tableau de bord Render
       - key: API_FOOTBALL_KEY
         sync: false  # à saisir dans le tableau de bord Render
+      # Jeton de la route /internal/sync appelée par la GitHub Action
+      - key: SYNC_TOKEN
+        sync: false  # à saisir dans Render ET dans les secrets GitHub

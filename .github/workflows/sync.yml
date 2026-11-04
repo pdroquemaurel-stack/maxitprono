@@ -1,0 +1,45 @@
+# Synchronisation des données foot : appelle POST /internal/sync sur l'app Render.
+# À configurer dans GitHub (Settings → Secrets and variables → Actions) :
+#   - secret   SYNC_TOKEN : la même valeur que la variable SYNC_TOKEN sur Render
+#   - variable APP_URL    : l'adresse de l'app, ex. https://maxitprono.onrender.com
+name: Synchronisation foot
+
+on:
+  schedule:
+    - cron: "0 4 * * *"     # import des matchs de J-3 à J+14, 1 fois par jour
+    - cron: "*/10 * * * *"  # scores des matchs en cours (aucun appel API s'il n'y en a pas)
+  workflow_dispatch:         # bouton « Run workflow » pour lancer à la main
+    inputs:
+      task:
+        description: "Tâche à lancer"
+        type: choice
+        options: [scores, fixtures]
+        default: scores
+
+# Jamais deux synchronisations en même temps
+concurrency:
+  group: sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Appeler /internal/sync
+        env:
+          APP_URL: ${{ vars.APP_URL }}
+          SYNC_TOKEN: ${{ secrets.SYNC_TOKEN }}
+          TASK: ${{ inputs.task || (github.event.schedule == '0 4 * * *' && 'fixtures' || 'scores') }}
+        run: |
+          if [ -z "$APP_URL" ] || [ -z "$SYNC_TOKEN" ]; then
+            echo "APP_URL (variable) ou SYNC_TOKEN (secret) non configuré dans GitHub"
+            exit 1
+          fi
+          echo "Tâche : $TASK"
+          # Jusqu'à 2 min par essai : le service Render gratuit met ~50 s à se réveiller
+          curl --fail-with-body --silent --show-error \
+               --max-time 120 --retry 2 --retry-delay 30 \
+               -X POST -H "Authorization: Bearer $SYNC_TOKEN" \
+               "$APP_URL/internal/sync?task=$TASK"
+          echo

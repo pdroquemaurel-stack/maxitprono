@@ -1,6 +1,6 @@
 # MaxitProno — État des lieux
 
-Mis à jour le 4 novembre 2026, après la PARTIE 2 étape 2 (script de changement de fournisseur).
+Mis à jour le 4 novembre 2026, après la PARTIE 2 étape 3 (synchronisation par `/internal/sync` + GitHub Action).
 
 ## 1. Avancement des étapes (SPEC §12)
 
@@ -28,16 +28,18 @@ Hors découpage : `scripts/seed_demo.py` (données de démo sans API) ; gestion 
 - **Identifiants** : `provider` + `external_id` (texte) sur `competitions` et `matches`, uniques ensemble. Les imports ne touchent que les données du fournisseur actif. Compétition démo : `provider = "demo"`.
 - **Pas de table « équipes »** (choix assumé pour le POC) : noms et logos stockés à plat dans `matches`.
 - **Changement de fournisseur** : `scripts/reset_football_data.py`. Simulation par défaut ; avec `--yes`, supprime les compétitions des autres fournisseurs, leurs matchs (y compris ceux ajoutés à la main) et les pronostics sur ces matchs, puis enregistre les compétitions du fournisseur actif (inactives). Joueurs, journal des appels et démo conservés (démo supprimée avec `--include-demo`). La base locale contient encore 12 compétitions API-Football (22 matchs, 0 prono) : le script n'a été lancé qu'en simulation.
-- **Appels** : uniquement via les scripts manuels (`check_coverage`, `run_import`, `run_import --scores`). Aucune tâche planifiée pour l'instant.
+- **Synchronisation automatique** : `POST /internal/sync?task=fixtures|scores` (`app/routes/internal.py`), protégée par `Authorization: Bearer <SYNC_TOKEN>` (401 si jeton faux, 503 si `SYNC_TOKEN` vide, 502 avec le message si le fournisseur échoue). Points calculés après chaque passage. Appelée par `.github/workflows/sync.yml` : `fixtures` à 04:00 UTC, `scores` toutes les 10 min (aucun appel API sans match en cours), plus un lancement manuel. Testée en local de bout en bout le 4 novembre 2026 (14 matchs de Ligue 1 importés).
+- **En local** : scripts manuels (`check_coverage`, `run_import`, `run_import --scores`).
 
 ## 3. Déploiement
 
 - `render.yaml` : base Postgres `maxitprono-db` (free, Francfort) + web service Python ; démarrage = `alembic upgrade head && uvicorn …` ; `healthCheckPath: /health`.
 - Variables déclarées : `PYTHON_VERSION`, `DATABASE_URL` (depuis la base), `SECRET_KEY` (générée), `DEFAULT_LANGUAGE`, `SECURE_COOKIES`, `API_FOOTBALL_KEY` (sync: false).
-- `render.yaml` déclare aussi `DATA_PROVIDER` (football_data) et `FOOTBALL_DATA_API_KEY` (sync: false). `SYNC_TOKEN` reste à ajouter avec la route `/internal/sync`.
-- `.env.example` : `DATA_PROVIDER`, `FOOTBALL_DATA_API_KEY`, `API_FOOTBALL_KEY`, `DATABASE_URL`, `SECRET_KEY`, `DEFAULT_LANGUAGE`, `SECURE_COOKIES`.
+- `render.yaml` déclare aussi `DATA_PROVIDER` (football_data), `FOOTBALL_DATA_API_KEY` et `SYNC_TOKEN` (sync: false, à saisir dans Render).
+- GitHub Actions : secret `SYNC_TOKEN` et variable `APP_URL` à configurer (voir README).
+- `.env.example` : `DATA_PROVIDER`, `FOOTBALL_DATA_API_KEY`, `API_FOOTBALL_KEY`, `DATABASE_URL`, `SECRET_KEY`, `DEFAULT_LANGUAGE`, `SECURE_COOKIES`, `SYNC_TOKEN`.
 - `.env` local (noms seulement) : `DATA_PROVIDER`, `FOOTBALL_DATA_API_KEY`, `API_FOOTBALL_KEY`.
-- **Tâches planifiées : aucune.** APScheduler n'est pas dans `requirements.txt` et n'est pas utilisé. Pas de dossier `.github/workflows/`.
+- **Tâches planifiées** : GitHub Action `.github/workflows/sync.yml` (pas de planificateur dans l'app). GitHub peut retarder les tâches de quelques minutes et les suspend après 60 jours sans commit.
 
 ## 4. Charte DESIGN.md
 
@@ -56,14 +58,13 @@ Socle en place (`app/static/css/style.css`) : variables de couleur, polices Outf
 
 ## 5. Tests
 
-`pytest` (via `.venv`, **Python 3.12.3**) : **267 tests passent, 0 échec**, 1 avertissement (dépréciation `httpx` dans le TestClient de Starlette).
+`pytest` (via `.venv`, **Python 3.12.3**) : **278 tests passent, 0 échec**, 1 avertissement (dépréciation `httpx` dans le TestClient de Starlette).
 
 ## 6. Incohérences et dettes
 
-1. **Aucune planification** alors que la SPEC §10 prévoit l'import quotidien et les scores toutes les 5-10 min ; CLAUDE.md mentionne encore APScheduler (remplacé par `/internal/sync` + GitHub Action, étape 3).
-2. **Langue non sélectionnable** par le joueur (§1, étape 9).
-3. **Barème de points** codé en dur (`ScoringRules()` par défaut) en attendant le back-office.
-4. **Couverture football-data.org** limitée aux compétitions européennes : CAN, CAF et championnats locaux demandent API-Football.
-5. Avertissement de dépréciation `httpx` / `starlette.testclient` (sans effet aujourd'hui).
+1. **Langue non sélectionnable** par le joueur (§1, étape 9).
+2. **Barème de points** codé en dur (`ScoringRules()` par défaut) en attendant le back-office.
+3. **Couverture football-data.org** limitée aux compétitions européennes : CAN, CAF et championnats locaux demandent API-Football.
+4. Avertissement de dépréciation `httpx` / `starlette.testclient` (sans effet aujourd'hui).
 
-Réglé à l'étape 1 de la PARTIE 2 : `.venv` recréé en Python 3.12, couplage à API-Football, compétition démo identifiée par un faux `api_id`, README limité à API-Football.
+Réglé à l'étape 1 de la PARTIE 2 : `.venv` recréé en Python 3.12, couplage à API-Football, compétition démo identifiée par un faux `api_id`, README limité à API-Football. Étape 3 : planification (SPEC §10) via `/internal/sync` + GitHub Action, CLAUDE.md sans APScheduler.
