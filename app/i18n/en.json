@@ -125,5 +125,11 @@
   "predictions_saved_none": "Nothing to save: fill in both boxes for at least one match.",
   "predictions_some_errors": "Some predictions were not saved: check the flagged matches.",
   "leaderboard_exacts_one": "{count} exact score",
-  "leaderboard_exacts_many": "{count} exact scores"
+  "leaderboard_exacts_many": "{count} exact scores",
+  "result_back": "Back to results",
+  "result_exact": "Your prediction: {score}, exact score!",
+  "result_winner": "Your prediction: {score}, right winner",
+  "result_missed": "Your prediction: {score}",
+  "result_cancelled": "Match cancelled: your prediction does not count.",
+  "result_no_prediction": "You did not predict this match."
 }

@@ -1,7 +1,7 @@
 """Onglet Résultats : matchs terminés, avec mon pronostic et mes points."""
 from datetime import datetime, timedelta
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy import select
 from sqlalchemy.orm import Session, joinedload
 
@@ -44,3 +44,22 @@ def results_page(request: Request, db: Session = Depends(get_db),
         "predictions": predictions_by_match(db, user, [m.id for m in matches]),
     }
     return templates.TemplateResponse(request, "results.html", context)
+
+
+@router.get("/results/{match_id}")
+def result_page(match_id: int, request: Request, db: Session = Depends(get_db),
+                user: User | None = Depends(current_user)):
+    """Match clôturé : score final et résultat de mon pronostic.
+
+    Les pronos des autres membres de la ligue viendront avec les ligues (étape 6).
+    """
+    match = db.get(Match, match_id)
+    if match is None or match.status not in DONE_STATUSES:
+        raise HTTPException(status_code=404)
+    context = {
+        "user": user,
+        "tz": resolve_timezone(request.cookies.get("tz")),
+        "match": match,
+        "prediction": predictions_by_match(db, user, [match.id]).get(match.id),
+    }
+    return templates.TemplateResponse(request, "result.html", context)

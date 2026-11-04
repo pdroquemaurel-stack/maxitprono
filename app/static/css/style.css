@@ -598,3 +598,41 @@ span.score-box { color: var(--placeholder); }
 }
 
 .sticky-action button, .sticky-action .button { max-width: 40rem; margin: 0 auto; }
+
+/* Liste des résultats : chaque carte mène au détail */
+a.card.result { display: block; color: var(--ink); font-weight: 400; text-decoration: none; }
+
+.result + .result { margin-top: 10px; }
+
+/* Match clôturé */
+.back-head { display: flex; align-items: center; gap: 8px; min-height: 48px; margin-bottom: 12px; color: var(--muted); font-size: 15px; }
+
+.back-head a { display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; margin-left: -10px; color: var(--ink); }
+
+.final-row { display: grid; grid-template-columns: 1fr auto 1fr; gap: 12px; align-items: center; }
+
+.final-row .team { font-weight: 700; font-size: 16px; overflow-wrap: anywhere; text-align: center; }
+
+.final-score { font-size: 48px; line-height: 1; }
+
+/* Sur carte sombre : variantes « on dark » du code couleur */
+.card-dark .win { color: var(--win-on-dark); }
+.card-dark .lose { color: var(--lose-on-dark); }
+.card-dark .draw { color: #5BB4E5; }
+.card-dark .score-digits .dash { color: var(--muted); }
+
+.verdict {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0 0;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: var(--ink-2);
+  font-weight: 600;
+}
+
+.verdict strong { font-family: var(--font-title); font-weight: 800; font-size: 24px; }
+
+.verdict.exact { background: var(--orange); color: #000; font-weight: 700; }

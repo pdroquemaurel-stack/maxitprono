@@ -4,7 +4,7 @@
   <h1>{{ t('results_title') }}</h1>
   {% for match in matches %}
     {% set prediction = predictions.get(match.id) %}
-    <article class="card result" id="m{{ match.id }}">
+    <a class="card result" id="m{{ match.id }}" href="/results/{{ match.id }}">
       <p class="card-meta">
         <span>{{ match.competition.name }} · {{ format_day(match.kickoff_at.astimezone(tz).date(), today) }}</span>
         {% if match.status == 'cancelled' %}<span>{{ t('status_cancelled') }}</span>{% endif %}
@@ -27,7 +27,7 @@
       {% elif user %}
         <p class="result-mine muted">{{ t('results_no_prediction') }}</p>
       {% endif %}
-    </article>
+    </a>
   {% else %}
     <p class="card lead">{{ t('results_none') }}</p>
   {% endfor %}

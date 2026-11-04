@@ -125,5 +125,11 @@
   "predictions_saved_none": "Rien à enregistrer : remplis les deux cases d'au moins un match.",
   "predictions_some_errors": "Certains pronos n'ont pas été enregistrés : regarde les matchs signalés.",
   "leaderboard_exacts_one": "{count} score exact",
-  "leaderboard_exacts_many": "{count} scores exacts"
+  "leaderboard_exacts_many": "{count} scores exacts",
+  "result_back": "Retour aux résultats",
+  "result_exact": "Ton prono : {score}, score exact !",
+  "result_winner": "Ton prono : {score}, bon vainqueur",
+  "result_missed": "Ton prono : {score}",
+  "result_cancelled": "Match annulé : ton prono ne compte pas.",
+  "result_no_prediction": "Tu n'avais pas pronostiqué ce match."
 }

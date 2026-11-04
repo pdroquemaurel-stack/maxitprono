@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}{{ match.home_team }} – {{ match.away_team }} · {{ t('app_name') }}{% endblock %}
+{% block content %}
+  <header class="back-head">
+    <a href="/results" aria-label="{{ t('result_back') }}">
+      <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
+    </a>
+    <span>{{ match.competition.name }} · {{ format_date_time(match.kickoff_at, tz) }} ·
+      {{ t('status_cancelled') if match.status == 'cancelled' else t('status_finished')|lower }}</span>
+  </header>
+
+  <section class="card-dark final-card">
+    <div class="final-row">
+      <span class="team">{{ match.home_team }}</span>
+      {% if match.home_score is not none %}
+        <span class="final-score">{% with home = match.home_score, away = match.away_score %}{% include "_score.html" %}{% endwith %}</span>
+      {% else %}
+        <span class="final-score">–</span>
+      {% endif %}
+      <span class="team">{{ match.away_team }}</span>
+    </div>
+
+    {% if match.status == 'cancelled' and prediction %}
+      <p class="verdict">{{ t('result_cancelled') }}</p>
+    {% elif prediction %}
+      {% set score = '%d – %d' % (prediction.home_score, prediction.away_score) %}
+      {% if prediction.is_exact %}
+        <p class="verdict exact"><span>{{ t('result_exact').format(score=score) }}</span><strong>+{{ prediction.points }}</strong></p>
+      {% elif prediction.is_winner %}
+        <p class="verdict"><span>{{ t('result_winner').format(score=score) }}</span><strong>+{{ prediction.points }}</strong></p>
+      {% else %}
+        <p class="verdict"><span>{{ t('result_missed').format(score=score) }}</span><strong>{{ prediction.points if prediction.points is not none else '' }}</strong></p>
+      {% endif %}
+    {% elif user %}
+      <p class="verdict">{{ t('result_no_prediction') }}</p>
+    {% endif %}
+  </section>
+  {# Étape 6 : carte « Les pronos de la ligue » (membres, scores colorés, points) #}
+{% endblock %}
