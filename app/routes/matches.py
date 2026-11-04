@@ -19,7 +19,6 @@ router = APIRouter()
 
 DAYS_AHEAD = 7
 RECENT_WINDOW = timedelta(hours=3)  # garde visibles les matchs en cours ou juste finis
-HOME_MATCH_COUNT = 5
 HISTORY_LIMIT = 50
 SAFE_RETURN_PAGES = ("/", "/matches")
 
@@ -91,13 +90,12 @@ def submit_prediction(match_id: int, db: Session = Depends(get_db),
     return RedirectResponse(f"{back}?{query}#m{match_id}", status_code=303)
 
 
-def home_matches(db: Session, user: User, now: datetime) -> tuple[list[Match], int]:
-    """Prochains matchs ouverts, et nombre de ceux qui n'ont pas encore de pronostic."""
+def matches_to_predict(db: Session, user: User, now: datetime) -> list[Match]:
+    """Matchs encore ouverts sur lesquels le joueur n'a pas de pronostic, du plus proche au plus lointain."""
     open_matches = [m for m in upcoming_matches(db, now)
                     if is_prediction_open(m.status, m.kickoff_at, now)]
     predicted = predictions_by_match(db, user, [m.id for m in open_matches])
-    to_predict = sum(1 for m in open_matches if m.id not in predicted)
-    return open_matches[:HOME_MATCH_COUNT], to_predict
+    return [m for m in open_matches if m.id not in predicted]
 
 
 def prediction_history(db: Session, user: User) -> list[Prediction]:

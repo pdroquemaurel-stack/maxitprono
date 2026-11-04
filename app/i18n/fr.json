@@ -106,5 +106,19 @@
   "nav_profile": "Profil",
   "results_title": "Résultats",
   "results_none": "Aucun match terminé ces 14 derniers jours.",
-  "results_no_prediction": "Pas de prono sur ce match."
+  "results_no_prediction": "Pas de prono sur ce match.",
+  "closes_in_hours": "dans {hours} h {minutes}",
+  "closes_in_minutes": "dans {minutes} min",
+  "closes": "Ferme {when}",
+  "home_podium": "Le podium",
+  "home_players": "{count} joueurs",
+  "home_players_one": "1 joueur",
+  "home_me": "Toi",
+  "home_todo_one": "1 match sans prono",
+  "home_todo_many": "{count} matchs sans prono",
+  "home_first_closes": "Le premier ferme {when}",
+  "home_play": "Jouer",
+  "home_all_done": "Tous tes pronos sont faits",
+  "home_all_done_hint": "Tu peux les modifier jusqu'à la clôture.",
+  "home_see_predictions": "Voir"
 }

@@ -105,10 +105,22 @@ def test_home_shows_my_rank(client, db_session):
     login(client)
     assert "Pas encore classé" in client.get("/").text
     add_scored(db_session, paul(db_session), 5)
-    assert "Ton rang : 1 sur 1 · 5 pts" in client.get("/").text
+    page = client.get("/").text
+    assert "Toi · 5" in page and 'class="step-1"' in page
 
 
 def test_history_shows_points(client, db_session):
     login(client)
     add_scored(db_session, paul(db_session), 5)
     assert "+5 Pts" in client.get("/profile").text
+
+
+def test_home_podium_shows_top_three_and_my_rank_below(client, db_session):
+    login(client)
+    for points, name in ((9, "Ali"), (7, "Bea"), (6, "Cyr")):
+        add_scored(db_session, add_player(db_session, name), points)
+    add_scored(db_session, paul(db_session), 2)
+    page = client.get("/").text
+    assert "Ali · 9" in page and "Bea · 7" in page and "Cyr · 6" in page
+    assert "Ton rang : 4 sur 4 · 2 pts" in page
+    assert "4 joueurs" in page

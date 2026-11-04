@@ -4,6 +4,7 @@ from datetime import date, datetime, tzinfo
 from pathlib import Path
 
 from app.config import settings
+from app.services.deadlines import closing_info
 
 I18N_DIR = Path(__file__).parent
 SUPPORTED_LANGUAGES = ("fr", "en")
@@ -40,3 +41,16 @@ def format_time(moment: datetime, tz: tzinfo) -> str:
 def format_date_time(moment: datetime, tz: tzinfo) -> str:
     """Date et heure courtes, ex. « 10/11 21:00 »."""
     return moment.astimezone(tz).strftime("%d/%m %H:%M")
+
+
+def closing_when(kickoff_at: datetime, now: datetime, tz: tzinfo,
+                 lang: str = settings.default_language) -> str:
+    """Partie « quand » de la clôture : « dans 1 h 42 », « dans 8 min », « demain », « samedi »."""
+    info = closing_info(kickoff_at, now, tz)
+    if info.kind == "soon" and info.hours:
+        return translate("closes_in_hours", lang).format(hours=info.hours, minutes=f"{info.minutes:02d}")
+    if info.kind == "soon":
+        return translate("closes_in_minutes", lang).format(minutes=info.minutes)
+    if info.kind == "tomorrow":
+        return translate("tomorrow", lang).lower()
+    return translate(f"weekday_{info.day.weekday()}", lang)

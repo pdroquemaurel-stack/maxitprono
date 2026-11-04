@@ -2,7 +2,8 @@
 
 Fonctions pures : la date courante est passée en paramètre.
 """
-from datetime import datetime, timedelta
+from dataclasses import dataclass
+from datetime import date, datetime, timedelta, tzinfo
 
 from app.models.match import MatchStatus
 
@@ -19,3 +20,30 @@ def prediction_deadline(kickoff_at: datetime) -> datetime:
 def is_prediction_open(status: str, kickoff_at: datetime, now: datetime) -> bool:
     """Vrai si on peut encore saisir ou modifier un pronostic sur ce match."""
     return status in OPEN_STATUSES and now < prediction_deadline(kickoff_at)
+
+
+# --- Délai avant clôture, pour l'affichage (« Ferme dans 1 h 42 », « Ferme demain »...) ---
+
+SOON_LIMIT = timedelta(hours=6)  # en dessous, on affiche toujours la durée restante
+
+
+@dataclass(frozen=True)
+class ClosingInfo:
+    kind: str  # "soon" (durée restante), "tomorrow" ou "later" (jour de la semaine)
+    hours: int = 0
+    minutes: int = 0
+    day: date | None = None  # jour local de la clôture, pour "later"
+
+
+def closing_info(kickoff_at: datetime, now: datetime, tz: tzinfo) -> ClosingInfo:
+    """Quand ferme le pronostic, vu depuis le fuseau du joueur."""
+    deadline = prediction_deadline(kickoff_at)
+    remaining = max(deadline - now, timedelta(0))
+    deadline_day = deadline.astimezone(tz).date()
+    today = now.astimezone(tz).date()
+    if deadline_day == today or remaining < SOON_LIMIT:
+        total_minutes = max(1, int(remaining.total_seconds() // 60))
+        return ClosingInfo("soon", hours=total_minutes // 60, minutes=total_minutes % 60)
+    if (deadline_day - today).days == 1:
+        return ClosingInfo("tomorrow")
+    return ClosingInfo("later", day=deadline_day)

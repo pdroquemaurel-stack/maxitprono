@@ -106,5 +106,19 @@
   "nav_profile": "Profile",
   "results_title": "Results",
   "results_none": "No match finished in the last 14 days.",
-  "results_no_prediction": "No prediction on this match."
+  "results_no_prediction": "No prediction on this match.",
+  "closes_in_hours": "in {hours} h {minutes}",
+  "closes_in_minutes": "in {minutes} min",
+  "closes": "Closes {when}",
+  "home_podium": "The podium",
+  "home_players": "{count} players",
+  "home_players_one": "1 player",
+  "home_me": "You",
+  "home_todo_one": "1 match without a prediction",
+  "home_todo_many": "{count} matches without a prediction",
+  "home_first_closes": "The first one closes {when}",
+  "home_play": "Play",
+  "home_all_done": "All your predictions are in",
+  "home_all_done_hint": "You can change them until they close.",
+  "home_see_predictions": "See"
 }

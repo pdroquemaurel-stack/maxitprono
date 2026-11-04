@@ -2,32 +2,68 @@
 {% block title %}{{ t('home_title') }} · {{ t('app_name') }}{% endblock %}
 {% block content %}
   {% if user %}
-    <h1>{{ t('home_hello') }} {{ user.nickname }} !</h1>
-    <p class="card my-rank">
-      {% if me %}{{ t('my_rank').format(rank=me.rank, total=me_total, points=me.points) }}
-      {% else %}{{ t('not_ranked_yet') }}{% endif %}
-      <a href="/leaderboard">{{ t('home_see_leaderboard') }}</a>
-    </p>
-    {% if to_predict %}
-      <p class="lead">{{ t('home_to_predict').format(count=to_predict) }}</p>
-    {% endif %}
-    <section class="card competition">
-      <h2>{{ t('home_next_matches') }}</h2>
-      {% for match in matches %}
-        <p class="competition-name">{{ match.competition.name }} · {{ format_day(match.kickoff_at.astimezone(tz).date(), today) }}</p>
-        {% with back = '/' %}{% include "_match_card.html" %}{% endwith %}
-      {% else %}
-        <p>{{ t('matches_none') }}</p>
-      {% endfor %}
+    <header class="home-head">
+      <span class="brand">{{ t('app_name') }}</span>
+      {# Plus tard (étape 6) : sélecteur de ligue à la place du nom de l'app #}
+      <a class="initials me" href="/profile" aria-label="{{ t('profile_title') }}">{{ initials(user.nickname) }}</a>
+    </header>
+
+    <section class="card-dark podium-card">
+      <div class="podium-head">
+        <h2>{{ t('home_podium') }}</h2>
+        {% if total %}
+          <span>{{ t('home_players_one') if total == 1 else t('home_players').format(count=total) }}</span>
+        {% endif %}
+      </div>
+      {% if podium %}
+        {# Ordre visuel : 2e, 1er, 3e #}
+        <ol class="podium">
+          {% for place in (2, 1, 3) if podium|length >= place %}
+            {% set player = podium[place - 1] %}
+            {% set is_me = player.user_id == user.id %}
+            <li class="step-{{ place }}" value="{{ place }}">
+              <span class="initials{% if is_me %} me{% endif %}">{{ initials(player.nickname) }}</span>
+              <span class="podium-name">{{ t('home_me') if is_me else player.nickname }} · {{ player.points }}</span>
+              <span class="podium-step">{{ place }}</span>
+            </li>
+          {% endfor %}
+        </ol>
+      {% endif %}
+      {% if not me %}
+        <p class="podium-note">{{ t('not_ranked_yet') }}</p>
+      {% elif me.rank > 3 %}
+        <p class="podium-note">{{ t('my_rank').format(rank=me.rank, total=total, points=me.points) }}</p>
+      {% endif %}
     </section>
-    <p><a class="button secondary" href="/matches">{{ t('home_all_matches') }}</a></p>
+
+    {% if to_predict %}
+      {% set count = to_predict|length %}
+      <a class="card todo-card" href="/matches">
+        <span class="todo-count">{{ count }}</span>
+        <span class="todo-text">
+          <strong>{{ t('home_todo_one') if count == 1 else t('home_todo_many').format(count=count) }}</strong>
+          <span>{{ t('home_first_closes').format(when=closing_when(to_predict[0].kickoff_at, now, tz, lang)) }}</span>
+        </span>
+        <span class="todo-link">{{ t('home_play') }} →</span>
+      </a>
+    {% else %}
+      <a class="card todo-card" href="/matches">
+        <span class="todo-text">
+          <strong>{{ t('home_all_done') }}</strong>
+          <span>{{ t('home_all_done_hint') }}</span>
+        </span>
+        <span class="todo-link">{{ t('home_see_predictions') }} →</span>
+      </a>
+    {% endif %}
+
+    <p class="small"><a href="/leaderboard">{{ t('home_see_leaderboard') }}</a></p>
   {% else %}
-    <h1>{{ t('app_name') }}</h1>
-    <p class="lead">{{ t('home_welcome') }}</p>
-    <p class="actions">
+    <header class="home-head"><span class="brand">{{ t('app_name') }}</span></header>
+    <section class="card-dark welcome-card">
+      <h1>{{ t('home_welcome') }}</h1>
       <a class="button" href="/register">{{ t('register_title') }}</a>
-      <a class="button secondary" href="/login">{{ t('nav_login') }}</a>
-    </p>
-    <p><a href="/matches">{{ t('home_all_matches') }}</a></p>
+    </section>
+    <a class="button secondary" href="/login">{{ t('nav_login') }}</a>
+    <p class="small"><a href="/matches">{{ t('home_all_matches') }}</a></p>
   {% endif %}
 {% endblock %}

@@ -24,3 +24,15 @@ def test_format_day():
 def test_french_and_english_have_the_same_keys():
     from app.i18n import TRANSLATIONS
     assert TRANSLATIONS["fr"].keys() == TRANSLATIONS["en"].keys()
+
+
+def test_closing_when_texts():
+    from datetime import UTC, datetime, timedelta
+
+    from app.i18n import closing_when
+    kickoff = datetime(2026, 11, 14, 19, 0, tzinfo=UTC)  # un samedi
+    deadline = kickoff - timedelta(minutes=10)
+    assert closing_when(kickoff, deadline - timedelta(minutes=102), UTC) == "dans 1 h 42"
+    assert closing_when(kickoff, deadline - timedelta(minutes=8), UTC, "en") == "in 8 min"
+    assert closing_when(kickoff, datetime(2026, 11, 13, 9, 0, tzinfo=UTC), UTC) == "demain"
+    assert closing_when(kickoff, datetime(2026, 11, 11, 9, 0, tzinfo=UTC), UTC, "en") == "Saturday"

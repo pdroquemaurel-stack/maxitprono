@@ -6,9 +6,10 @@ from app.auth import current_user
 from app.db import get_db
 from app.models import User
 from app.models.types import utc_now
-from app.routes.matches import home_matches, match_context
+from app.routes.matches import matches_to_predict
 from app.services.leaderboards import leaderboard
 from app.services.ranking import find_player
+from app.services.timezones import resolve_timezone
 from app.templating import templates
 
 router = APIRouter()
@@ -20,12 +21,17 @@ def home(request: Request, db: Session = Depends(get_db),
     if user is None:
         return templates.TemplateResponse(request, "home.html", {"user": None})
     now = utc_now()
-    matches, to_predict = home_matches(db, user, now)
-    context = match_context(request, db, user, matches, now)
-    # Classement général complet pour trouver le rang : suffisant pour le POC
+    # Classement général complet pour le podium et mon rang : suffisant pour le POC
     ranking = leaderboard(db)
-    context.update(matches=matches, to_predict=to_predict,
-                   me=find_player(ranking, user.id), me_total=len(ranking))
+    context = {
+        "user": user,
+        "now": now,
+        "tz": resolve_timezone(request.cookies.get("tz")),
+        "to_predict": matches_to_predict(db, user, now),
+        "podium": ranking[:3],
+        "me": find_player(ranking, user.id),
+        "total": len(ranking),
+    }
     return templates.TemplateResponse(request, "home.html", context)
 
 
