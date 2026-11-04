@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="{{ lang }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ t('app_name') }}{% endblock %}</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+  <header class="topbar">{{ t('app_name') }}</header>
+  <main class="content">
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>
