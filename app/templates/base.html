@@ -7,9 +7,20 @@
   <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
-  <header class="topbar">{{ t('app_name') }}</header>
+  <header class="topbar">
+    <a href="/" class="brand">{{ t('app_name') }}</a>
+    <nav>
+      {% if user %}
+        <a href="/profile">{{ user.nickname }}</a>
+      {% else %}
+        <a href="/login">{{ t('nav_login') }}</a>
+      {% endif %}
+    </nav>
+  </header>
   <main class="content">
     {% block content %}{% endblock %}
   </main>
+  <footer class="footer"><a href="/rules">{{ t('rules_title') }}</a></footer>
+  {% block scripts %}{% endblock %}
 </body>
 </html>

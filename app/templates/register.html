@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}{{ t('register_title') }} · {{ t('app_name') }}{% endblock %}
+{% block content %}
+  <h1>{{ t('register_title') }}</h1>
+  {% include "_error.html" %}
+  <form class="card form" method="post" action="/register" enctype="multipart/form-data">
+    <label for="nickname">{{ t('field_nickname') }}</label>
+    <input id="nickname" name="nickname" value="{{ form.nickname or '' }}" required
+           minlength="3" maxlength="20" pattern="[A-Za-z0-9_\-]{3,20}" autocomplete="username">
+    <small>{{ t('hint_nickname') }}</small>
+
+    <label for="pin">{{ t('field_pin') }}</label>
+    <input id="pin" name="pin" type="password" inputmode="numeric" pattern="[0-9]{4}"
+           maxlength="4" required autocomplete="new-password">
+    <small>{{ t('hint_pin') }}</small>
+
+    {% with selected_country = form.country_code %}{% include "_country_select.html" %}{% endwith %}
+
+    {% with avatar_url = None %}{% include "_avatar_input.html" %}{% endwith %}
+
+    <label class="checkbox">
+      <input type="checkbox" name="rules_accepted" value="true" required
+             {% if form.rules_accepted %}checked{% endif %}>
+      {{ t('field_rules_accepted') }} <a href="/rules" target="_blank">{{ t('rules_title') }}</a>
+    </label>
+
+    <button type="submit">{{ t('register_submit') }}</button>
+  </form>
+  <p>{{ t('register_already') }} <a href="/login">{{ t('nav_login') }}</a></p>
+{% endblock %}
+{% block scripts %}<script src="/static/js/avatar.js" defer></script>{% endblock %}

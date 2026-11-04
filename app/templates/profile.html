@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}{{ t('profile_title') }} · {{ t('app_name') }}{% endblock %}
+{% block content %}
+  <h1>{{ t('profile_title') }}</h1>
+  {% include "_error.html" %}
+  {% if request.query_params.get('saved') %}<p class="notice">{{ t('profile_saved') }}</p>{% endif %}
+  <form class="card form" method="post" action="/profile" enctype="multipart/form-data">
+    <p><strong>{{ user.nickname }}</strong></p>
+    {% with avatar_url = '/avatars/%d' % user.id if user.avatar else None %}
+      {% include "_avatar_input.html" %}
+    {% endwith %}
+    {% with selected_country = user.country_code %}{% include "_country_select.html" %}{% endwith %}
+    <button type="submit">{{ t('profile_submit') }}</button>
+  </form>
+
+  <section class="card">
+    <h2>{{ t('profile_history') }}</h2>
+    <p class="lead">{{ t('profile_history_soon') }}</p>
+  </section>
+
+  <form method="post" action="/logout">
+    <button type="submit" class="secondary">{{ t('logout') }}</button>
+  </form>
+{% endblock %}
+{% block scripts %}<script src="/static/js/avatar.js" defer></script>{% endblock %}

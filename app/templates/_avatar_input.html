@@ -1,0 +1,7 @@
+<label for="avatar_file">{{ t('field_avatar') }}</label>
+<div class="avatar-field">
+  <img id="avatar_preview" class="avatar" alt=""
+       src="{{ avatar_url or '' }}" {% if not avatar_url %}hidden{% endif %}>
+  <input id="avatar_file" name="avatar_file" type="file" accept="image/jpeg,image/png" data-avatar>
+</div>
+<input type="hidden" name="avatar_data">

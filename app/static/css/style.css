@@ -40,3 +40,82 @@ h1 { margin: 0.5rem 0; font-size: 1.5rem; }
   padding: 1rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
+
+a { color: var(--primary); }
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.topbar a { color: #fff; text-decoration: none; }
+
+.footer {
+  text-align: center;
+  padding: 1rem;
+  font-size: 0.9rem;
+}
+
+.card + .card, .card + form, form + .card { margin-top: 1rem; }
+
+h2 { font-size: 1.15rem; margin: 0 0 0.5rem; }
+
+/* Formulaires */
+.form { display: flex; flex-direction: column; gap: 0.35rem; }
+
+.form label { font-weight: 600; margin-top: 0.6rem; }
+
+.form small { color: var(--muted); }
+
+input, select, button, .button {
+  font: inherit;
+  padding: 0.65rem 0.75rem;
+  border-radius: 0.5rem;
+  border: 1px solid #ccc;
+  width: 100%;
+}
+
+button, .button {
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  font-weight: 600;
+  margin-top: 1rem;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+}
+
+button.secondary, .button.secondary {
+  background: transparent;
+  color: var(--primary);
+  border: 1px solid var(--primary);
+}
+
+.actions { display: flex; gap: 0.75rem; }
+
+.form .checkbox { display: flex; gap: 0.5rem; align-items: flex-start; font-weight: 400; }
+
+.checkbox input { width: auto; margin-top: 0.3rem; }
+
+.alert, .notice {
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+}
+
+.alert { background: #fdecea; color: #8a1c1c; }
+
+.notice { background: #e7f5ee; color: var(--primary); }
+
+/* Avatar */
+.avatar-field { display: flex; gap: 0.75rem; align-items: center; }
+
+.avatar {
+  width: 4rem;
+  height: 4rem;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}

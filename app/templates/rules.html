@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}{{ t('rules_title') }} · {{ t('app_name') }}{% endblock %}
+{% block content %}
+  <h1>{{ t('rules_title') }}</h1>
+  <section class="card">
+    <ul>
+      <li>{{ t('rules_free') }}</li>
+      <li>{{ t('rules_exact_score') }}</li>
+      <li>{{ t('rules_deadline') }}</li>
+      <li>{{ t('rules_points') }}</li>
+      <li>{{ t('rules_cancelled') }}</li>
+      <li>{{ t('rules_ranking') }}</li>
+      <li>{{ t('rules_one_account') }}</li>
+    </ul>
+  </section>
+{% endblock %}

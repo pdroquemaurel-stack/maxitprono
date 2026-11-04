@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}{{ t('nav_login') }} · {{ t('app_name') }}{% endblock %}
+{% block content %}
+  <h1>{{ t('nav_login') }}</h1>
+  {% include "_error.html" %}
+  <form class="card form" method="post" action="/login">
+    <label for="nickname">{{ t('field_nickname') }}</label>
+    <input id="nickname" name="nickname" value="{{ form.nickname or '' }}" required
+           autocomplete="username">
+
+    <label for="pin">{{ t('field_pin') }}</label>
+    <input id="pin" name="pin" type="password" inputmode="numeric" pattern="[0-9]{4}"
+           maxlength="4" required autocomplete="current-password">
+
+    <button type="submit">{{ t('login_submit') }}</button>
+  </form>
+  <p>{{ t('login_no_account') }} <a href="/register">{{ t('register_title') }}</a></p>
+{% endblock %}

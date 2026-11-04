@@ -1,7 +1,15 @@
 {% extends "base.html" %}
 {% block title %}{{ t('home_title') }} · {{ t('app_name') }}{% endblock %}
 {% block content %}
-  <h1>{{ t('app_name') }}</h1>
-  <p class="lead">{{ t('home_welcome') }}</p>
+  {% if user %}
+    <h1>{{ t('home_hello') }} {{ user.nickname }} !</h1>
+  {% else %}
+    <h1>{{ t('app_name') }}</h1>
+    <p class="lead">{{ t('home_welcome') }}</p>
+    <p class="actions">
+      <a class="button" href="/register">{{ t('register_title') }}</a>
+      <a class="button secondary" href="/login">{{ t('nav_login') }}</a>
+    </p>
+  {% endif %}
   <section class="card">{{ t('home_coming_soon') }}</section>
 {% endblock %}

@@ -4,7 +4,10 @@ import pytest
 
 from app.services.accounts import (
     LOCK_DURATION,
+    MAX_AVATAR_BYTES,
     after_failed_attempt,
+    avatar_mime,
+    decode_data_url,
     hash_pin,
     is_locked,
     nickname_key,
@@ -78,3 +81,27 @@ def test_fifth_failure_locks_for_15_minutes_and_resets_counter():
     count, locked_until = after_failed_attempt(4, NOW)
     assert count == 0
     assert locked_until == NOW + LOCK_DURATION
+
+
+JPEG = b"\xff\xd8\xff\xe0" + b"0" * 100
+PNG = b"\x89PNG\r\n\x1a\n" + b"0" * 100
+
+
+def test_avatar_mime_accepts_jpeg_and_png():
+    assert avatar_mime(JPEG) == ("image/jpeg", None)
+    assert avatar_mime(PNG) == ("image/png", None)
+
+
+def test_avatar_mime_refuses_other_files():
+    assert avatar_mime(b"GIF89a...") == (None, "error_avatar_format")
+    assert avatar_mime(b"<svg></svg>") == (None, "error_avatar_format")
+
+
+def test_avatar_mime_refuses_big_files():
+    assert avatar_mime(JPEG + b"0" * MAX_AVATAR_BYTES) == (None, "error_avatar_too_big")
+
+
+def test_decode_data_url():
+    assert decode_data_url("data:image/jpeg;base64,/9j/4A==") == b"\xff\xd8\xff\xe0"
+    assert decode_data_url("data:image/jpeg;base64,!!!") is None
+    assert decode_data_url("") is None

@@ -2,6 +2,8 @@
 
 Fonctions pures : aucune base de données, la date courante est passée en paramètre.
 """
+import base64
+import binascii
 import hashlib
 import hmac
 import re
@@ -15,6 +17,10 @@ MAX_PIN_ATTEMPTS = 5
 LOCK_DURATION = timedelta(minutes=15)
 
 PBKDF2_ITERATIONS = 200_000
+
+# Le navigateur réduit la photo à ~20 Ko ; on accepte plus large pour l'envoi sans JavaScript
+MAX_AVATAR_BYTES = 300_000
+AVATAR_SIGNATURES = {b"\xff\xd8\xff": "image/jpeg", b"\x89PNG\r\n\x1a\n": "image/png"}
 
 
 # --- Validation (renvoie une clé de traduction d'erreur, ou None si valide) ---
@@ -77,3 +83,24 @@ def after_failed_attempt(failed_attempts: int, now: datetime) -> tuple[int, date
     if failed_attempts >= MAX_PIN_ATTEMPTS:
         return 0, now + LOCK_DURATION
     return failed_attempts, None
+
+
+# --- Avatar ---
+
+def decode_data_url(value: str) -> bytes | None:
+    """Décode "data:image/jpeg;base64,..." envoyé par le navigateur ; None si illisible."""
+    _, _, encoded = value.partition(";base64,")
+    try:
+        return base64.b64decode(encoded, validate=True) or None
+    except binascii.Error:
+        return None
+
+
+def avatar_mime(data: bytes) -> tuple[str | None, str | None]:
+    """Renvoie (type MIME, erreur) : seules les images JPEG et PNG de taille raisonnable passent."""
+    if len(data) > MAX_AVATAR_BYTES:
+        return None, "error_avatar_too_big"
+    for signature, mime in AVATAR_SIGNATURES.items():
+        if data.startswith(signature):
+            return mime, None
+    return None, "error_avatar_format"
