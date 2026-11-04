@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}{{ t('leaderboard_title') }} · {{ t('app_name') }}{% endblock %}
+{% block content %}
+  <h1>{{ t('leaderboard_title') }}</h1>
+  <nav class="tabs">
+    {% for name in tabs %}
+      <a href="/leaderboard?tab={{ name }}"{% if name == tab %} class="active"{% endif %}>{{ t('leaderboard_tab_' ~ name) }}</a>
+    {% endfor %}
+  </nav>
+
+  {% if tab == 'country' %}
+    <form class="filter" method="get" action="/leaderboard">
+      <input type="hidden" name="tab" value="country">
+      {% with selected_country = country %}{% include "_country_select.html" %}{% endwith %}
+      <button type="submit" class="secondary">{{ t('leaderboard_show') }}</button>
+    </form>
+  {% elif tab == 'competition' and competitions %}
+    <form class="filter" method="get" action="/leaderboard">
+      <input type="hidden" name="tab" value="competition">
+      <label for="competition">{{ t('leaderboard_competition') }}</label>
+      <select id="competition" name="competition">
+        {% for competition in competitions %}
+          <option value="{{ competition.id }}"{% if competition.id == competition_id %} selected{% endif %}>{{ competition.name }}</option>
+        {% endfor %}
+      </select>
+      <button type="submit" class="secondary">{{ t('leaderboard_show') }}</button>
+    </form>
+  {% elif tab == 'week' %}
+    <p class="week-nav">
+      <a href="/leaderboard?tab=week&week={{ previous_week.isoformat() }}" aria-label="{{ t('leaderboard_previous_week') }}">‹</a>
+      <span>{{ t('leaderboard_week_range').format(start=week.strftime('%d/%m'), end=week_end.strftime('%d/%m')) }}</span>
+      <a href="/leaderboard?tab=week&week={{ next_week.isoformat() }}" aria-label="{{ t('leaderboard_next_week') }}">›</a>
+    </p>
+  {% endif %}
+
+  {% if user %}
+    <p class="lead">
+      {% if me %}{{ t('my_rank').format(rank=me.rank, total=total, points=me.points) }}
+      {% else %}{{ t('not_ranked_yet') }}{% endif %}
+    </p>
+  {% endif %}
+
+  <section class="card">
+    {% if top %}
+      <table class="ranking">
+        <thead>
+          <tr><th>#</th><th>{{ t('field_nickname') }}</th><th class="num" title="{{ t('leaderboard_exacts_long') }}">{{ t('leaderboard_exacts') }}</th><th class="num">{{ t('leaderboard_points') }}</th></tr>
+        </thead>
+        <tbody>
+          {% for player in top %}{% include "_leaderboard_row.html" %}{% endfor %}
+          {% if me_outside_top %}
+            <tr class="gap"><td colspan="4">…</td></tr>
+            {% with player = me %}{% include "_leaderboard_row.html" %}{% endwith %}
+          {% endif %}
+        </tbody>
+      </table>
+    {% else %}
+      <p class="lead">{{ t('leaderboard_empty') }}</p>
+    {% endif %}
+  </section>
+  <p class="small"><a href="/rules">{{ t('leaderboard_tiebreak_link') }}</a></p>
+{% endblock %}

@@ -3,6 +3,11 @@
 {% block content %}
   {% if user %}
     <h1>{{ t('home_hello') }} {{ user.nickname }} !</h1>
+    <p class="card my-rank">
+      {% if me %}{{ t('my_rank').format(rank=me.rank, total=me_total, points=me.points) }}
+      {% else %}{{ t('not_ranked_yet') }}{% endif %}
+      <a href="/leaderboard">{{ t('home_see_leaderboard') }}</a>
+    </p>
     {% if to_predict %}
       <p class="lead">{{ t('home_to_predict').format(count=to_predict) }}</p>
     {% endif %}

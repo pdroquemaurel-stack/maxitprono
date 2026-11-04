@@ -1,0 +1,6 @@
+<tr{% if user and player.user_id == user.id %} class="me"{% endif %}>
+  <td class="rank">{{ player.rank }}</td>
+  <td class="player">{{ player.nickname }}</td>
+  <td class="num">{{ player.exacts }}</td>
+  <td class="num points">{{ player.points }}</td>
+</tr>

@@ -188,3 +188,59 @@ h3, .competition-name {
 .history-scores { grid-column: 2; font-weight: 600; }
 
 .history-scores small { font-weight: 400; color: var(--muted); }
+
+/* Classements */
+.tabs {
+  display: flex;
+  gap: 0.25rem;
+  overflow-x: auto;
+  margin: 0.5rem 0 0.75rem;
+}
+
+.tabs a {
+  padding: 0.4rem 0.8rem;
+  border-radius: 1rem;
+  background: #e4e7ea;
+  color: var(--text);
+  text-decoration: none;
+  white-space: nowrap;
+  font-size: 0.9rem;
+}
+
+.tabs a.active { background: var(--primary); color: #fff; }
+
+.filter { display: flex; gap: 0.5rem; align-items: end; flex-wrap: wrap; margin-bottom: 0.5rem; }
+
+.filter label { width: 100%; font-weight: 600; }
+
+.filter select { flex: 1; width: auto; min-width: 0; }
+
+.filter button { width: auto; margin-top: 0; }
+
+.week-nav { display: flex; justify-content: space-between; align-items: center; font-weight: 600; }
+
+.week-nav a { font-size: 1.5rem; text-decoration: none; padding: 0 0.75rem; }
+
+.ranking { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+
+.ranking th { text-align: left; color: var(--muted); font-weight: 400; font-size: 0.8rem; }
+
+.ranking td { padding: 0.45rem 0.25rem; border-top: 1px solid #eee; }
+
+.ranking .rank { width: 2.5rem; color: var(--muted); }
+
+.ranking .player { overflow-wrap: anywhere; }
+
+.ranking .num { text-align: right; width: 3.5rem; }
+
+.ranking .points { font-weight: 700; }
+
+.ranking tr.me td { background: #e7f5ee; font-weight: 600; }
+
+.ranking tr.gap td { text-align: center; color: var(--muted); border-top: none; }
+
+.my-rank { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.5rem; }
+
+.badge.points { background: #e7f5ee; color: var(--primary); margin-left: 0.25rem; }
+
+.small { font-size: 0.9rem; text-align: center; }

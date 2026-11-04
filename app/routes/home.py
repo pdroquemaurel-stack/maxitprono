@@ -7,6 +7,8 @@ from app.db import get_db
 from app.models import User
 from app.models.types import utc_now
 from app.routes.matches import home_matches, match_context
+from app.services.leaderboards import leaderboard
+from app.services.ranking import find_player
 from app.templating import templates
 
 router = APIRouter()
@@ -20,7 +22,10 @@ def home(request: Request, db: Session = Depends(get_db),
     now = utc_now()
     matches, to_predict = home_matches(db, user, now)
     context = match_context(request, db, user, matches, now)
-    context.update(matches=matches, to_predict=to_predict)
+    # Classement général complet pour trouver le rang : suffisant pour le POC
+    ranking = leaderboard(db)
+    context.update(matches=matches, to_predict=to_predict,
+                   me=find_player(ranking, user.id), me_total=len(ranking))
     return templates.TemplateResponse(request, "home.html", context)
 
 

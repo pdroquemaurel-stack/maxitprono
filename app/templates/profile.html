@@ -25,6 +25,7 @@
           {% if match.status == 'cancelled' %}<small>({{ t('status_cancelled') }})</small>
           {% elif match.home_score is not none %}<small>({{ t('final_score') }} {{ match.home_score }}-{{ match.away_score }})</small>
           {% endif %}
+          {% if prediction.points is not none %}<span class="badge points">+{{ prediction.points }} {{ t('leaderboard_points') }}</span>{% endif %}
         </span>
       </div>
     {% else %}
