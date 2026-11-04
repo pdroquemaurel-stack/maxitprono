@@ -23,3 +23,14 @@ Le fichier `render.yaml` décrit la base Postgres et le web service.
 3. Valider : Render crée la base, installe, applique les migrations et démarre l'app.
 
 Vérification : `https://<nom-du-service>.onrender.com/health` doit répondre `{"status":"ok"}`.
+
+## Données foot (API-Football)
+
+```bash
+python -m scripts.check_coverage              # couverture des compétitions (~10 appels)
+python -m scripts.activate_competition 61     # activer une compétition (ici Ligue 1)
+python -m scripts.run_import                  # import des matchs J-3 à J+14
+python -m scripts.run_import --scores         # mise à jour des matchs en cours
+# Offre gratuite (saisons 2022-2024 uniquement) :
+python -m scripts.run_import --season 2024 --from 2024-08-16 --to 2024-08-31
+```

@@ -23,6 +23,7 @@ class Match(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     api_id: Mapped[int | None] = mapped_column(Integer, unique=True)  # vide si ajouté à la main
     competition_id: Mapped[int] = mapped_column(ForeignKey("competitions.id"), index=True)
+    season: Mapped[int | None] = mapped_column(Integer)  # saison API, vide si ajouté à la main
     home_team: Mapped[str] = mapped_column(String(120))
     away_team: Mapped[str] = mapped_column(String(120))
     home_logo_url: Mapped[str] = mapped_column(String(255), default="")

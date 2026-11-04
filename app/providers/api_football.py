@@ -11,7 +11,6 @@ from app.config import settings
 from app.models import ApiCallLog
 
 BASE_URL = "https://v3.football.api-sports.io"
-MAX_IDS_PER_CALL = 20  # limite de l'API pour /fixtures?ids=
 
 
 class ApiFootballError(Exception):
@@ -38,12 +37,6 @@ class ApiFootballClient:
         """Matchs d'une compétition entre deux dates (format AAAA-MM-JJ)."""
         params = {"league": league, "season": season, "from": date_from, "to": date_to}
         return self._get("fixtures", params)
-
-    def get_fixtures_by_ids(self, ids: list[int]) -> list:
-        """Jusqu'à 20 matchs en un seul appel."""
-        if not 1 <= len(ids) <= MAX_IDS_PER_CALL:
-            raise ValueError(f"Entre 1 et {MAX_IDS_PER_CALL} identifiants par appel")
-        return self._get("fixtures", {"ids": "-".join(str(i) for i in ids)})
 
     def _get(self, endpoint: str, params: dict):
         log = ApiCallLog(endpoint=endpoint, params=json.dumps(params, sort_keys=True))

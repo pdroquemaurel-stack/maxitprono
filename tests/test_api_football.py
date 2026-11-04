@@ -68,22 +68,6 @@ def test_network_error_raises_and_is_logged(db):
     assert db.query(ApiCallLog).one().status_code is None
 
 
-def test_fixtures_by_ids_joins_ids_with_dashes(db):
-    seen = {}
-
-    def handler(request):
-        seen["ids"] = request.url.params["ids"]
-        return ok_response([])
-
-    make_client(db, handler).get_fixtures_by_ids([10, 11, 12])
-    assert seen["ids"] == "10-11-12"
-
-
-def test_fixtures_by_ids_refuses_more_than_20(db):
-    with pytest.raises(ValueError):
-        make_client(db, lambda r: ok_response([])).get_fixtures_by_ids(list(range(21)))
-
-
 def test_missing_key_is_refused(db):
     with pytest.raises(ApiFootballError, match="manquante"):
         ApiFootballClient("", db)
