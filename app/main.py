@@ -8,9 +8,20 @@ from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
 from app.auth import LoginRequired
+from app.i18n import pick_language, set_language
 from app.routes import accounts, admin, home, internal, leaderboard, leagues, matches, results
 
 app = FastAPI(title="MaxitProno")
+
+
+@app.middleware("http")
+async def use_player_language(request, call_next):
+    """Langue choisie par le joueur (cookie « lang »), sinon celle du téléphone."""
+    set_language(pick_language(request.cookies.get("lang"),
+                               request.headers.get("accept-language")))
+    return await call_next(request)
+
+
 app.mount("/static", StaticFiles(directory=Path(__file__).parent / "static"), name="static")
 app.include_router(home.router)
 app.include_router(accounts.router)

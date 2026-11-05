@@ -1,5 +1,6 @@
 {% extends "base.html" %}
-{% block title %}{{ t('nav_login') }} · {{ t('app_name') }}{% endblock %}
+{% block title %}{{ t('nav_login') }} · {{ t('app_name') }}  {% include "_language.html" %}
+{% endblock %}
 {% block content %}
   <h1>{{ t('nav_login') }}</h1>
   {% include "_error.html" %}

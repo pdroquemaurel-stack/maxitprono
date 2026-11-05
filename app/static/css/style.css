@@ -949,3 +949,10 @@ button.toggle.on { background: var(--win-bg); color: var(--win); }
 .kpi-table tbody tr + tr { border-top: 1px solid var(--border); }
 
 .kpi-table tbody th { font-weight: 700; }
+
+/* Choix de la langue */
+.language-switch { display: flex; justify-content: center; align-items: center; gap: 10px; margin: 16px 0; font-size: 14px; color: var(--muted); }
+
+.language-switch a, .language-switch strong { display: inline-flex; align-items: center; min-height: 44px; padding: 0 6px; }
+
+.language-switch strong { color: var(--ink); }

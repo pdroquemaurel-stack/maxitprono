@@ -265,5 +265,6 @@
   "kpi_new_leagues": "Leagues",
   "kpi_definitions": "Active: made or changed at least one prediction that week. Preds / active: predictions made that week divided by active players. Weeks run Monday to Sunday (UTC), demo players excluded.",
   "decimal_separator": ".",
-  "admin_manage": "Manage"
+  "admin_manage": "Manage",
+  "language_label": "Language"
 }

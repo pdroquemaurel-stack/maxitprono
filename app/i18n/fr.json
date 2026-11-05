@@ -265,5 +265,6 @@
   "kpi_new_leagues": "Ligues",
   "kpi_definitions": "Actif : a fait ou modifié au moins un prono dans la semaine. Pronos / actif : pronostics faits dans la semaine divisés par les joueurs actifs. Semaines du lundi au dimanche (UTC), joueurs démo exclus.",
   "decimal_separator": ",",
-  "admin_manage": "Gérer"
+  "admin_manage": "Gérer",
+  "language_label": "Langue"
 }

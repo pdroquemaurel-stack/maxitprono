@@ -3,17 +3,23 @@ from pathlib import Path
 
 from fastapi.templating import Jinja2Templates
 
-from app.config import settings
-from app.i18n import (closing_when, format_date_time, format_day, format_time, time_ago,
-                      translate)
+from app.i18n import (closing_when, current_language, format_date_time, format_day, format_time,
+                      time_ago, translate)
 from app.i18n.countries import country_name, country_options
 from app.services.avatars import initials
 from app.services.score_colors import score_classes
 from app.services.teams import team_initials
 
-templates = Jinja2Templates(directory=Path(__file__).parent / "templates")
+
+
+def language_context(request) -> dict:
+    """Langue de la requête (posée par le middleware de app/main.py) pour tous les templates."""
+    return {"lang": current_language()}
+
+
+templates = Jinja2Templates(directory=Path(__file__).parent / "templates",
+                            context_processors=[language_context])
 templates.env.globals["t"] = translate
-templates.env.globals["lang"] = settings.default_language
 templates.env.globals["country_options"] = country_options
 templates.env.globals["country_name"] = country_name
 templates.env.globals["format_day"] = format_day

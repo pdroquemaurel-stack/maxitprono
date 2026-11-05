@@ -1,6 +1,6 @@
 # MaxitProno — État des lieux
 
-Mis à jour le 4 novembre 2026, après l'étape 8 de la SPEC (back-office et KPIs terminés).
+Mis à jour le 4 novembre 2026, pendant l'étape 9 de la SPEC (finitions : 9a faite, 9b et 9c à venir).
 
 ## 1. Avancement des étapes (SPEC §12)
 
@@ -14,7 +14,7 @@ Mis à jour le 4 novembre 2026, après l'étape 8 de la SPEC (back-office et KPI
 | 6 | Ligues privées + lien de partage | **Fait** | Tables `leagues` + `league_members`, `app/services/leagues.py` (règles pures), `app/services/league_store.py`, `app/routes/leagues.py`, templates `leagues`, `league`, `join`, `_invite`. `app/services/activity.py`, `leaderboard(league_id=…)`, accueil et onglet « Ligue ». carte « Les pronos de la ligue » sur « Match clôturé » (`app/routes/results.py`) |
 | 7 | Pourcentages 1/N/2 | **Fait** | `app/services/probabilities.py`, `app/jobs/import_probabilities.py`, `Match.prob_home/draw/away`, `get_probabilities` des fournisseurs, `_match_card.html` |
 | 8 | Back-office admin + KPIs | **Fait** | Accès admin (`users.is_admin`, `scripts/make_admin.py`, `require_admin`), réglages du jeu (`game_settings`, `app/services/game_settings.py`, `settings_store.py`, `/admin/settings`). compétitions et matchs (`/admin/competitions`, `/admin/matches`, `app/services/admin_matches.py`, `Match.score_locked`). KPIs sur `/admin` (`app/services/kpis.py`, `kpi_store.py`) |
-| 9 | Traductions FR/EN, page d'erreur, finitions mobile | **Partiel** | `app/i18n/fr.json` et `en.json` complets (267 clés chacun, mêmes clés) ; mais la langue est figée sur `DEFAULT_LANGUAGE` (`app/templating.py`), pas de choix par le joueur ; pas de page « erreur réseau + réessayer » (`_error.html` n'est qu'un message de formulaire) |
+| 9 | Traductions FR/EN, page d'erreur, finitions mobile | **Partiel** (9a faite) | Langue au choix du joueur : `pick_language` / `set_language` (`app/i18n/__init__.py`), middleware dans `app/main.py`, route `/language/{fr,en}`, `_language.html` (268 clés FR/EN). Reste : pages d'erreur et page hors connexion (9b), finitions mobile (9c) |
 
 Hors découpage : `scripts/seed_demo.py` (données de démo sans API ; les joueurs fictifs pronostiquent aussi les matchs ouverts des compétitions actives, réels compris, pour afficher la tendance 1/N/2 ; `--reset` supprime ces pronostics) ; gestion du fuseau horaire du joueur (`app/services/timezones.py`, `static/js/timezone.js`, cookie `tz`).
 
@@ -54,6 +54,12 @@ Hors découpage : `scripts/seed_demo.py` (données de démo sans API ; les joueu
 - **Match ajouté à la main** (`/admin/matches/new`) : compétition active, équipes, date et heure saisies dans le fuseau de l'admin (stockées en UTC) ; sans fournisseur, jamais touché par la synchro, initiales à la place des écussons.
 - **KPIs** (`/admin`) : joueurs inscrits (démo à part), ligues, pronostics, appels API des 7 derniers jours avec le nombre d'erreurs et la dernière erreur ; tableau des 8 dernières semaines (lundi-dimanche, UTC, démo exclue) : nouveaux inscrits, **joueurs actifs** (ont fait ou modifié au moins un prono dans la semaine), pronos faits par joueur actif, ligues créées. Seules les 8 semaines sont lues en base.
 
+## 2 quater. Langue (étape 9a)
+
+- **Ordre** : choix du joueur (cookie `lang`, un an), sinon langue du téléphone (`Accept-Language`, la première langue connue l'emporte), sinon français. Cookie seul : rien n'est enregistré sur le compte (Max it passera sa langue plus tard par le même mécanisme).
+- **Mise en œuvre** : un middleware pose la langue de la requête ; `t()`, les dates, les temps relatifs, les noms de pays, `<html lang>` et les messages construits côté serveur (texte WhatsApp) la suivent sans paramètre.
+- **Choix** : liens « Français · English » (`/language/{fr,en}?next=…`) sur le profil, l'accueil sans compte, la connexion et l'inscription.
+
 ## 3. Déploiement
 
 - `render.yaml` : base Postgres `maxitprono-db` (free, Francfort) + web service Python ; démarrage = `alembic upgrade head && uvicorn …` ; `healthCheckPath: /health`.
@@ -81,12 +87,11 @@ Socle en place (`app/static/css/style.css`) : variables de couleur, polices Outf
 
 ## 5. Tests
 
-`pytest` (via `.venv`, **Python 3.12.3**) : **453 tests passent, 0 échec**, 1 avertissement (dépréciation `httpx` dans le TestClient de Starlette).
+`pytest` (via `.venv`, **Python 3.12.3**) : **469 tests passent, 0 échec**, 1 avertissement (dépréciation `httpx` dans le TestClient de Starlette).
 
 ## 6. Incohérences et dettes
 
-1. **Langue non sélectionnable** par le joueur (§1, étape 9).
-2. **Couverture football-data.org** limitée aux compétitions européennes : CAN, CAF et championnats locaux demandent API-Football.
-3. Avertissement de dépréciation `httpx` / `starlette.testclient` (sans effet aujourd'hui).
+1. **Couverture football-data.org** limitée aux compétitions européennes : CAN, CAF et championnats locaux demandent API-Football.
+2. Avertissement de dépréciation `httpx` / `starlette.testclient` (sans effet aujourd'hui).
 
 Réglé à l'étape 1 de la PARTIE 2 : `.venv` recréé en Python 3.12, couplage à API-Football, compétition démo identifiée par un faux `api_id`, README limité à API-Football. Étape 3 : planification (SPEC §10) via `/internal/sync` + GitHub Action, CLAUDE.md sans APScheduler.

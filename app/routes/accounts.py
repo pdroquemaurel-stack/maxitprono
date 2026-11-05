@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from app.auth import current_user, end_session, require_user, start_session
 from app.auth import pin_auth
 from app.db import get_db
+from app.i18n import SUPPORTED_LANGUAGES
 from app.i18n.countries import COUNTRY_CODES
 from app.models import User
 from app.models.types import utc_now
@@ -132,6 +133,15 @@ def profile_submit(request: Request, db: Session = Depends(get_db),
         user.avatar, user.avatar_mime = avatar, mime
     db.commit()
     return redirect("/profile?saved=1")
+
+
+@router.get("/language/{lang}")
+def choose_language(lang: str, request: Request):
+    """Choix de la langue : simple lien, mémorisé un an dans le cookie « lang »."""
+    response = redirect(safe_next(request.query_params.get("next")))
+    if lang in SUPPORTED_LANGUAGES:
+        response.set_cookie("lang", lang, max_age=365 * 24 * 3600, samesite="lax")
+    return response
 
 
 @router.get("/avatars/{user_id}")

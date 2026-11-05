@@ -1,0 +1,8 @@
+{# Choix de la langue : liens simples, la page courante est rechargée dans la langue choisie #}
+<p class="language-switch" aria-label="{{ t('language_label') }}">
+  {% for code, name in [('fr', 'Français'), ('en', 'English')] %}
+    {% if code == lang %}<strong aria-current="true">{{ name }}</strong>
+    {% else %}<a href="/language/{{ code }}?next={{ (request.url.path ~ ('?' ~ request.url.query if request.url.query else ''))|urlencode }}" lang="{{ code }}" hreflang="{{ code }}">{{ name }}</a>{% endif %}
+    {% if not loop.last %}<span aria-hidden="true">·</span>{% endif %}
+  {% endfor %}
+</p>
