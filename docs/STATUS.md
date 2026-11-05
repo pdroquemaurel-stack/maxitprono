@@ -1,6 +1,6 @@
 # MaxitProno — État des lieux
 
-Mis à jour le 4 novembre 2026, pendant l'étape 8 de la SPEC (back-office : 8a et 8b faites, 8c à venir).
+Mis à jour le 4 novembre 2026, après l'étape 8 de la SPEC (back-office et KPIs terminés).
 
 ## 1. Avancement des étapes (SPEC §12)
 
@@ -13,8 +13,8 @@ Mis à jour le 4 novembre 2026, pendant l'étape 8 de la SPEC (back-office : 8a 
 | 5 | Points + classements + départage | **Fait** | `app/services/scoring.py`, `app/services/ranking.py`, `app/services/leaderboards.py`, `app/jobs/score_predictions.py`, `app/routes/leaderboard.py`, `app/routes/results.py` |
 | 6 | Ligues privées + lien de partage | **Fait** | Tables `leagues` + `league_members`, `app/services/leagues.py` (règles pures), `app/services/league_store.py`, `app/routes/leagues.py`, templates `leagues`, `league`, `join`, `_invite`. `app/services/activity.py`, `leaderboard(league_id=…)`, accueil et onglet « Ligue ». carte « Les pronos de la ligue » sur « Match clôturé » (`app/routes/results.py`) |
 | 7 | Pourcentages 1/N/2 | **Fait** | `app/services/probabilities.py`, `app/jobs/import_probabilities.py`, `Match.prob_home/draw/away`, `get_probabilities` des fournisseurs, `_match_card.html` |
-| 8 | Back-office admin + KPIs | **Partiel** (8a, 8b faites) | Accès admin (`users.is_admin`, `scripts/make_admin.py`, `require_admin`), réglages du jeu (`game_settings`, `app/services/game_settings.py`, `settings_store.py`, `/admin/settings`). compétitions et matchs (`/admin/competitions`, `/admin/matches`, `app/services/admin_matches.py`, `Match.score_locked`). Reste : KPIs (8c) |
-| 9 | Traductions FR/EN, page d'erreur, finitions mobile | **Partiel** | `app/i18n/fr.json` et `en.json` complets (251 clés chacun, mêmes clés) ; mais la langue est figée sur `DEFAULT_LANGUAGE` (`app/templating.py`), pas de choix par le joueur ; pas de page « erreur réseau + réessayer » (`_error.html` n'est qu'un message de formulaire) |
+| 8 | Back-office admin + KPIs | **Fait** | Accès admin (`users.is_admin`, `scripts/make_admin.py`, `require_admin`), réglages du jeu (`game_settings`, `app/services/game_settings.py`, `settings_store.py`, `/admin/settings`). compétitions et matchs (`/admin/competitions`, `/admin/matches`, `app/services/admin_matches.py`, `Match.score_locked`). KPIs sur `/admin` (`app/services/kpis.py`, `kpi_store.py`) |
+| 9 | Traductions FR/EN, page d'erreur, finitions mobile | **Partiel** | `app/i18n/fr.json` et `en.json` complets (267 clés chacun, mêmes clés) ; mais la langue est figée sur `DEFAULT_LANGUAGE` (`app/templating.py`), pas de choix par le joueur ; pas de page « erreur réseau + réessayer » (`_error.html` n'est qu'un message de formulaire) |
 
 Hors découpage : `scripts/seed_demo.py` (données de démo sans API ; les joueurs fictifs pronostiquent aussi les matchs ouverts des compétitions actives, réels compris, pour afficher la tendance 1/N/2 ; `--reset` supprime ces pronostics) ; gestion du fuseau horaire du joueur (`app/services/timezones.py`, `static/js/timezone.js`, cookie `tz`).
 
@@ -44,7 +44,7 @@ Hors découpage : `scripts/seed_demo.py` (données de démo sans API ; les joueu
 - **Match clôturé** : carte « Les pronos de la ligue » (ligue choisie sur l'accueil) avec le score pronostiqué coloré et le badge de points de chaque membre ; moi d'abord, puis par points, les membres sans prono en dernier. Seulement après la clôture : avant, on ne voit jamais les pronos des autres (seulement la tendance 1/N/2).
 - Après connexion demandée par une page, retour à cette page (`/login?next=…`).
 
-## 2 ter. Back-office (étapes 8a et 8b)
+## 2 ter. Back-office
 
 - **Accès** : drapeau `users.is_admin`, donné par `python -m scripts.make_admin <pseudo>` ; les pages `/admin/…` utilisent la connexion normale et répondent **404** aux autres joueurs. Lien « Administration » sur le profil des admins.
 - **Réglages du jeu** (`/admin/settings`, table `game_settings` à une ligne, valeurs par défaut tant que rien n'est enregistré) : points du bon vainqueur (0-20), bonus du score exact (0-20), taille maximale des ligues (2-1000).
@@ -52,6 +52,7 @@ Hors découpage : `scripts/seed_demo.py` (données de démo sans API ; les joueu
 - **Compétitions** (`/admin/competitions`) : interrupteur actif / inactif par compétition ; bouton « Actualiser la liste du fournisseur » (1 appel, nouvelles compétitions inactives). `scripts/activate_competition.py` reste pour le local.
 - **Correction d'un match** (`/admin/matches/{id}`, matchs des 7 derniers et 7 prochains jours) : statut et score final ; points recalculés aussitôt (remis à vide si le match repasse « à venir » ou « en cours »). Le match passe en **`score_locked`** : la synchro met encore à jour noms, logos et horaire, mais plus le statut ni le score. Bouton « Rendre la main à la synchronisation ».
 - **Match ajouté à la main** (`/admin/matches/new`) : compétition active, équipes, date et heure saisies dans le fuseau de l'admin (stockées en UTC) ; sans fournisseur, jamais touché par la synchro, initiales à la place des écussons.
+- **KPIs** (`/admin`) : joueurs inscrits (démo à part), ligues, pronostics, appels API des 7 derniers jours avec le nombre d'erreurs et la dernière erreur ; tableau des 8 dernières semaines (lundi-dimanche, UTC, démo exclue) : nouveaux inscrits, **joueurs actifs** (ont fait ou modifié au moins un prono dans la semaine), pronos faits par joueur actif, ligues créées. Seules les 8 semaines sont lues en base.
 
 ## 3. Déploiement
 
@@ -80,7 +81,7 @@ Socle en place (`app/static/css/style.css`) : variables de couleur, polices Outf
 
 ## 5. Tests
 
-`pytest` (via `.venv`, **Python 3.12.3**) : **447 tests passent, 0 échec**, 1 avertissement (dépréciation `httpx` dans le TestClient de Starlette).
+`pytest` (via `.venv`, **Python 3.12.3**) : **453 tests passent, 0 échec**, 1 avertissement (dépréciation `httpx` dans le TestClient de Starlette).
 
 ## 6. Incohérences et dettes
 

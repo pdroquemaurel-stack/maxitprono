@@ -249,5 +249,21 @@
   "error_team_name": "Indique le nom des deux équipes (120 caractères au plus).",
   "error_same_teams": "Les deux équipes doivent être différentes.",
   "error_kickoff": "Date ou heure invalide.",
-  "error_competition": "Choisis une compétition."
+  "error_competition": "Choisis une compétition.",
+  "kpi_players": "joueurs inscrits",
+  "kpi_leagues": "ligues",
+  "kpi_predictions": "pronostics",
+  "kpi_api_calls": "appels API (7 j)",
+  "kpi_demo_players": "{count} joueurs démo non comptés",
+  "kpi_api_errors": "{count} appels API en erreur sur 7 jours",
+  "kpi_last_error": "Dernière erreur API",
+  "kpi_weekly_title": "Semaine par semaine",
+  "kpi_week": "Semaine",
+  "kpi_new": "Inscrits",
+  "kpi_active": "Actifs",
+  "kpi_per_active": "Pronos par actif",
+  "kpi_new_leagues": "Ligues",
+  "kpi_definitions": "Actif : a fait ou modifié au moins un prono dans la semaine. Pronos / actif : pronostics faits dans la semaine divisés par les joueurs actifs. Semaines du lundi au dimanche (UTC), joueurs démo exclus.",
+  "decimal_separator": ",",
+  "admin_manage": "Gérer"
 }

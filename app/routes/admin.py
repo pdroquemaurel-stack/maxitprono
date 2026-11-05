@@ -16,6 +16,7 @@ from app.providers import make_provider
 from app.providers.base import ProviderError
 from app.routes.accounts import redirect
 from app.services.admin_matches import STATUSES, parse_correction, parse_new_match
+from app.services import kpi_store
 from app.services.game_settings import parse_settings
 from app.services.settings_store import current_rules, get_settings, save_settings
 from app.services.timezones import resolve_timezone
@@ -27,8 +28,14 @@ router = APIRouter(prefix="/admin")
 
 
 @router.get("")
-def admin_home(request: Request, user: User = Depends(require_admin)):
-    return templates.TemplateResponse(request, "admin/index.html", {"user": user})
+def admin_home(request: Request, db: Session = Depends(get_db),
+               user: User = Depends(require_admin)):
+    """Accueil du back-office : KPIs, puis liens vers les autres pages."""
+    now = utc_now()
+    context = {"user": user, "totals": kpi_store.totals(db, now),
+               "weeks": kpi_store.weekly(db, now.date()),
+               "tz": resolve_timezone(request.cookies.get("tz"))}
+    return templates.TemplateResponse(request, "admin/index.html", context)
 
 
 @router.get("/settings")

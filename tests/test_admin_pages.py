@@ -71,3 +71,10 @@ def test_bad_settings_keep_input_and_show_error(admin):
 def test_rules_page_shows_default_scale(client):
     page = client.get("/rules").text
     assert "3 points" in page and "2 points de bonus" in page
+
+
+def test_admin_home_shows_kpis(admin):
+    page = admin.get("/admin").text
+    assert "joueurs inscrits" in page and "Semaine par semaine" in page
+    assert page.count("<tr>") == 9  # en-tête + 8 semaines
+    assert 'href="/admin/competitions"' in page

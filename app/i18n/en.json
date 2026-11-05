@@ -249,5 +249,21 @@
   "error_team_name": "Enter both team names (120 characters at most).",
   "error_same_teams": "The two teams must be different.",
   "error_kickoff": "Invalid date or time.",
-  "error_competition": "Choose a competition."
+  "error_competition": "Choose a competition.",
+  "kpi_players": "registered players",
+  "kpi_leagues": "leagues",
+  "kpi_predictions": "predictions",
+  "kpi_api_calls": "API calls (7 d)",
+  "kpi_demo_players": "{count} demo players not counted",
+  "kpi_api_errors": "{count} failed API calls over 7 days",
+  "kpi_last_error": "Last API error",
+  "kpi_weekly_title": "Week by week",
+  "kpi_week": "Week",
+  "kpi_new": "Sign-ups",
+  "kpi_active": "Active",
+  "kpi_per_active": "Preds per active",
+  "kpi_new_leagues": "Leagues",
+  "kpi_definitions": "Active: made or changed at least one prediction that week. Preds / active: predictions made that week divided by active players. Weeks run Monday to Sunday (UTC), demo players excluded.",
+  "decimal_separator": ".",
+  "admin_manage": "Manage"
 }

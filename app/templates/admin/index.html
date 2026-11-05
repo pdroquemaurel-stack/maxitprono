@@ -2,6 +2,54 @@
 {% block title %}{{ t('admin_title') }} · {{ t('app_name') }}{% endblock %}
 {% block content %}
   <h1>{{ t('admin_title') }}</h1>
+
+  <section class="kpi-grid">
+    {% for value, label in [
+      (totals.players, t('kpi_players')),
+      (totals.leagues, t('kpi_leagues')),
+      (totals.predictions, t('kpi_predictions')),
+      (totals.api_calls, t('kpi_api_calls')),
+    ] %}
+      <div class="card kpi"><strong>{{ value }}</strong><span>{{ label }}</span></div>
+    {% endfor %}
+  </section>
+  <p class="small">
+    {% if totals.demo_players %}{{ t('kpi_demo_players').format(count=totals.demo_players) }} · {% endif %}
+    {{ t('kpi_api_errors').format(count=totals.api_errors) }}
+  </p>
+  {% if totals.last_api_error %}
+    <p class="alert small-alert">{{ t('kpi_last_error') }} ({{ format_date_time(totals.last_api_error.called_at, tz) }},
+      {{ totals.last_api_error.provider }} /{{ totals.last_api_error.endpoint }}) : {{ totals.last_api_error.error }}</p>
+  {% endif %}
+
+  <h2>{{ t('kpi_weekly_title') }}</h2>
+  <div class="card kpi-table-card">
+    <table class="kpi-table">
+      <thead>
+        <tr>
+          <th scope="col">{{ t('kpi_week') }}</th>
+          <th scope="col">{{ t('kpi_new') }}</th>
+          <th scope="col">{{ t('kpi_active') }}</th>
+          <th scope="col">{{ t('kpi_per_active') }}</th>
+          <th scope="col">{{ t('kpi_new_leagues') }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for week in weeks %}
+          <tr>
+            <th scope="row">{{ week.monday.strftime('%d/%m') }}</th>
+            <td>{{ week.new_players }}</td>
+            <td>{{ week.active_players }}</td>
+            <td>{{ ('%.1f' % week.predictions_per_active).replace('.', t('decimal_separator')) if week.active_players else '–' }}</td>
+            <td>{{ week.leagues }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p class="small">{{ t('kpi_definitions') }}</p>
+
+  <h2>{{ t('admin_manage') }}</h2>
   <ul class="card list-card">
     {% for href, title, hint in [
       ('/admin/competitions', 'admin_competitions', 'admin_competitions_hint'),
