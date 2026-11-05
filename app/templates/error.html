@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}{{ t('error_' ~ kind ~ '_title') }} · {{ t('app_name') }}{% endblock %}
+{% block content %}
+  <section class="card-dark error-card">
+    <h1>{{ t('error_' ~ kind ~ '_title') }}</h1>
+    <p>{{ t('error_' ~ kind ~ '_text') }}</p>
+  </section>
+  <a class="button" href="{{ request.url.path }}{{ '?' ~ request.url.query if request.url.query else '' }}">{{ t('retry') }}</a>
+  <a class="button secondary" href="/">{{ t('back_home') }}</a>
+{% endblock %}

@@ -1,0 +1,23 @@
+<!doctype html>
+{# Page autonome (sans barre de navigation) : gardée par le service worker pour le hors connexion #}
+<html lang="{{ lang }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ t('offline_title') }} · {{ t('app_name') }}</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body class="offline-page">
+  <main class="content">
+    <section class="card-dark error-card">
+      <h1>{{ t('offline_title') }}</h1>
+      <p>{{ t('offline_text') }}</p>
+    </section>
+    <button type="button" onclick="location.reload()">{{ t('retry') }}</button>
+  </main>
+  <script>
+    // Le réseau revient : on recharge la page demandée
+    window.addEventListener("online", function () { location.reload(); });
+  </script>
+</body>
+</html>

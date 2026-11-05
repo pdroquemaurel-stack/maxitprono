@@ -1,6 +1,6 @@
 # MaxitProno — État des lieux
 
-Mis à jour le 4 novembre 2026, pendant l'étape 9 de la SPEC (finitions : 9a faite, 9b et 9c à venir).
+Mis à jour le 4 novembre 2026, pendant l'étape 9 de la SPEC (finitions : 9a et 9b faites, 9c à venir).
 
 ## 1. Avancement des étapes (SPEC §12)
 
@@ -14,7 +14,7 @@ Mis à jour le 4 novembre 2026, pendant l'étape 9 de la SPEC (finitions : 9a fa
 | 6 | Ligues privées + lien de partage | **Fait** | Tables `leagues` + `league_members`, `app/services/leagues.py` (règles pures), `app/services/league_store.py`, `app/routes/leagues.py`, templates `leagues`, `league`, `join`, `_invite`. `app/services/activity.py`, `leaderboard(league_id=…)`, accueil et onglet « Ligue ». carte « Les pronos de la ligue » sur « Match clôturé » (`app/routes/results.py`) |
 | 7 | Pourcentages 1/N/2 | **Fait** | `app/services/probabilities.py`, `app/jobs/import_probabilities.py`, `Match.prob_home/draw/away`, `get_probabilities` des fournisseurs, `_match_card.html` |
 | 8 | Back-office admin + KPIs | **Fait** | Accès admin (`users.is_admin`, `scripts/make_admin.py`, `require_admin`), réglages du jeu (`game_settings`, `app/services/game_settings.py`, `settings_store.py`, `/admin/settings`). compétitions et matchs (`/admin/competitions`, `/admin/matches`, `app/services/admin_matches.py`, `Match.score_locked`). KPIs sur `/admin` (`app/services/kpis.py`, `kpi_store.py`) |
-| 9 | Traductions FR/EN, page d'erreur, finitions mobile | **Partiel** (9a faite) | Langue au choix du joueur : `pick_language` / `set_language` (`app/i18n/__init__.py`), middleware dans `app/main.py`, route `/language/{fr,en}`, `_language.html` (268 clés FR/EN). Reste : pages d'erreur et page hors connexion (9b), finitions mobile (9c) |
+| 9 | Traductions FR/EN, page d'erreur, finitions mobile | **Partiel** (9a, 9b faites) | Langue au choix du joueur : `pick_language` / `set_language` (`app/i18n/__init__.py`), middleware dans `app/main.py`, route `/language/{fr,en}`, `_language.html` (276 clés FR/EN). pages d'erreur 404/500 (`error.html`, gestionnaires dans `app/main.py`), page hors connexion (`offline.html`, `static/js/sw.js` servi en `/sw.js`). Reste : finitions mobile (9c) |
 
 Hors découpage : `scripts/seed_demo.py` (données de démo sans API ; les joueurs fictifs pronostiquent aussi les matchs ouverts des compétitions actives, réels compris, pour afficher la tendance 1/N/2 ; `--reset` supprime ces pronostics) ; gestion du fuseau horaire du joueur (`app/services/timezones.py`, `static/js/timezone.js`, cookie `tz`).
 
@@ -60,6 +60,12 @@ Hors découpage : `scripts/seed_demo.py` (données de démo sans API ; les joueu
 - **Mise en œuvre** : un middleware pose la langue de la requête ; `t()`, les dates, les temps relatifs, les noms de pays, `<html lang>` et les messages construits côté serveur (texte WhatsApp) la suivent sans paramètre.
 - **Choix** : liens « Français · English » (`/language/{fr,en}?next=…`) sur le profil, l'accueil sans compte, la connexion et l'inscription.
 
+## 2 quinquies. Erreurs et hors connexion (étape 9b)
+
+- **404 / 500** : pages aux couleurs du jeu avec « Réessayer » (recharge la même adresse) et « Retour à l'accueil », dans la langue du joueur ; une 500 est journalisée (logs Render). La route `/internal/sync` garde des erreurs en JSON (appelée par un robot).
+- **Pas de connexion** (SPEC §8) : service worker minimal (`/sw.js`) qui garde seulement `/offline`, la feuille de style et les polices. Si une page ne répond pas, il affiche « Pas de connexion » + « Réessayer », et la page se recharge seule au retour du réseau. Rien d'autre n'est gardé : les données restent toujours fraîches. Sans prise en charge des service workers (peut-être la web-view Max it), rien ne change.
+- **Vérifié dans un vrai Chrome** (piloté par le protocole de débogage) : installation en ligne, serveur coupé, navigation → page hors connexion affichée avec ses polices.
+
 ## 3. Déploiement
 
 - `render.yaml` : base Postgres `maxitprono-db` (free, Francfort) + web service Python ; démarrage = `alembic upgrade head && uvicorn …` ; `healthCheckPath: /health`.
@@ -87,7 +93,7 @@ Socle en place (`app/static/css/style.css`) : variables de couleur, polices Outf
 
 ## 5. Tests
 
-`pytest` (via `.venv`, **Python 3.12.3**) : **469 tests passent, 0 échec**, 1 avertissement (dépréciation `httpx` dans le TestClient de Starlette).
+`pytest` (via `.venv`, **Python 3.12.3**) : **477 tests passent, 0 échec**, 1 avertissement (dépréciation `httpx` dans le TestClient de Starlette).
 
 ## 6. Incohérences et dettes
 

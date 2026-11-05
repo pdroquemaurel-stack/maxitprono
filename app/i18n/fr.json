@@ -266,5 +266,13 @@
   "kpi_definitions": "Actif : a fait ou modifié au moins un prono dans la semaine. Pronos / actif : pronostics faits dans la semaine divisés par les joueurs actifs. Semaines du lundi au dimanche (UTC), joueurs démo exclus.",
   "decimal_separator": ",",
   "admin_manage": "Gérer",
-  "language_label": "Langue"
+  "language_label": "Langue",
+  "error_not_found_title": "Page introuvable",
+  "error_not_found_text": "Cette page n'existe pas ou n'existe plus.",
+  "error_server_title": "Oups, un problème de notre côté",
+  "error_server_text": "Ce n'est pas toi : réessaie dans un instant.",
+  "offline_title": "Pas de connexion",
+  "offline_text": "Vérifie ton réseau (données mobiles ou Wi-Fi), puis réessaie. La page se recharge toute seule quand la connexion revient.",
+  "retry": "Réessayer",
+  "back_home": "Retour à l'accueil"
 }

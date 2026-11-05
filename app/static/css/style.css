@@ -956,3 +956,12 @@ button.toggle.on { background: var(--win-bg); color: var(--win); }
 .language-switch a, .language-switch strong { display: inline-flex; align-items: center; min-height: 44px; padding: 0 6px; }
 
 .language-switch strong { color: var(--ink); }
+
+/* Pages d'erreur et hors connexion */
+.error-card { margin-top: 24px; }
+
+.error-card h1 { margin: 0 0 8px; font-size: 26px; }
+
+.error-card p { margin: 0; color: #C9CCE0; }
+
+.offline-page { padding-bottom: 0; }

@@ -47,6 +47,10 @@
   </nav>
 
   <script src="/static/js/timezone.js"></script>
+  <script>
+    // Page « Pas de connexion » quand le réseau ne répond pas (sans effet si non pris en charge)
+    if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js");
+  </script>
   {% block scripts %}{% endblock %}
 </body>
 </html>

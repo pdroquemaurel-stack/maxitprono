@@ -266,5 +266,13 @@
   "kpi_definitions": "Active: made or changed at least one prediction that week. Preds / active: predictions made that week divided by active players. Weeks run Monday to Sunday (UTC), demo players excluded.",
   "decimal_separator": ".",
   "admin_manage": "Manage",
-  "language_label": "Language"
+  "language_label": "Language",
+  "error_not_found_title": "Page not found",
+  "error_not_found_text": "This page does not exist or no longer exists.",
+  "error_server_title": "Oops, a problem on our side",
+  "error_server_text": "It's not you: try again in a moment.",
+  "offline_title": "No connection",
+  "offline_text": "Check your network (mobile data or Wi-Fi), then try again. The page reloads by itself when the connection comes back.",
+  "retry": "Try again",
+  "back_home": "Back to home"
 }
