@@ -8,7 +8,27 @@
     {% endfor %}
   </nav>
 
-  {% if tab == 'country' %}
+  {% if tab == 'league' and leagues|length > 1 %}
+    <form class="filter" method="get" action="/leaderboard">
+      <input type="hidden" name="tab" value="league">
+      <label for="league">{{ t('leaderboard_league') }}</label>
+      <select id="league" name="league">
+        {% for league, count in leagues %}
+          <option value="{{ league.id }}"{% if league.id == league_id %} selected{% endif %}>{{ league.name }}</option>
+        {% endfor %}
+      </select>
+      <button type="submit" class="secondary">{{ t('leaderboard_show') }}</button>
+    </form>
+  {% endif %}
+  {% if tab == 'league' and not leagues %}
+    <a class="card todo-card" href="{{ '/leagues' if user else '/login?next=/leaderboard' }}">
+      <span class="todo-text">
+        <strong>{{ t('home_no_league') }}</strong>
+        <span>{{ t('leaderboard_no_league') }} {{ t('home_no_league_hint') }}</span>
+      </span>
+      <span class="todo-link">{{ t('home_no_league_link') }} →</span>
+    </a>
+  {% elif tab == 'country' %}
     <form class="filter" method="get" action="/leaderboard">
       <input type="hidden" name="tab" value="country">
       {% with selected_country = country %}{% include "_country_select.html" %}{% endwith %}
@@ -51,5 +71,6 @@
   {% else %}
     <p class="card lead">{{ t('leaderboard_empty') }}</p>
   {% endif %}
+  {% if tab == 'league' and leagues %}<p class="small">{{ t('leaderboard_league_rule') }}</p>{% endif %}
   <p class="small"><a href="/rules">{{ t('leaderboard_tiebreak_link') }}</a></p>
 {% endblock %}

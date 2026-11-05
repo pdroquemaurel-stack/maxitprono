@@ -260,7 +260,9 @@ body { padding-bottom: calc(var(--tabbar-height) + env(safe-area-inset-bottom));
 .tabs {
   display: grid;
   grid-auto-flow: column;
-  grid-auto-columns: 1fr;
+  grid-auto-columns: minmax(max-content, 1fr);
+  overflow-x: auto;  /* 5 onglets : défilent sur les petits écrans au lieu de déborder */
+  scrollbar-width: none;
   gap: 4px;
   margin: 0 0 12px;
   padding: 4px;
@@ -792,3 +794,74 @@ a.card.result { display: block; color: var(--ink); font-weight: 400; text-decora
 .danger-zone p { margin: 0; color: var(--muted); }
 
 button.danger { background: var(--lose); color: #fff; }
+
+/* Accueil : sélecteur de ligue */
+.league-picker { position: relative; min-width: 0; }
+
+.league-picker summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  max-width: 100%;
+  padding: 6px 14px 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  font-family: var(--font-title);
+  font-weight: 700;
+  font-size: 17px;
+  list-style: none;
+  cursor: pointer;
+}
+
+.league-picker summary::-webkit-details-marker { display: none; }
+
+.league-picker .league-badge { width: 30px; height: 30px; font-size: 12px; border-radius: 9px; }
+
+.league-picker-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.league-menu {
+  position: absolute;
+  z-index: 10;
+  top: calc(100% + 6px);
+  left: 0;
+  min-width: 240px;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+  box-shadow: 0 8px 24px rgba(22, 26, 51, 0.12);
+}
+
+.league-menu a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 4px 10px;
+  border-radius: 10px;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.league-menu a[aria-current] { background: var(--orange-soft); }
+
+.league-menu li:nth-last-child(-n+2) a { color: var(--orange-text); }
+
+.home-head .initials.me { flex: none; margin-left: 12px; }
+
+/* Accueil : fil « Dans la ligue » */
+.activity { margin-top: 20px; }
+
+.activity h2 { font-size: 20px; font-weight: 800; }
+
+.activity ul { margin: 0; padding: 0; list-style: none; }
+
+.activity li { display: flex; align-items: center; gap: 12px; padding: 8px 0; }
+
+.activity-text { flex: 1; min-width: 0; }
+
+.activity-when { flex: none; color: var(--muted); font-size: 14px; }

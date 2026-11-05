@@ -4,7 +4,8 @@ from pathlib import Path
 from fastapi.templating import Jinja2Templates
 
 from app.config import settings
-from app.i18n import closing_when, format_date_time, format_day, format_time, translate
+from app.i18n import (closing_when, format_date_time, format_day, format_time, time_ago,
+                      translate)
 from app.i18n.countries import country_name, country_options
 from app.services.avatars import initials
 from app.services.score_colors import score_classes
@@ -22,3 +23,4 @@ templates.env.globals["score_classes"] = score_classes
 templates.env.globals["closing_when"] = closing_when
 templates.env.globals["initials"] = initials
 templates.env.globals["team_initials"] = team_initials
+templates.env.globals["time_ago"] = time_ago

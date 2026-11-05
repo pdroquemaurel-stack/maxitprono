@@ -1,4 +1,4 @@
-"""Page d'accueil, règles du jeu et vérification de santé."""
+"""Page d'accueil (« Ma ligue »), règles du jeu et vérification de santé."""
 from fastapi import APIRouter, Depends, Request
 from sqlalchemy.orm import Session
 
@@ -6,13 +6,19 @@ from app.auth import current_user
 from app.db import get_db
 from app.models import User
 from app.models.types import utc_now
+from app.routes.leagues import share_links
 from app.routes.matches import matches_to_predict
+from app.services import league_store
 from app.services.leaderboards import leaderboard
+from app.services.leagues import pick_league
 from app.services.ranking import find_player
 from app.services.timezones import resolve_timezone
 from app.templating import templates
 
 router = APIRouter()
+
+LEAGUE_COOKIE = "league"  # dernière ligue choisie dans le sélecteur
+LEAGUE_COOKIE_AGE = 365 * 24 * 3600
 
 
 @router.get("/")
@@ -21,8 +27,13 @@ def home(request: Request, db: Session = Depends(get_db),
     if user is None:
         return templates.TemplateResponse(request, "home.html", {"user": None})
     now = utc_now()
-    # Classement général complet pour le podium et mon rang : suffisant pour le POC
-    ranking = leaderboard(db)
+    leagues = league_store.my_leagues(db, user.id)
+    wanted = request.query_params.get("league") or request.cookies.get(LEAGUE_COOKIE)
+    league_id = pick_league([league.id for league, _ in leagues], wanted)
+    league, members = next(((l, n) for l, n in leagues if l.id == league_id), (None, 0))
+
+    # Classement de la ligue choisie, sinon classement général : suffisant pour le POC
+    ranking = leaderboard(db, league_id=league.id) if league else leaderboard(db)
     context = {
         "user": user,
         "now": now,
@@ -31,8 +42,18 @@ def home(request: Request, db: Session = Depends(get_db),
         "podium": ranking[:3],
         "me": find_player(ranking, user.id),
         "total": len(ranking),
+        "leagues": leagues,
+        "league": league,
+        "player_count": members if league else len(ranking),
+        "activity": league_store.recent_activity(db, league, now) if league else [],
     }
-    return templates.TemplateResponse(request, "home.html", context)
+    if league:
+        context.update(share_links(request, league))
+    response = templates.TemplateResponse(request, "home.html", context)
+    if league and request.query_params.get("league"):
+        response.set_cookie(LEAGUE_COOKIE, str(league.id), max_age=LEAGUE_COOKIE_AGE,
+                            httponly=True, samesite="lax")
+    return response
 
 
 @router.get("/rules")

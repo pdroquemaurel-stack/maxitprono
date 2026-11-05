@@ -5,7 +5,8 @@ from datetime import datetime
 from sqlalchemy import delete, func, select
 from sqlalchemy.orm import Session
 
-from app.models import League, LeagueMember, User
+from app.models import League, LeagueMember, Match, Prediction, User
+from app.services.activity import ACTIVITY_WINDOW, Event, exact_event, join_event, latest_events
 from app.services.leagues import (clean_name, create_error, generate_code, join_error,
                                   leave_error, normalize_code, remove_error, validate_league_name)
 
@@ -55,6 +56,30 @@ def members(db: Session, league_id: int) -> list[LeagueMember]:
              .where(LeagueMember.league_id == league_id)
              .order_by(LeagueMember.joined_at, LeagueMember.id))
     return list(db.scalars(query))
+
+
+def recent_activity(db: Session, league: League, now: datetime) -> list[Event]:
+    """Arrivées et scores exacts des membres sur les 7 derniers jours.
+
+    Comme pour le classement de la ligue, seuls comptent les matchs commencés
+    après l'arrivée du joueur.
+    """
+    since = now - ACTIVITY_WINDOW
+    joins = db.execute(select(User.id, User.nickname, LeagueMember.joined_at)
+                       .join(LeagueMember, LeagueMember.user_id == User.id)
+                       .where(LeagueMember.league_id == league.id,
+                              LeagueMember.joined_at >= since))
+    exacts = db.execute(select(User.nickname, Match.home_team, Match.away_team, Match.kickoff_at)
+                        .join(Prediction, Prediction.user_id == User.id)
+                        .join(Match, Prediction.match_id == Match.id)
+                        .join(LeagueMember, LeagueMember.user_id == User.id)
+                        .where(LeagueMember.league_id == league.id,
+                               Prediction.is_exact, Prediction.points.is_not(None),
+                               Match.kickoff_at >= LeagueMember.joined_at,
+                               Match.kickoff_at >= since))
+    events = [join_event(nickname, at, user_id == league.owner_id) for user_id, nickname, at in joins]
+    events += [exact_event(*row) for row in exacts]
+    return latest_events(events, now)
 
 
 # --- Écritures ---

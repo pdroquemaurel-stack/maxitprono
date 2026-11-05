@@ -62,3 +62,10 @@ def remove_error(is_owner: bool, target_is_owner: bool) -> str | None:
     if target_is_owner:
         return "error_owner_cannot_leave"
     return None
+
+
+def pick_league(league_ids: list[int], wanted: str | None) -> int | None:
+    """Ligue à afficher : celle demandée si le joueur en est membre, sinon la première."""
+    if wanted and wanted.isdigit() and int(wanted) in league_ids:
+        return int(wanted)
+    return league_ids[0] if league_ids else None

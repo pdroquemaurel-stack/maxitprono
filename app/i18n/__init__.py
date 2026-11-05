@@ -54,3 +54,17 @@ def closing_when(kickoff_at: datetime, now: datetime, tz: tzinfo,
     if info.kind == "tomorrow":
         return translate("tomorrow", lang).lower()
     return translate(f"weekday_{info.day.weekday()}", lang)
+
+
+def time_ago(moment: datetime, now: datetime, lang: str = settings.default_language) -> str:
+    """Il y a combien de temps : « à l'instant », « 12 min », « 2 h », « hier », « 3 j »."""
+    minutes = int((now - moment).total_seconds() // 60)
+    if minutes < 1:
+        return translate("ago_now", lang)
+    if minutes < 60:
+        return translate("ago_minutes", lang).format(count=minutes)
+    if minutes < 24 * 60:
+        return translate("ago_hours", lang).format(count=minutes // 60)
+    if minutes < 48 * 60:
+        return translate("ago_yesterday", lang)
+    return translate("ago_days", lang).format(count=minutes // (24 * 60))

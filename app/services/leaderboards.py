@@ -8,13 +8,18 @@ from datetime import datetime
 from sqlalchemy import case, func, select
 from sqlalchemy.orm import Session
 
-from app.models import Match, Prediction, User
+from app.models import LeagueMember, Match, Prediction, User
 from app.services.ranking import PlayerScore, rank_players
 
 
 def leaderboard(db: Session, country_code: str | None = None, competition_id: int | None = None,
-                period: tuple[datetime, datetime] | None = None) -> list[PlayerScore]:
-    """Classement complet, filtré par pays du joueur, compétition ou semaine."""
+                period: tuple[datetime, datetime] | None = None,
+                league_id: int | None = None) -> list[PlayerScore]:
+    """Classement complet, filtré par pays du joueur, compétition, semaine ou ligue.
+
+    Pour une ligue : ses membres seulement, et pour chacun les matchs commencés
+    après son arrivée dans la ligue.
+    """
     query = (
         select(User.id, User.nickname, User.country_code, User.created_at,
                func.sum(Prediction.points),
@@ -31,6 +36,10 @@ def leaderboard(db: Session, country_code: str | None = None, competition_id: in
         query = query.where(Match.competition_id == competition_id)
     if period:
         query = query.where(Match.kickoff_at >= period[0], Match.kickoff_at < period[1])
+    if league_id:
+        query = (query.join(LeagueMember, LeagueMember.user_id == User.id)
+                 .where(LeagueMember.league_id == league_id,
+                        Match.kickoff_at >= LeagueMember.joined_at))
 
     players = [PlayerScore(user_id, nickname, country, created_at, points, exacts, winners)
                for user_id, nickname, country, created_at, points, exacts, winners
