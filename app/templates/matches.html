@@ -36,4 +36,4 @@
     <p class="card lead">{{ t('matches_none') }}</p>
   {% endif %}
 {% endblock %}
-{% block scripts %}<script src="/static/js/score-colors.js" defer></script>{% endblock %}
+{% block scripts %}<script src="{{ static_url('js/score-colors.js') }}" defer></script>{% endblock %}

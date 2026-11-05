@@ -6,6 +6,7 @@ from urllib.parse import quote
 from fastapi import FastAPI, Request
 from fastapi.exception_handlers import http_exception_handler
 from fastapi.responses import FileResponse, RedirectResponse
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
@@ -17,7 +18,23 @@ from app.templating import templates
 STATIC_DIR = Path(__file__).parent / "static"
 logger = logging.getLogger(__name__)
 
+
+
+class CachedStaticFiles(StaticFiles):
+    """Fichiers statiques gardés un an par le navigateur quand leur URL est versionnée
+    (?v=…, voir static_url) ; les polices ne changent jamais, elles aussi."""
+
+    async def get_response(self, path, scope):
+        response = await super().get_response(path, scope)
+        versioned = b"v=" in scope.get("query_string", b"") or path.startswith("fonts/")
+        if response.status_code == 200 and versioned:
+            response.headers["Cache-Control"] = "public, max-age=31536000, immutable"
+        return response
+
+
 app = FastAPI(title="MaxitProno")
+# Pages compressées : 5 à 8 fois plus légères sur un réseau 3G
+app.add_middleware(GZipMiddleware, minimum_size=500)
 
 
 @app.middleware("http")
@@ -28,7 +45,7 @@ async def use_player_language(request, call_next):
     return await call_next(request)
 
 
-app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+app.mount("/static", CachedStaticFiles(directory=STATIC_DIR), name="static")
 app.include_router(home.router)
 app.include_router(accounts.router)
 app.include_router(matches.router)
@@ -68,6 +85,13 @@ async def http_error(request: Request, exc: StarletteHTTPException):
 async def server_error(request: Request, exc: Exception):
     logger.exception("Erreur sur %s %s", request.method, request.url.path)
     return error_page(request, "server", 500)
+
+
+@app.get("/favicon.ico", include_in_schema=False)
+def favicon():
+    # Certains navigateurs le demandent quand même : évite une page 404 à chaque visite
+    return FileResponse(STATIC_DIR / "icons" / "apple-touch-icon.png", media_type="image/png",
+                        headers={"Cache-Control": "public, max-age=604800"})
 
 
 # --- Hors connexion (service worker) ---

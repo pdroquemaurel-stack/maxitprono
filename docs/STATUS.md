@@ -1,6 +1,6 @@
 # MaxitProno — État des lieux
 
-Mis à jour le 4 novembre 2026, pendant l'étape 9 de la SPEC (finitions : 9a et 9b faites, 9c à venir).
+Mis à jour le 4 novembre 2026, après l'étape 9 de la SPEC : **toutes les étapes du découpage (SPEC §12) sont faites**.
 
 ## 1. Avancement des étapes (SPEC §12)
 
@@ -14,7 +14,7 @@ Mis à jour le 4 novembre 2026, pendant l'étape 9 de la SPEC (finitions : 9a et
 | 6 | Ligues privées + lien de partage | **Fait** | Tables `leagues` + `league_members`, `app/services/leagues.py` (règles pures), `app/services/league_store.py`, `app/routes/leagues.py`, templates `leagues`, `league`, `join`, `_invite`. `app/services/activity.py`, `leaderboard(league_id=…)`, accueil et onglet « Ligue ». carte « Les pronos de la ligue » sur « Match clôturé » (`app/routes/results.py`) |
 | 7 | Pourcentages 1/N/2 | **Fait** | `app/services/probabilities.py`, `app/jobs/import_probabilities.py`, `Match.prob_home/draw/away`, `get_probabilities` des fournisseurs, `_match_card.html` |
 | 8 | Back-office admin + KPIs | **Fait** | Accès admin (`users.is_admin`, `scripts/make_admin.py`, `require_admin`), réglages du jeu (`game_settings`, `app/services/game_settings.py`, `settings_store.py`, `/admin/settings`). compétitions et matchs (`/admin/competitions`, `/admin/matches`, `app/services/admin_matches.py`, `Match.score_locked`). KPIs sur `/admin` (`app/services/kpis.py`, `kpi_store.py`) |
-| 9 | Traductions FR/EN, page d'erreur, finitions mobile | **Partiel** (9a, 9b faites) | Langue au choix du joueur : `pick_language` / `set_language` (`app/i18n/__init__.py`), middleware dans `app/main.py`, route `/language/{fr,en}`, `_language.html` (276 clés FR/EN). pages d'erreur 404/500 (`error.html`, gestionnaires dans `app/main.py`), page hors connexion (`offline.html`, `static/js/sw.js` servi en `/sw.js`). Reste : finitions mobile (9c) |
+| 9 | Traductions FR/EN, page d'erreur, finitions mobile | **Fait** | Langue au choix du joueur : `pick_language` / `set_language` (`app/i18n/__init__.py`), middleware dans `app/main.py`, route `/language/{fr,en}`, `_language.html` (276 clés FR/EN). pages d'erreur 404/500 (`error.html`, gestionnaires dans `app/main.py`), page hors connexion (`offline.html`, `static/js/sw.js` servi en `/sw.js`). finitions mobile (compression, cache, icônes, saisies 16 px, écussons des résultats) |
 
 Hors découpage : `scripts/seed_demo.py` (données de démo sans API ; les joueurs fictifs pronostiquent aussi les matchs ouverts des compétitions actives, réels compris, pour afficher la tendance 1/N/2 ; `--reset` supprime ces pronostics) ; gestion du fuseau horaire du joueur (`app/services/timezones.py`, `static/js/timezone.js`, cookie `tz`).
 
@@ -39,7 +39,7 @@ Hors découpage : `scripts/seed_demo.py` (données de démo sans API ; les joueu
 - **Rejoindre** : par code (`/leagues`) ou par lien `/join/{code}`. Le lien affiche la ligue et un bouton ; l'adhésion se fait toujours par **POST** (les aperçus de lien de WhatsApp ne font jamais adhérer). Sans compte : inscription ou connexion puis **retour au lien** (paramètre `next`, limité aux chemins du site).
 - **Partage** : bouton « Inviter des potes par WhatsApp » (`wa.me` + message), partage natif du téléphone s'il existe (`static/js/share.js`). `render.yaml` démarre uvicorn avec `--forwarded-allow-ips='*'` pour que les liens partagés soient en https.
 - **Admin** : retire un membre, supprime la ligue (confirmation) ; ne peut pas la quitter. Un membre peut la quitter. Un non-membre reçoit une 404.
-- **Classement de la ligue** : membres seulement, et pour chacun les matchs commencés **après son arrivée** (`league_members.joined_at`). Onglet « Ligue » en tête des classements, ouvert par défaut pour un membre (menu si plusieurs ligues) ; les 5 onglets défilent horizontalement sur petit écran.
+- **Classement de la ligue** : membres seulement, et pour chacun les matchs commencés **après son arrivée** (`league_members.joined_at`). Onglet « Ligue » en tête des classements, ouvert par défaut pour un membre (menu si plusieurs ligues) ; onglet « Compét. » raccourci : les 5 onglets tiennent à 360 px.
 - **Accueil « Ma ligue »** : sélecteur de ligue (menu `<details>`, sans JavaScript ; choix mémorisé dans le cookie `league`, par défaut la ligue rejointe en dernier), podium et nombre de joueurs de la ligue, fil « Dans la ligue » (créée / a rejoint / score exact, 5 événements des 7 derniers jours, temps relatif « 2 h », « hier »), bouton d'invitation WhatsApp. Sans ligue : podium général et carte « Joue avec tes potes ». « a pronostiqué les 5 matchs du week-end » (maquette) reporté.
 - **Match clôturé** : carte « Les pronos de la ligue » (ligue choisie sur l'accueil) avec le score pronostiqué coloré et le badge de points de chaque membre ; moi d'abord, puis par points, les membres sans prono en dernier. Seulement après la clôture : avant, on ne voit jamais les pronos des autres (seulement la tendance 1/N/2).
 - Après connexion demandée par une page, retour à cette page (`/login?next=…`).
@@ -66,6 +66,16 @@ Hors découpage : `scripts/seed_demo.py` (données de démo sans API ; les joueu
 - **Pas de connexion** (SPEC §8) : service worker minimal (`/sw.js`) qui garde seulement `/offline`, la feuille de style et les polices. Si une page ne répond pas, il affiche « Pas de connexion » + « Réessayer », et la page se recharge seule au retour du réseau. Rien d'autre n'est gardé : les données restent toujours fraîches. Sans prise en charge des service workers (peut-être la web-view Max it), rien ne change.
 - **Vérifié dans un vrai Chrome** (piloté par le protocole de débogage) : installation en ligne, serveur coupé, navigation → page hors connexion affichée avec ses polices.
 
+## 2 sexies. Finitions mobile (étape 9c)
+
+- **Compression GZip** (`GZipMiddleware` de Starlette, aucune dépendance) : la liste des matchs passe de 39,6 Ko à 3,5 Ko, les autres pages autour de 1,3 Ko, la feuille de style de 24,5 Ko à 5,6 Ko.
+- **Cache** : CSS et JS appelés par `static_url()` (`?v=` + empreinte du fichier, recalculée quand il change), gardés un an par le navigateur ; polices gardées un an sans version (même adresse que dans le CSS, préchargées).
+- **Icônes** : `static/icons/icon.svg` (onglet) et `apple-touch-icon.png` 180 px (écran d'accueil), `/favicon.ico` ; barre du navigateur en `#F6F7FB`.
+- **Saisie** : champs à 16 px (pas de zoom automatique sur iPhone) ; `scroll-padding-bottom` pour que le champ en cours de saisie reste au-dessus du bouton collé et de la barre d'onglets.
+- **Écussons** aussi dans la liste des résultats ; noms d'équipe longs coupés en fin de mot ou par trait d'union (plus « Strasbour/g »).
+- Onglet « Compét. » (« Comp. » en anglais) : les 5 onglets tiennent à 360 px.
+- **Passe à 360 px** en émulation mobile (accueil, pronos, classements, résultats, profil) : aucun débordement horizontal.
+
 ## 3. Déploiement
 
 - `render.yaml` : base Postgres `maxitprono-db` (free, Francfort) + web service Python ; démarrage = `alembic upgrade head && uvicorn …` ; `healthCheckPath: /health`.
@@ -85,15 +95,15 @@ Socle en place (`app/static/css/style.css`) : variables de couleur, polices Outf
 | Accueil (Ma ligue) | **Conforme** : sélecteur de ligue, podium de la ligue, carte « matchs sans prono », fil « Dans la ligue », bouton d'invitation WhatsApp (bordure orange pointillée) |
 | Pronos (saisie directe) | **Conforme** : cases de score colorées, état « Ferme dans… », bouton collé en bas, ligne 1/N/2, écussons 36 px au-dessus des noms |
 | Match clôturé | **Conforme** : carte score final (écussons 44 px), bandeau du prono, pronos des membres de la ligue avec leurs points |
-| Classements | **Conforme** (liste, onglets) avec l'onglet « Ligue » |
-| Résultats | Conforme au style général (pas de maquette dédiée) |
+| Classements | **Conforme** (liste, onglets) avec l'onglet « Ligue » ; les 5 onglets tiennent à 360 px |
+| Résultats | Conforme au style général (pas de maquette dédiée), avec écussons |
 | Profil, connexion, inscription, règles | Composants de base (cartes, formulaires, boutons) ; pas de maquette dédiée |
 
-Écussons d'équipes (`_crest.html`) : logo du fournisseur chargé en différé (`loading="lazy"`), directement depuis le site du fournisseur (pas de copie locale) ; initiales en dessous (`app/services/teams.py`), visibles s'il n'y a pas de logo ou s'il ne charge pas. Affichés sur les cartes de pronos et l'écran « Match clôturé », pas encore dans la liste des résultats.
+Écussons d'équipes (`_crest.html`) : logo du fournisseur chargé en différé (`loading="lazy"`), directement depuis le site du fournisseur (pas de copie locale) ; initiales en dessous (`app/services/teams.py`), visibles s'il n'y a pas de logo ou s'il ne charge pas. Affichés sur les cartes de pronos, la liste des résultats et l'écran « Match clôturé ».
 
 ## 5. Tests
 
-`pytest` (via `.venv`, **Python 3.12.3**) : **477 tests passent, 0 échec**, 1 avertissement (dépréciation `httpx` dans le TestClient de Starlette).
+`pytest` (via `.venv`, **Python 3.12.3**) : **484 tests passent, 0 échec**, 1 avertissement (dépréciation `httpx` dans le TestClient de Starlette).
 
 ## 6. Incohérences et dettes
 

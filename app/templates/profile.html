@@ -40,4 +40,4 @@
     <button type="submit" class="secondary">{{ t('logout') }}</button>
   </form>
 {% endblock %}
-{% block scripts %}<script src="/static/js/avatar.js" defer></script>{% endblock %}
+{% block scripts %}<script src="{{ static_url('js/avatar.js') }}" defer></script>{% endblock %}

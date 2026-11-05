@@ -377,7 +377,7 @@ body { padding-bottom: calc(var(--tabbar-height) + env(safe-area-inset-bottom));
   align-items: center;
 }
 
-.result-row .team { font-weight: 700; overflow-wrap: anywhere; }
+.result-row .team { font-weight: 700; overflow-wrap: break-word; hyphens: auto; }
 
 .result-row .home { text-align: right; }
 
@@ -533,8 +533,8 @@ body { padding-bottom: calc(var(--tabbar-height) + env(safe-area-inset-bottom));
 
 .match-grid {
   display: grid;
-  grid-template-columns: 1fr 44px 16px 44px 1fr;
-  gap: 6px;
+  grid-template-columns: 1fr 44px 12px 44px 1fr;
+  gap: 4px;
   align-items: center;
 }
 
@@ -544,8 +544,10 @@ body { padding-bottom: calc(var(--tabbar-height) + env(safe-area-inset-bottom));
   align-items: flex-start;
   gap: 4px;
   font-weight: 700;
-  font-size: 16px;
-  overflow-wrap: anywhere;
+  font-size: 15px;
+  /* Noms longs : coupés en fin de mot ou avec un trait d'union, jamais au milieu d'une lettre */
+  overflow-wrap: break-word;
+  hyphens: auto;
 }
 
 .match-grid .home { align-items: flex-end; text-align: right; }
@@ -965,3 +967,14 @@ button.toggle.on { background: var(--win-bg); color: var(--win); }
 .error-card p { margin: 0; color: #C9CCE0; }
 
 .offline-page { padding-bottom: 0; }
+
+/* iPhone : pas de zoom automatique quand on tape dans un champ de moins de 16 px */
+input, select, textarea { font-size: 16px; }
+
+/* Le champ en cours de saisie reste visible au-dessus du bouton collé et de la barre d'onglets */
+html { scroll-padding-bottom: calc(var(--tabbar-height) + 96px); }
+
+/* Liste des résultats : écussons au-dessus des noms */
+.result-row .team { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+
+.result-row .home { align-items: flex-end; }

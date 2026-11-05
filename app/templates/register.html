@@ -30,4 +30,4 @@
   </form>
   <p>{{ t('register_already') }} <a href="/login{% if next and next != '/' %}?next={{ next|urlencode }}{% endif %}">{{ t('nav_login') }}</a></p>
 {% endblock %}
-{% block scripts %}<script src="/static/js/avatar.js" defer></script>{% endblock %}
+{% block scripts %}<script src="{{ static_url('js/avatar.js') }}" defer></script>{% endblock %}

@@ -10,13 +10,13 @@
         {% if match.status == 'cancelled' %}<span>{{ t('status_cancelled') }}</span>{% endif %}
       </p>
       <div class="result-row">
-        <span class="team home">{{ match.home_team }}</span>
+        <span class="team home">{% with url = match.home_logo_url, name = match.home_team %}{% include "_crest.html" %}{% endwith %}<span>{{ match.home_team }}</span></span>
         {% if match.home_score is not none %}
           <span class="result-score">{% with home = match.home_score, away = match.away_score %}{% include "_score.html" %}{% endwith %}</span>
         {% else %}
           <span class="result-score">–</span>
         {% endif %}
-        <span class="team away">{{ match.away_team }}</span>
+        <span class="team away">{% with url = match.away_logo_url, name = match.away_team %}{% include "_crest.html" %}{% endwith %}<span>{{ match.away_team }}</span></span>
       </div>
       {% if prediction %}
         <p class="result-mine">
