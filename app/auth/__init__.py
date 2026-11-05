@@ -3,7 +3,7 @@
 Les routes utilisent seulement `current_user`, `require_user`, `start_session`
 et `end_session` : elles ne savent pas comment le joueur s'est connecté.
 """
-from fastapi import Depends, Request, Response
+from fastapi import Depends, HTTPException, Request, Response
 from sqlalchemy.orm import Session
 
 from app.auth.session import COOKIE_NAME, SESSION_DURATION, read_session, sign_session
@@ -25,6 +25,13 @@ def current_user(request: Request, db: Session = Depends(get_db)) -> User | None
 def require_user(user: User | None = Depends(current_user)) -> User:
     if user is None:
         raise LoginRequired()
+    return user
+
+
+def require_admin(user: User = Depends(require_user)) -> User:
+    """Page du back-office : 404 pour les non-admins (on ne révèle pas son existence)."""
+    if not user.is_admin:
+        raise HTTPException(404)
     return user
 
 

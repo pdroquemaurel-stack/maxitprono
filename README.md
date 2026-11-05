@@ -72,6 +72,16 @@ python -m scripts.reset_football_data --yes   # supprime les données de l'ancie
                                               # puis enregistre les compétitions du nouveau
 ```
 
+## Back-office
+
+Réservé aux joueurs admins. Donner l'accès (en local, ou depuis le Shell de Render) :
+
+```bash
+python -m scripts.make_admin <pseudo>         # --off pour retirer l'accès
+```
+
+Puis Profil → Administration (`/admin`).
+
 ## Données de démo (tests sans l'API)
 
 ```bash

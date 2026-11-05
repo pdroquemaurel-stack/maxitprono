@@ -34,6 +34,7 @@
   </section>
 
   <p class="small"><a href="/rules">{{ t('rules_title') }}</a></p>
+  {% if user.is_admin %}<a class="button secondary" href="/admin">{{ t('profile_admin') }}</a>{% endif %}
   <form method="post" action="/logout">
     <button type="submit" class="secondary">{{ t('logout') }}</button>
   </form>

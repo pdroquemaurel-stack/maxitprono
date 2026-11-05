@@ -51,3 +51,16 @@ def score_finished_matches(db: Session, rules: ScoringRules, now: datetime) -> i
         apply_result(prediction, match, rules, now)
     db.commit()
     return len(rows)
+
+
+def rescore_all(db: Session, rules: ScoringRules, now: datetime) -> int:
+    """Recalcule tous les pronostics des matchs terminés ou annulés (changement de barème)."""
+    rows = db.execute(
+        select(Prediction, Match)
+        .join(Match, Prediction.match_id == Match.id)
+        .where(Match.status.in_([MatchStatus.FINISHED, MatchStatus.CANCELLED]))
+    ).all()
+    for prediction, match in rows:
+        apply_result(prediction, match, rules, now)
+    db.commit()
+    return len(rows)

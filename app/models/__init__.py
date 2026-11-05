@@ -6,3 +6,4 @@ from app.models.match import Match, MatchStatus  # noqa: F401
 from app.models.user import User  # noqa: F401
 from app.models.prediction import Prediction  # noqa: F401
 from app.models.league import League, LeagueMember  # noqa: F401
+from app.models.game_settings import GameSettings  # noqa: F401

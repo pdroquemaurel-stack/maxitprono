@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}{{ t('admin_settings') }} · {{ t('app_name') }}{% endblock %}
+{% block content %}
+  {% include "admin/_back.html" %}
+  <h1>{{ t('admin_settings') }}</h1>
+  {% if rescored %}<p class="notice" role="status">{{ t('admin_settings_rescored').format(count=rescored) }}</p>
+  {% elif saved %}<p class="notice" role="status">{{ t('admin_settings_saved') }}</p>{% endif %}
+  {% include "_error.html" %}
+
+  {% set values = form or {'winner_points': settings.winner_points, 'exact_bonus': settings.exact_bonus,
+                            'league_max_members': settings.league_max_members} %}
+  <form class="card form" method="post" action="/admin/settings">
+    <label for="winner_points">{{ t('field_winner_points') }}</label>
+    <input id="winner_points" name="winner_points" value="{{ values.winner_points }}" required
+           inputmode="numeric" pattern="[0-9]{1,2}" maxlength="2">
+
+    <label for="exact_bonus">{{ t('field_exact_bonus') }}</label>
+    <input id="exact_bonus" name="exact_bonus" value="{{ values.exact_bonus }}" required
+           inputmode="numeric" pattern="[0-9]{1,2}" maxlength="2">
+    <small>{{ t('admin_settings_rescore_warning') }}</small>
+
+    <label for="league_max_members">{{ t('field_league_max_members') }}</label>
+    <input id="league_max_members" name="league_max_members" value="{{ values.league_max_members }}"
+           required inputmode="numeric" pattern="[0-9]{1,4}" maxlength="4">
+    <small>{{ t('admin_league_size_note') }}</small>
+
+    <button type="submit">{{ t('admin_settings_submit') }}</button>
+  </form>
+{% endblock %}

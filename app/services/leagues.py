@@ -5,7 +5,6 @@ Les erreurs sont des clés de traduction, ou None si tout va bien.
 import re
 import secrets
 
-MAX_MEMBERS = 100  # paramétrable par l'admin global plus tard (back-office, étape 8)
 MAX_LEAGUES_PER_PLAYER = 10
 NAME_MIN, NAME_MAX = 3, 40
 
@@ -41,11 +40,15 @@ def create_error(player_league_count: int) -> str | None:
     return None
 
 
-def join_error(is_member: bool, member_count: int, player_league_count: int) -> str | None:
-    """Pourquoi le joueur ne peut pas rejoindre la ligue, ou None s'il le peut."""
+def join_error(is_member: bool, member_count: int, player_league_count: int,
+               max_members: int) -> str | None:
+    """Pourquoi le joueur ne peut pas rejoindre la ligue, ou None s'il le peut.
+
+    `max_members` : taille maximale réglée par l'admin (back-office).
+    """
     if is_member:
         return "error_already_member"
-    if member_count >= MAX_MEMBERS:
+    if member_count >= max_members:
         return "error_league_full"
     return create_error(player_league_count)
 

@@ -24,7 +24,7 @@ from app.jobs.score_predictions import score_finished_matches
 from app.models.types import utc_now
 from app.providers import make_provider
 from app.providers.base import ProviderError
-from app.services.scoring import ScoringRules
+from app.services.settings_store import current_rules
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -61,7 +61,7 @@ def sync(task: Literal["fixtures", "scores"], authorization: str = Header(""),
         error = str(exc)
         logger.warning("Synchronisation %s en échec : %s", task, error)
     # Calcul des points même après un import partiel
-    result["predictions_scored"] = score_finished_matches(db, ScoringRules(), utc_now())
+    result["predictions_scored"] = score_finished_matches(db, current_rules(db), utc_now())
     if error:
         return JSONResponse({**result, "error": error}, status_code=502)
     return result

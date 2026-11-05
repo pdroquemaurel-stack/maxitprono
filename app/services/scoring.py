@@ -7,7 +7,7 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class ScoringRules:
-    """Barème (modifiable plus tard par l'admin dans le back-office)."""
+    """Barème ; valeurs par défaut, modifiables par l'admin (voir settings_store.py)."""
 
     winner_points: int = 3  # bon vainqueur ou bon match nul
     exact_bonus: int = 2  # en plus si le score est exact

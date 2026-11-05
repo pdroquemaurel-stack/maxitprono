@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import Integer, LargeBinary, String
+from sqlalchemy import Boolean, Integer, LargeBinary, String, false
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db import Base
@@ -24,3 +24,5 @@ class User(Base):
     # Protection contre les essais de PIN en série
     failed_pin_attempts: Mapped[int] = mapped_column(Integer, default=0)
     locked_until: Mapped[datetime | None] = mapped_column(UTCDateTime)
+    # Accès au back-office /admin, donné par scripts/make_admin.py
+    is_admin: Mapped[bool] = mapped_column(Boolean, default=False, server_default=false())

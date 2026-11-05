@@ -17,7 +17,7 @@ from app.jobs.score_predictions import score_finished_matches
 from app.models.types import utc_now
 from app.providers import make_provider
 from app.providers.base import ProviderError
-from app.services.scoring import ScoringRules
+from app.services.settings_store import current_rules
 
 
 def main() -> None:
@@ -42,7 +42,7 @@ def main() -> None:
         except ProviderError as exc:
             print(f"Arrêt : {exc}")
         # Calcul des points après chaque import, même partiel
-        print(f"Pronostics calculés : {score_finished_matches(db, ScoringRules(), utc_now())}")
+        print(f"Pronostics calculés : {score_finished_matches(db, current_rules(db), utc_now())}")
 
 
 if __name__ == "__main__":

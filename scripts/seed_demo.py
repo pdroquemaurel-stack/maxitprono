@@ -28,7 +28,7 @@ from app.models.types import utc_now
 from app.providers import DEMO
 from app.services.accounts import hash_pin
 from app.services.deadlines import is_prediction_open
-from app.services.scoring import ScoringRules
+from app.services.settings_store import current_rules
 
 DEMO_COMPETITION_ID = "demo"  # identifiant chez le « fournisseur » démo
 DEMO_COMPETITION_NAME = "Démo"
@@ -154,7 +154,7 @@ def seed(db: Session, now: datetime, rng: random.Random) -> dict:
     past = add_past_matches(db, competition, players, now, rng)
     upcoming = add_upcoming_matches(db, competition, now, rng)
     predicted = predict_open_matches(db, players, now, rng)
-    scored = score_finished_matches(db, ScoringRules(), now)
+    scored = score_finished_matches(db, current_rules(db), now)
     return {"players": len(players), "past": past, "upcoming": upcoming,
             "predicted": predicted, "scored": scored}
 
@@ -176,7 +176,7 @@ def finish_open_matches(db: Session, now: datetime, rng: random.Random) -> int:
         match.status = MatchStatus.FINISHED
         match.home_score, match.away_score = _random_score(rng)
     db.commit()
-    score_finished_matches(db, ScoringRules(), now)
+    score_finished_matches(db, current_rules(db), now)
     return len(to_finish)
 
 

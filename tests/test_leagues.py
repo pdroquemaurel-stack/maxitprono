@@ -1,7 +1,7 @@
 import pytest
 
 from app.services.leagues import (CODE_ALPHABET, CODE_LENGTH, MAX_LEAGUES_PER_PLAYER,
-                                  MAX_MEMBERS, clean_name, create_error, generate_code,
+                                  clean_name, create_error, generate_code,
                                   join_error, leave_error, normalize_code, remove_error,
                                   validate_league_name)
 from app.services.redirects import safe_next
@@ -40,10 +40,11 @@ def test_create_refused_at_player_limit():
 
 
 def test_join_rules():
-    assert join_error(False, 5, 0) is None
-    assert join_error(True, 5, 0) == "error_already_member"
-    assert join_error(False, MAX_MEMBERS, 0) == "error_league_full"
-    assert join_error(False, MAX_MEMBERS - 1, MAX_LEAGUES_PER_PLAYER) == "error_too_many_leagues"
+    assert join_error(False, 5, 0, max_members=100) is None
+    assert join_error(True, 5, 0, max_members=100) == "error_already_member"
+    assert join_error(False, 100, 0, max_members=100) == "error_league_full"
+    assert join_error(False, 3, 0, max_members=3) == "error_league_full"  # limite réglée par l'admin
+    assert join_error(False, 99, MAX_LEAGUES_PER_PLAYER, max_members=100) == "error_too_many_leagues"
 
 
 def test_owner_cannot_leave_but_members_can():

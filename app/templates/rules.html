@@ -7,7 +7,7 @@
       <li>{{ t('rules_free') }}</li>
       <li>{{ t('rules_exact_score') }}</li>
       <li>{{ t('rules_deadline') }}</li>
-      <li>{{ t('rules_points') }}</li>
+      <li>{{ t('rules_points').format(winner=rules.winner_points, bonus=rules.exact_bonus) }}</li>
       <li>{{ t('rules_cancelled') }}</li>
       <li>{{ t('rules_ranking') }}</li>
       <li>{{ t('rules_one_account') }}</li>

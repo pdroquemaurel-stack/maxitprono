@@ -11,6 +11,7 @@ from app.routes.matches import matches_to_predict
 from app.services import league_store
 from app.services.leaderboards import leaderboard
 from app.services.leagues import pick_league
+from app.services.settings_store import current_rules
 from app.services.ranking import find_player
 from app.services.timezones import resolve_timezone
 from app.templating import templates
@@ -57,8 +58,10 @@ def home(request: Request, db: Session = Depends(get_db),
 
 
 @router.get("/rules")
-def rules(request: Request, user: User | None = Depends(current_user)):
-    return templates.TemplateResponse(request, "rules.html", {"user": user})
+def rules(request: Request, db: Session = Depends(get_db),
+          user: User | None = Depends(current_user)):
+    return templates.TemplateResponse(request, "rules.html",
+                                      {"user": user, "rules": current_rules(db)})
 
 
 @router.get("/health")

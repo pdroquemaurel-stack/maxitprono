@@ -15,7 +15,7 @@ from app.models import League, User
 from app.models.types import utc_now
 from app.routes.accounts import redirect
 from app.services import league_store
-from app.services.leagues import MAX_MEMBERS
+from app.services.settings_store import league_max_members
 from app.templating import templates
 
 router = APIRouter()
@@ -98,7 +98,7 @@ def render_league(request: Request, db: Session, league: League, user: User,
     notice = "league_created" if params.get("created") else (
         "league_joined" if params.get("joined") else None)
     context = {"user": user, "league": league, "members": league_store.members(db, league.id),
-               "is_owner": league.owner_id == user.id, "max_members": MAX_MEMBERS,
+               "is_owner": league.owner_id == user.id, "max_members": league_max_members(db),
                "error": error, "notice": notice, **share_links(request, league)}
     return templates.TemplateResponse(request, "league.html", context, status_code=status_code)
 
