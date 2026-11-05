@@ -195,5 +195,8 @@
   "leaderboard_tab_league": "Ligue",
   "leaderboard_league": "Ligue",
   "leaderboard_no_league": "Tu n'es dans aucune ligue pour l'instant.",
-  "leaderboard_league_rule": "Seuls comptent les matchs joués depuis l'arrivée de chaque joueur dans la ligue."
+  "leaderboard_league_rule": "Seuls comptent les matchs joués depuis l'arrivée de chaque joueur dans la ligue.",
+  "result_league_picks": "Les pronos de la ligue",
+  "result_league_picks_note": "Les pronos des autres s'affichent après la clôture.",
+  "result_no_pick": "pas de prono"
 }

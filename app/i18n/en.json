@@ -195,5 +195,8 @@
   "leaderboard_tab_league": "League",
   "leaderboard_league": "League",
   "leaderboard_no_league": "You are not in any league yet.",
-  "leaderboard_league_rule": "Only matches played since each player joined the league count."
+  "leaderboard_league_rule": "Only matches played since each player joined the league count.",
+  "result_league_picks": "League predictions",
+  "result_league_picks_note": "Other players' predictions are shown once predictions close.",
+  "result_no_pick": "no prediction"
 }

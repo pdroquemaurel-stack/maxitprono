@@ -36,5 +36,25 @@
       <p class="verdict">{{ t('result_no_prediction') }}</p>
     {% endif %}
   </section>
-  {# Étape 6 : carte « Les pronos de la ligue » (membres, scores colorés, points) #}
+  {% if league %}
+    <section class="card league-picks">
+      <h2>{{ t('result_league_picks') }} <small>{{ league.name }}</small></h2>
+      <ul>
+        {% for user_id, nickname, pick in league_picks %}
+          {% set is_me = user_id == user.id %}
+          <li>
+            <span class="initials">{{ initials(nickname) }}</span>
+            <span class="player">{{ t('home_me') if is_me else nickname }}</span>
+            {% if pick %}
+              <span class="pick-score">{% with home = pick.home_score, away = pick.away_score %}{% include "_score.html" %}{% endwith %}</span>
+              <span class="pick-points">{% with prediction = pick %}{% include "_points_badge.html" %}{% endwith %}</span>
+            {% else %}
+              <span class="pick-none">{{ t('result_no_pick') }}</span>
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+    </section>
+    <p class="small">{{ t('result_league_picks_note') }}</p>
+  {% endif %}
 {% endblock %}

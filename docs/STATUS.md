@@ -1,6 +1,6 @@
 # MaxitProno — État des lieux
 
-Mis à jour le 4 novembre 2026, pendant l'étape 5 de la PARTIE 2 (ligues privées : 5a et 5b faites, 5c à venir).
+Mis à jour le 4 novembre 2026, après l'étape 5 de la PARTIE 2 (ligues privées terminées).
 
 ## 1. Avancement des étapes (SPEC §12)
 
@@ -11,10 +11,10 @@ Mis à jour le 4 novembre 2026, pendant l'étape 5 de la PARTIE 2 (ligues privé
 | 3 | Comptes joueurs (pseudo + PIN, profil, règlement) | **Fait** | `app/auth/` (`pin_auth.py`, `session.py`), `app/services/accounts.py`, `app/services/avatars.py`, `app/routes/accounts.py`, templates `register/login/profile/rules` |
 | 4 | Pronostics + clôture 10 min | **Fait** | `app/models/prediction.py`, `app/services/deadlines.py`, `app/services/predictions.py`, `app/routes/matches.py`, `matches.html`, `_match_card.html` |
 | 5 | Points + classements + départage | **Fait** | `app/services/scoring.py`, `app/services/ranking.py`, `app/services/leaderboards.py`, `app/jobs/score_predictions.py`, `app/routes/leaderboard.py`, `app/routes/results.py` |
-| 6 | Ligues privées + lien de partage | **Partiel** (5a, 5b faites) | Tables `leagues` + `league_members`, `app/services/leagues.py` (règles pures), `app/services/league_store.py`, `app/routes/leagues.py`, templates `leagues`, `league`, `join`, `_invite`. `app/services/activity.py`, `leaderboard(league_id=…)`, accueil et onglet « Ligue ». Reste : pronos de la ligue sur « Match clôturé » (5c) |
+| 6 | Ligues privées + lien de partage | **Fait** | Tables `leagues` + `league_members`, `app/services/leagues.py` (règles pures), `app/services/league_store.py`, `app/routes/leagues.py`, templates `leagues`, `league`, `join`, `_invite`. `app/services/activity.py`, `leaderboard(league_id=…)`, accueil et onglet « Ligue ». carte « Les pronos de la ligue » sur « Match clôturé » (`app/routes/results.py`) |
 | 7 | Pourcentages 1/N/2 | **Fait** | `app/services/probabilities.py`, `app/jobs/import_probabilities.py`, `Match.prob_home/draw/away`, `get_probabilities` des fournisseurs, `_match_card.html` |
 | 8 | Back-office admin + KPIs | **À faire** | Remplacé provisoirement par `scripts/activate_competition.py` ; barème figé dans `ScoringRules()` |
-| 9 | Traductions FR/EN, page d'erreur, finitions mobile | **Partiel** | `app/i18n/fr.json` et `en.json` complets (197 clés chacun, mêmes clés) ; mais la langue est figée sur `DEFAULT_LANGUAGE` (`app/templating.py`), pas de choix par le joueur ; pas de page « erreur réseau + réessayer » (`_error.html` n'est qu'un message de formulaire) |
+| 9 | Traductions FR/EN, page d'erreur, finitions mobile | **Partiel** | `app/i18n/fr.json` et `en.json` complets (200 clés chacun, mêmes clés) ; mais la langue est figée sur `DEFAULT_LANGUAGE` (`app/templating.py`), pas de choix par le joueur ; pas de page « erreur réseau + réessayer » (`_error.html` n'est qu'un message de formulaire) |
 
 Hors découpage : `scripts/seed_demo.py` (données de démo sans API ; les joueurs fictifs pronostiquent aussi les matchs ouverts des compétitions actives, réels compris, pour afficher la tendance 1/N/2 ; `--reset` supprime ces pronostics) ; gestion du fuseau horaire du joueur (`app/services/timezones.py`, `static/js/timezone.js`, cookie `tz`).
 
@@ -32,7 +32,7 @@ Hors découpage : `scripts/seed_demo.py` (données de démo sans API ; les joueu
 - **Pourcentages 1/N/2** : prédictions du fournisseur (API-Football `/predictions`, 1 appel par match, au plus 20 par import quotidien, matchs des 3 prochains jours) stockées dans `matches.prob_*` ; football-data.org n'en a pas (aucun appel). À défaut, **tendance des joueurs** calculée à l'affichage à partir de 5 pronostics, visible avant la clôture, avec la mention « Tendance des joueurs ». Arrondi à 100 % par la méthode du plus fort reste.
 - **En local** : scripts manuels (`check_coverage`, `run_import`, `run_import --scores`).
 
-## 2 bis. Ligues privées (étapes 5a et 5b)
+## 2 bis. Ligues privées
 
 - **Création** par un joueur, qui en devient admin et membre. Nom de 3 à 40 caractères, **code d'invitation** de 6 caractères sans 0/O/1/I/L (ex. `K7PM4X`), tapé librement (minuscules, espaces, tirets acceptés).
 - **Limites** : 100 membres par ligue (constante `MAX_MEMBERS`, en attendant le back-office), 10 ligues par joueur.
@@ -41,6 +41,7 @@ Hors découpage : `scripts/seed_demo.py` (données de démo sans API ; les joueu
 - **Admin** : retire un membre, supprime la ligue (confirmation) ; ne peut pas la quitter. Un membre peut la quitter. Un non-membre reçoit une 404.
 - **Classement de la ligue** : membres seulement, et pour chacun les matchs commencés **après son arrivée** (`league_members.joined_at`). Onglet « Ligue » en tête des classements, ouvert par défaut pour un membre (menu si plusieurs ligues) ; les 5 onglets défilent horizontalement sur petit écran.
 - **Accueil « Ma ligue »** : sélecteur de ligue (menu `<details>`, sans JavaScript ; choix mémorisé dans le cookie `league`, par défaut la ligue rejointe en dernier), podium et nombre de joueurs de la ligue, fil « Dans la ligue » (créée / a rejoint / score exact, 5 événements des 7 derniers jours, temps relatif « 2 h », « hier »), bouton d'invitation WhatsApp. Sans ligue : podium général et carte « Joue avec tes potes ». « a pronostiqué les 5 matchs du week-end » (maquette) reporté.
+- **Match clôturé** : carte « Les pronos de la ligue » (ligue choisie sur l'accueil) avec le score pronostiqué coloré et le badge de points de chaque membre ; moi d'abord, puis par points, les membres sans prono en dernier. Seulement après la clôture : avant, on ne voit jamais les pronos des autres (seulement la tendance 1/N/2).
 - Après connexion demandée par une page, retour à cette page (`/login?next=…`).
 
 ## 3. Déploiement
@@ -61,7 +62,7 @@ Socle en place (`app/static/css/style.css`) : variables de couleur, polices Outf
 |-------|------|
 | Accueil (Ma ligue) | **Conforme** : sélecteur de ligue, podium de la ligue, carte « matchs sans prono », fil « Dans la ligue », bouton d'invitation WhatsApp (bordure orange pointillée) |
 | Pronos (saisie directe) | **Conforme** : cases de score colorées, état « Ferme dans… », bouton collé en bas, ligne 1/N/2, écussons 36 px au-dessus des noms |
-| Match clôturé | **Partiel** : carte score final (avec écussons 44 px) et bandeau du prono conformes ; manquent les pronos des membres de la ligue (étape 6) |
+| Match clôturé | **Conforme** : carte score final (écussons 44 px), bandeau du prono, pronos des membres de la ligue avec leurs points |
 | Classements | **Conforme** (liste, onglets) avec l'onglet « Ligue » |
 | Résultats | Conforme au style général (pas de maquette dédiée) |
 | Profil, connexion, inscription, règles | Composants de base (cartes, formulaires, boutons) ; pas de maquette dédiée |
@@ -70,7 +71,7 @@ Socle en place (`app/static/css/style.css`) : variables de couleur, polices Outf
 
 ## 5. Tests
 
-`pytest` (via `.venv`, **Python 3.12.3**) : **391 tests passent, 0 échec**, 1 avertissement (dépréciation `httpx` dans le TestClient de Starlette).
+`pytest` (via `.venv`, **Python 3.12.3**) : **396 tests passent, 0 échec**, 1 avertissement (dépréciation `httpx` dans le TestClient de Starlette).
 
 ## 6. Incohérences et dettes
 

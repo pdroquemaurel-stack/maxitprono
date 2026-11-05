@@ -69,3 +69,15 @@ def pick_league(league_ids: list[int], wanted: str | None) -> int | None:
     if wanted and wanted.isdigit() and int(wanted) in league_ids:
         return int(wanted)
     return league_ids[0] if league_ids else None
+
+
+def sort_league_predictions(rows: list[tuple], me_id: int | None) -> list[tuple]:
+    """Pronos de la ligue sur un match : moi d'abord, puis par points, sans prono en dernier.
+
+    `rows` : (user_id, pseudo, pronostic ou None).
+    """
+    def key(row):
+        user_id, nickname, prediction = row
+        points = prediction.points if prediction is not None and prediction.points is not None else -1
+        return (user_id != me_id, prediction is None, -points, nickname.lower())
+    return sorted(rows, key=key)

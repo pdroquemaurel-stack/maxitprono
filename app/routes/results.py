@@ -11,6 +11,9 @@ from app.models import Competition, Match, User
 from app.models.match import MatchStatus
 from app.models.types import utc_now
 from app.routes.matches import predictions_by_match
+from app.services import league_store
+from app.services.deadlines import is_prediction_open
+from app.services.leagues import pick_league, sort_league_predictions
 from app.services.timezones import resolve_timezone
 from app.templating import templates
 
@@ -49,17 +52,30 @@ def results_page(request: Request, db: Session = Depends(get_db),
 @router.get("/results/{match_id}")
 def result_page(match_id: int, request: Request, db: Session = Depends(get_db),
                 user: User | None = Depends(current_user)):
-    """Match clôturé : score final et résultat de mon pronostic.
-
-    Les pronos des autres membres de la ligue viendront avec les ligues (étape 6).
-    """
+    """Match clôturé : score final, résultat de mon pronostic et pronos de ma ligue."""
     match = db.get(Match, match_id)
     if match is None or match.status not in DONE_STATUSES:
         raise HTTPException(status_code=404)
+    league, picks = league_picks(request, db, user, match)
     context = {
         "user": user,
         "tz": resolve_timezone(request.cookies.get("tz")),
         "match": match,
         "prediction": predictions_by_match(db, user, [match.id]).get(match.id),
+        "league": league,
+        "league_picks": picks,
     }
     return templates.TemplateResponse(request, "result.html", context)
+
+
+def league_picks(request: Request, db: Session, user: User | None, match: Match) -> tuple:
+    """Ligue choisie sur l'accueil et pronos de ses membres, seulement après la clôture."""
+    if user is None or is_prediction_open(match.status, match.kickoff_at, utc_now()):
+        return None, []
+    leagues = league_store.my_leagues(db, user.id)
+    league_id = pick_league([league.id for league, _ in leagues], request.cookies.get("league"))
+    if league_id is None:
+        return None, []
+    league = next(league for league, _ in leagues if league.id == league_id)
+    rows = league_store.match_predictions(db, league_id, match.id)
+    return league, sort_league_predictions(rows, user.id)

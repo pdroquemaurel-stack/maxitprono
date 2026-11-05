@@ -865,3 +865,31 @@ button.danger { background: var(--lose); color: #fff; }
 .activity-text { flex: 1; min-width: 0; }
 
 .activity-when { flex: none; color: var(--muted); font-size: 14px; }
+
+/* Match clôturé : pronos de la ligue */
+.league-picks { margin-top: 16px; padding: 0; }
+
+.league-picks h2 { margin: 0; padding: 18px 16px 12px; font-size: 20px; font-weight: 800; }
+
+.league-picks h2 small { display: block; margin-top: 2px; color: var(--muted); font-family: var(--font-text); font-size: 14px; font-weight: 400; }
+
+.league-picks ul { margin: 0; padding: 0; list-style: none; }
+
+.league-picks li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 60px;
+  padding: 8px 16px;
+  border-top: 1px solid var(--border);
+}
+
+.league-picks .player { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.pick-score { font-family: var(--font-title); font-weight: 800; font-size: 20px; }
+
+.pick-points { flex: none; min-width: 64px; text-align: right; }
+
+.pick-points .badge { min-width: 56px; padding: 6px 12px; border-radius: 12px; font-size: 15px; text-align: center; }
+
+.pick-none { color: var(--muted); font-size: 13px; }

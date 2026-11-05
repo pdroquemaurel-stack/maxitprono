@@ -58,6 +58,16 @@ def members(db: Session, league_id: int) -> list[LeagueMember]:
     return list(db.scalars(query))
 
 
+def match_predictions(db: Session, league_id: int, match_id: int) -> list[tuple]:
+    """(user_id, pseudo, pronostic ou None) de chaque membre de la ligue sur ce match."""
+    query = (select(User.id, User.nickname, Prediction)
+             .join(LeagueMember, LeagueMember.user_id == User.id)
+             .outerjoin(Prediction, (Prediction.user_id == User.id)
+                        & (Prediction.match_id == match_id))
+             .where(LeagueMember.league_id == league_id))
+    return [tuple(row) for row in db.execute(query)]
+
+
 def recent_activity(db: Session, league: League, now: datetime) -> list[Event]:
     """Arrivées et scores exacts des membres sur les 7 derniers jours.
 
