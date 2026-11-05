@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}{{ match.home_team }} – {{ match.away_team }} · {{ t('app_name') }}{% endblock %}
+{% block content %}
+  <header class="back-head">
+    <a href="/admin/matches" aria-label="{{ t('admin_matches') }}">
+      <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
+    </a>
+    <span>{{ t('admin_matches') }}</span>
+  </header>
+  <h1>{{ match.home_team }} – {{ match.away_team }}</h1>
+  <p class="lead">{{ match.competition.name }} · {{ format_date_time(match.kickoff_at, tz) }}</p>
+  {% include "_error.html" %}
+
+  {% if match.score_locked %}
+    <div class="notice">
+      <p>{{ t('admin_locked_hint') }}</p>
+      <form method="post" action="/admin/matches/{{ match.id }}/unlock">
+        <button type="submit" class="secondary">{{ t('admin_unlock') }}</button>
+      </form>
+    </div>
+  {% endif %}
+
+  <form class="card form" method="post" action="/admin/matches/{{ match.id }}">
+    <label for="status">{{ t('admin_status') }}</label>
+    <select id="status" name="status">
+      {% for status in statuses %}
+        <option value="{{ status }}"{% if status == form.status %} selected{% endif %}>{{ t('status_' ~ status) }}</option>
+      {% endfor %}
+    </select>
+
+    <label>{{ t('admin_score') }}</label>
+    <div class="admin-score">
+      <input name="home_score" value="{{ form.home_score }}" inputmode="numeric" pattern="[0-9]{1,2}"
+             maxlength="2" aria-label="{{ t('score_of') }} {{ match.home_team }}">
+      <span aria-hidden="true">–</span>
+      <input name="away_score" value="{{ form.away_score }}" inputmode="numeric" pattern="[0-9]{1,2}"
+             maxlength="2" aria-label="{{ t('score_of') }} {{ match.away_team }}">
+    </div>
+    <small>{{ t('admin_correct_hint') }}</small>
+
+    <button type="submit">{{ t('admin_correct_submit') }}</button>
+  </form>
+{% endblock %}

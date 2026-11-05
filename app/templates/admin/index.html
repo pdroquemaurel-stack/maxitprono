@@ -3,11 +3,17 @@
 {% block content %}
   <h1>{{ t('admin_title') }}</h1>
   <ul class="card list-card">
-    <li>
-      <a class="league-row" href="/admin/settings">
-        <span class="player"><strong>{{ t('admin_settings') }}</strong><small>{{ t('admin_settings_hint') }}</small></span>
-        <span aria-hidden="true">›</span>
-      </a>
-    </li>
+    {% for href, title, hint in [
+      ('/admin/competitions', 'admin_competitions', 'admin_competitions_hint'),
+      ('/admin/matches', 'admin_matches', 'admin_matches_hint'),
+      ('/admin/settings', 'admin_settings', 'admin_settings_hint'),
+    ] %}
+      <li>
+        <a class="league-row" href="{{ href }}">
+          <span class="player"><strong>{{ t(title) }}</strong><small>{{ t(hint) }}</small></span>
+          <span aria-hidden="true">›</span>
+        </a>
+      </li>
+    {% endfor %}
   </ul>
 {% endblock %}

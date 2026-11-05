@@ -64,3 +64,16 @@ def rescore_all(db: Session, rules: ScoringRules, now: datetime) -> int:
         apply_result(prediction, match, rules, now)
     db.commit()
     return len(rows)
+
+
+def rescore_corrected_match(db: Session, match: Match, rules: ScoringRules, now: datetime) -> int:
+    """Après une correction admin : points recalculés si le match est terminé ou annulé,
+    sinon remis à zéro (match repassé « à venir » ou « en cours »)."""
+    if match.status in (MatchStatus.FINISHED, MatchStatus.CANCELLED):
+        return score_match(db, match, rules, now)
+    predictions = db.scalars(select(Prediction).where(Prediction.match_id == match.id)).all()
+    for prediction in predictions:
+        prediction.points, prediction.is_exact, prediction.is_winner = None, False, False
+        prediction.scored_at = None
+    db.commit()
+    return len(predictions)

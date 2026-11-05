@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}{{ t('admin_matches') }} · {{ t('app_name') }}{% endblock %}
+{% block content %}
+  {% include "admin/_back.html" %}
+  <h1>{{ t('admin_matches') }}</h1>
+  {% if notice %}<p class="notice" role="status">{{ t(notice) }}</p>{% endif %}
+  <a class="button" href="/admin/matches/new">{{ t('admin_match_new') }}</a>
+  <p class="small">{{ t('admin_matches_window') }}</p>
+
+  {% if matches %}
+    <ul class="card list-card">
+      {% for match in matches %}
+        <li>
+          <a class="league-row" href="/admin/matches/{{ match.id }}">
+            <span class="player">
+              <strong>{{ match.home_team }} – {{ match.away_team }}</strong>
+              <small>{{ format_date_time(match.kickoff_at, tz) }} · {{ match.competition.name }} · {{ t('status_' ~ match.status) }}{% if match.home_score is not none %} · {{ match.home_score }}–{{ match.away_score }}{% endif %}{% if match.score_locked %} · 🔒 {{ t('admin_locked') }}{% endif %}{% if not match.provider %} · {{ t('admin_manual') }}{% endif %}</small>
+            </span>
+            <span aria-hidden="true">›</span>
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="lead">{{ t('admin_matches_empty') }}</p>
+  {% endif %}
+{% endblock %}

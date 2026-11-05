@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}{{ t('admin_competitions') }} · {{ t('app_name') }}{% endblock %}
+{% block content %}
+  {% include "admin/_back.html" %}
+  <h1>{{ t('admin_competitions') }}</h1>
+  {% if notice %}<p class="notice" role="status">{{ t(notice) }}</p>{% endif %}
+  {% if error %}<p class="alert" role="alert">{{ error }}</p>{% endif %}
+
+  {% if competitions %}
+    <ul class="card list-card">
+      {% for competition in competitions %}
+        <li class="admin-row">
+          <span class="player">
+            <strong>{{ competition.name }}</strong>
+            <small>{{ competition.country }} · {{ competition.provider }} {{ competition.external_id }}{% if competition.season %} · {{ competition.season }}{% endif %}</small>
+          </span>
+          <form method="post" action="/admin/competitions/{{ competition.id }}/toggle">
+            <button type="submit" class="toggle{% if competition.is_active %} on{% endif %}"
+                    aria-pressed="{{ 'true' if competition.is_active else 'false' }}">
+              {{ t('admin_active') if competition.is_active else t('admin_inactive') }}
+            </button>
+          </form>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="lead">{{ t('admin_competitions_empty') }}</p>
+  {% endif %}
+
+  <form method="post" action="/admin/competitions/refresh">
+    <button type="submit" class="secondary">{{ t('admin_competitions_refresh') }}</button>
+  </form>
+  <p class="small">{{ t('admin_competitions_refresh_hint') }}</p>
+{% endblock %}

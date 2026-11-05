@@ -17,6 +17,7 @@ from app.services.fixtures import needs_score_update
 
 DAYS_BACK = 3  # rattrape les matchs restés sans score final
 DAYS_AHEAD = 14
+LOCKED_FIELDS = ("status", "home_score", "away_score")  # protégés après correction admin
 
 
 def upsert_match(db: Session, competition: Competition, fields: dict) -> Match:
@@ -27,6 +28,8 @@ def upsert_match(db: Session, competition: Competition, fields: dict) -> Match:
         match = Match(competition=competition)
         db.add(match)
     for name, value in fields.items():
+        if match.score_locked and name in LOCKED_FIELDS:
+            continue
         setattr(match, name, value)
     match.synced_at = utc_now()
     return match
