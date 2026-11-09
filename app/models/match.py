@@ -28,6 +28,8 @@ class Match(Base):
     external_id: Mapped[str | None] = mapped_column(String(40))
     competition_id: Mapped[int] = mapped_column(ForeignKey("competitions.id"), index=True)
     season: Mapped[int | None] = mapped_column(Integer)  # saison API, vide si ajouté à la main
+    # Numéro de journée du fournisseur ; vide en phase à élimination directe ou si inconnu
+    matchday: Mapped[int | None] = mapped_column(Integer)
     home_team: Mapped[str] = mapped_column(String(120))
     away_team: Mapped[str] = mapped_column(String(120))
     home_logo_url: Mapped[str] = mapped_column(String(255), default="")

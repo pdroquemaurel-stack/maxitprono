@@ -57,6 +57,8 @@ def profile(request: Request, db: Session = Depends(get_db), user: User = Depend
              and (competition_id is None or pick.competition_id == competition_id)]
     outcomes = stats.chronological_outcomes(picks)
     competition_stats = stats.by_competition(picks)
+    if period == "week":
+        context["matchday"] = stats.single_matchday(picks)
     context.update(
         summary=stats.summarize(picks),
         form=stats.recent_form(outcomes),

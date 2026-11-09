@@ -67,7 +67,8 @@
       <p class="p-hero-label">{{ t('profile_points') }}</p>
       <p class="p-hero-points">{{ s.points }}</p>
       <p class="p-hero-sub">
-        {% if period == 'week' %}{{ t('profile_week_of').format(day=week.day, month=t('month_%d' % week.month)) }}
+        {% if period == 'week' and matchday %}{{ t('profile_matchday').format(number=matchday) }}
+        {% elif period == 'week' %}{{ t('profile_week_of').format(day=week.day, month=t('month_%d' % week.month)) }}
         {% elif period == 'competition' %}{{ competition_name or t('profile_no_competition') }}
         {% else %}{{ t('profile_average').format(average=('%.1f' % s.average_points)|replace('.', t('decimal_separator'))) }}{% endif %}
       </p>

@@ -19,7 +19,7 @@ def match_item(match_id=497410, status="TIMED", full_time=(None, None), duration
     if penalties:
         score["penalties"] = {"home": penalties[0], "away": penalties[1]}
     return {
-        "id": match_id, "utcDate": utc_date, "status": status,
+        "id": match_id, "utcDate": utc_date, "status": status, "matchday": 12,
         "season": {"id": 2316, "startDate": "2026-08-15", "endDate": "2027-05-22"},
         "homeTeam": {"id": 524, "name": "Paris Saint-Germain FC", "shortName": "PSG",
                      "tla": "PSG", "crest": "https://crests.football-data.org/524.png"},
@@ -178,3 +178,9 @@ def test_get_probabilities_makes_no_call(db):
 
     assert make_client(db, handler).get_probabilities("497410") is None
     assert db.query(ApiCallLog).count() == 0
+
+
+def test_parse_match_keeps_matchday():
+    assert parse_match(match_item())["matchday"] == 12
+    knockout = match_item() | {"matchday": None}  # phase à élimination directe
+    assert parse_match(knockout)["matchday"] is None

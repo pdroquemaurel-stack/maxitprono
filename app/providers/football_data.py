@@ -129,6 +129,7 @@ def parse_match(item: dict) -> dict:
         "provider": FOOTBALL_DATA,
         "external_id": str(item["id"]),
         "season": _season_year(item.get("season") or {}),
+        "matchday": item.get("matchday"),  # vide en phase à élimination directe
         "kickoff_at": datetime.fromisoformat(item["utcDate"]),  # en UTC (suffixe Z)
         "status": map_match_status(item["status"]),
         "home_team": home.get("shortName") or home["name"],

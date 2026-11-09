@@ -349,5 +349,6 @@
   "profile_share": "Share my stats",
   "profile_share_text": "{points} pts and {rate}% success on MaxitProno. Come and challenge me!",
   "profile_link_copied": "Link copied!",
-  "profile_challenge": "Challenge a friend"
+  "profile_challenge": "Challenge a friend",
+  "profile_matchday": "Matchday {number}"
 }

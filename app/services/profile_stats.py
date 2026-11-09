@@ -25,6 +25,7 @@ class PlayedPick:
     competition: str
     competition_id: int = 0
     points: int = 0  # points calculés (0 si pas encore calculés)
+    matchday: int | None = None  # numéro de journée du fournisseur, s'il le donne
 
 
 @dataclass(frozen=True)
@@ -192,6 +193,16 @@ def next_badge(badges: list[Badge]) -> Badge | None:
     """Le badge verrouillé le plus proche (le moins de choses à faire)."""
     locked = [badge for badge in badges if not badge.unlocked]
     return min(locked, key=lambda badge: badge.remaining, default=None)
+
+
+def single_matchday(picks: list[PlayedPick]) -> int | None:
+    """Numéro de journée commun à tous ces pronos (ex. la semaine), sinon None.
+
+    None aussi si un match n'a pas de journée (coupe, match ajouté à la main)
+    ou si la semaine mélange plusieurs journées (plusieurs compétitions).
+    """
+    matchdays = {pick.matchday for pick in picks}
+    return matchdays.pop() if len(matchdays) == 1 and None not in matchdays else None
 
 
 def choose_competition(competitions: list[tuple[int, str]], wanted: str | None) -> int | None:

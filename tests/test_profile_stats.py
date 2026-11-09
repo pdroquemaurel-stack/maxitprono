@@ -106,3 +106,12 @@ def test_rank_change():
     assert stats.rank_change(fifth, third) == 2  # 2 places gagnées
     assert stats.rank_change(third, fifth) == -2
     assert stats.rank_change(None, third) is None
+
+
+def test_single_matchday():
+    def on(matchday, competition="Ligue 1"):
+        return PlayedPick(1, 0, 1, 0, START, competition, matchday=matchday)
+    assert stats.single_matchday([on(12), on(12)]) == 12
+    assert stats.single_matchday([on(12), on(4, "Ligue des champions")]) is None
+    assert stats.single_matchday([on(12), on(None)]) is None
+    assert stats.single_matchday([]) is None

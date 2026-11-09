@@ -7,7 +7,8 @@ import pytest
 from app.models import ApiCallLog
 from app.models.match import MatchStatus
 from app.providers.api_football import (BASE_URL, ApiFootballClient, ApiFootballError,
-                                        map_fixture_status, parse_fixture, parse_league)
+                                        map_fixture_status, parse_fixture, parse_league,
+                                        parse_round)
 from tests.fixture_factory import fixture_item
 
 
@@ -174,3 +175,11 @@ def test_get_probabilities_without_prediction(db):
 def test_parse_prediction_percent(percent, expected):
     from app.providers.api_football import parse_prediction_percent
     assert parse_prediction_percent({"predictions": {"percent": percent}}) == expected
+
+
+def test_parse_round_gives_matchday():
+    assert parse_fixture(fixture_item())["matchday"] == 1
+    assert parse_round("Regular Season - 12") == 12
+    assert parse_round("League Stage - 5") == 5
+    assert parse_round("Round of 16") is None
+    assert parse_round(None) is None

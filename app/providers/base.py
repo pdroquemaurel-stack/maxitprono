@@ -3,7 +3,7 @@
 Les fournisseurs renvoient des dictionnaires déjà convertis à notre format :
 - compétition : external_id, name, country, logo_url, season, is_current,
   start, end, coverage (texte libre affiché par scripts/check_coverage) ;
-- match : les champs d'un Match (provider, external_id, season, kickoff_at,
+- match : les champs d'un Match (provider, external_id, season, matchday, kickoff_at,
   status, home_team, away_team, home_logo_url, away_logo_url, home_score, away_score).
 """
 from datetime import date

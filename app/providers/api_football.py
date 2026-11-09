@@ -4,6 +4,7 @@ Chaque appel est enregistré dans ApiCallLog pour suivre le quota.
 Les fonctions parse_* convertissent les réponses à notre format (voir base.py).
 """
 import json
+import re
 from datetime import date, datetime
 
 import httpx
@@ -159,6 +160,12 @@ def map_fixture_status(code: str) -> MatchStatus:
     return _STATUS_BY_CODE.get(code, MatchStatus.SCHEDULED)
 
 
+def parse_round(text: str | None) -> int | None:
+    """« Regular Season - 12 » ou « League Stage - 5 » -> 12 ou 5 ; « Round of 16 » -> None."""
+    match = re.search(r" - (\d+)$", text or "")
+    return int(match.group(1)) if match else None
+
+
 def parse_fixture(item: dict) -> dict:
     """Champs d'un Match à partir d'un élément de la réponse /fixtures."""
     fixture, teams, goals = item["fixture"], item["teams"], item["goals"]
@@ -166,6 +173,7 @@ def parse_fixture(item: dict) -> dict:
         "provider": API_FOOTBALL,
         "external_id": str(fixture["id"]),
         "season": item["league"]["season"],
+        "matchday": parse_round(item["league"].get("round")),
         "kickoff_at": datetime.fromisoformat(fixture["date"]),  # l'API fournit le fuseau
         "status": map_fixture_status(fixture["status"]["short"]),
         "home_team": teams["home"]["name"],

@@ -17,7 +17,8 @@ def played_picks(db: Session, user_id: int) -> list[PlayedPick]:
     return [PlayedPick(pred_home=prediction.home_score, pred_away=prediction.away_score,
                        real_home=match.home_score, real_away=match.away_score,
                        kickoff_at=match.kickoff_at, competition=match.competition.name,
-                       competition_id=match.competition_id, points=prediction.points or 0)
+                       competition_id=match.competition_id, points=prediction.points or 0,
+                       matchday=match.matchday)
             for prediction, match in db.execute(query)]
 
 

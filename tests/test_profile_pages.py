@@ -159,3 +159,11 @@ def test_nickname_already_taken(client, db_session):
 def test_invalid_nickname_is_refused(client):
     register(client)
     assert client.post("/profile", data={"nickname": "a b", "country_code": "CM"}).status_code == 400
+
+
+def test_week_shows_matchday_when_known(client, db_session):
+    register(client)
+    match = add_pick(db_session, paul(db_session), (1, 0), (1, 0), hours_ago=0)
+    match.matchday = 12
+    db_session.commit()
+    assert "Journée 12" in client.get("/profile?period=week").text
