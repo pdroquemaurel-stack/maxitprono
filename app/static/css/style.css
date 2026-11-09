@@ -1948,27 +1948,12 @@ a.p-logo { display: inline-flex; align-items: center; gap: 4px; min-height: 44px
   border-radius: 14px;
 }
 
-.lg-option + .lg-option { margin-top: 8px; }
-
 .lg-option input { position: absolute; opacity: 0; }
 
 .lg-option:has(input:checked) { border: 2px solid var(--orange); background: var(--lg-soft); }
 
 .lg-option span { color: var(--lg-muted); font-size: 13px; }
 
-.lg-option.disabled { opacity: 0.55; }
-
-.lg-option .lg-soon {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  padding: 2px 8px;
-  border-radius: 999px;
-  background: var(--lg-bar);
-  color: var(--lg-muted);
-  font-size: 11px;
-  font-weight: 700;
-}
 
 /* Écran de succès */
 .lg-ready { padding-top: 24px; text-align: center; }

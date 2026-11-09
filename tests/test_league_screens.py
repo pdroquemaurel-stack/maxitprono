@@ -209,7 +209,7 @@ def test_create_page_lists_colors_competitions_and_scoring(client, db_session):
     assert page.count('name="color"') == 4 and 'value="orange" checked' in page
     assert "Ligue 1" in page and 'value="all" checked' in page
     assert "Classique (conseillé)" in page and "5 pts score exact, 3 pts bon résultat" in page
-    assert "Bientôt" in page and "Créer ma ligue" in page
+    assert "Expert" not in page and "Créer ma ligue" in page
 
 
 def test_create_with_color_and_competitions_then_ready_screen(client, db_session):

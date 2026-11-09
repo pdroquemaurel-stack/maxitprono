@@ -42,7 +42,7 @@
 </section>
 
 {% if show_scoring %}
-  {# Un seul barème pour tout le jeu pour l'instant : « Expert » viendra plus tard #}
+  {# Un seul barème pour tout le jeu : celui réglé par l'admin #}
   <section class="lg-card">
     <fieldset class="lg-fieldset">
       <legend class="lg-field-label">{{ t('league_scoring') }}</legend>
@@ -51,11 +51,6 @@
         <strong>{{ t('league_scoring_classic') }}</strong>
         <span>{{ t('league_scoring_classic_detail').format(exact=exact_points, winner=winner_points) }}</span>
       </label>
-      <div class="lg-option disabled" aria-disabled="true">
-        <strong>{{ t('league_scoring_expert') }}</strong>
-        <span>{{ t('league_scoring_expert_detail') }}</span>
-        <span class="lg-soon">{{ t('league_soon') }}</span>
-      </div>
     </fieldset>
   </section>
 {% endif %}
