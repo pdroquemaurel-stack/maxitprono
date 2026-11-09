@@ -1,5 +1,7 @@
 from datetime import UTC, date, datetime, timedelta
 
+import pytest
+
 from app.jobs.import_matches import import_matches, import_upcoming_matches, update_live_scores
 from app.models import Competition, Match
 from app.models.match import MatchStatus
@@ -75,6 +77,14 @@ def test_import_upcoming_uses_window_from_d_minus_3_to_d_plus_14(db):
     client = FakeProvider()
     import_upcoming_matches(db, client, date(2026, 11, 4))
     assert client.calls[0][3:] == ("2026-11-01", "2026-11-18")
+
+
+@pytest.mark.parametrize("days_ahead, last_day", [(7, "2026-11-18"), (21, "2026-11-25")])
+def test_import_window_covers_admin_days_setting(db, days_ahead, last_day):
+    add_competition(db, 61)
+    client = FakeProvider()
+    import_upcoming_matches(db, client, date(2026, 11, 4), days_ahead)
+    assert client.calls[0][3:] == ("2026-11-01", last_day)
 
 
 def add_match(db, competition, api_id, kickoff_at, status=MatchStatus.SCHEDULED):

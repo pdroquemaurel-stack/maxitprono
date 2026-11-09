@@ -903,6 +903,11 @@ button.danger { background: var(--lose); color: #fff; }
 
 .admin-row .player small { color: var(--muted); font-size: 12px; }
 
+/* Boutons de synchronisation : côte à côte, ou l'un sous l'autre sur petit écran */
+.admin-sync { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+
+.admin-sync form { flex: 1 1 160px; }
+
 button.toggle {
   width: auto;
   min-width: 84px;

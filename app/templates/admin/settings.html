@@ -8,7 +8,8 @@
   {% include "_error.html" %}
 
   {% set values = form or {'winner_points': settings.winner_points, 'exact_bonus': settings.exact_bonus,
-                            'league_max_members': settings.league_max_members} %}
+                            'league_max_members': settings.league_max_members,
+                            'prediction_days_ahead': settings.prediction_days_ahead} %}
   <form class="card form" method="post" action="/admin/settings">
     <label for="winner_points">{{ t('field_winner_points') }}</label>
     <input id="winner_points" name="winner_points" value="{{ values.winner_points }}" required
@@ -23,6 +24,12 @@
     <input id="league_max_members" name="league_max_members" value="{{ values.league_max_members }}"
            required inputmode="numeric" pattern="[0-9]{1,4}" maxlength="4">
     <small>{{ t('admin_league_size_note') }}</small>
+
+    <label for="prediction_days_ahead">{{ t('field_prediction_days_ahead') }}</label>
+    <input id="prediction_days_ahead" name="prediction_days_ahead"
+           value="{{ values.prediction_days_ahead }}" required
+           inputmode="numeric" pattern="[0-9]{1,2}" maxlength="2">
+    <small>{{ t('admin_prediction_days_note') }}</small>
 
     <button type="submit">{{ t('admin_settings_submit') }}</button>
   </form>

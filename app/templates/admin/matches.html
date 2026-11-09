@@ -4,7 +4,19 @@
   {% include "admin/_back.html" %}
   <h1>{{ t('admin_matches') }}</h1>
   {% if notice %}<p class="notice" role="status">{{ t(notice) }}</p>{% endif %}
+  {% if sync_error %}<p class="alert" role="alert">{{ t('admin_sync_failed') }} {{ sync_error }}</p>
+  {% elif synced is not none %}<p class="notice" role="status">{{ t('admin_sync_done_' ~ ('scores' if sync_task == 'scores' else 'fixtures')).format(count=synced) }}</p>{% endif %}
   <a class="button" href="/admin/matches/new">{{ t('admin_match_new') }}</a>
+
+  <div class="admin-sync">
+    <form method="post" action="/admin/matches/sync/fixtures">
+      <button type="submit" class="secondary">{{ t('admin_sync_fixtures') }}</button>
+    </form>
+    <form method="post" action="/admin/matches/sync/scores">
+      <button type="submit" class="secondary">{{ t('admin_sync_scores') }}</button>
+    </form>
+  </div>
+  <p class="small">{{ t('admin_sync_hint') }}</p>
   <p class="small">{{ t('admin_matches_window') }}</p>
 
   {% if matches %}

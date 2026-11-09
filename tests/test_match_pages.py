@@ -8,6 +8,8 @@ from app.main import app
 from app.models import Competition, Match, Prediction
 from app.models.match import MatchStatus
 from app.models.types import utc_now
+from app.services.game_settings import Settings
+from app.services.settings_store import save_settings
 
 
 @pytest.fixture
@@ -53,9 +55,19 @@ def test_matches_page_lists_active_competitions_only(client, db_session):
 
 def test_matches_page_hides_old_and_far_matches(client, db_session):
     add_match(db_session, -5, home="Ancien")
-    add_match(db_session, 24 * 8, home="Lointain")
+    add_match(db_session, 24 * 13, home="Proche")
+    add_match(db_session, 24 * 15, home="Lointain")
     page = client.get("/matches").text
+    assert "Proche" in page  # 14 jours par défaut
     assert "Ancien" not in page and "Lointain" not in page
+
+
+def test_matches_page_follows_admin_days_setting(client, db_session):
+    save_settings(db_session, Settings(prediction_days_ahead=3), utc_now())
+    add_match(db_session, 24 * 2, home="Bientôt")
+    add_match(db_session, 24 * 4, home="Après")
+    page = client.get("/matches").text
+    assert "Bientôt" in page and "Après" not in page
 
 
 def test_anonymous_visitor_is_invited_to_log_in(client, db_session):

@@ -9,28 +9,40 @@ from app.models.match import MatchStatus
 from app.services import league_store
 from app.services.game_settings import Settings, parse_settings
 from app.services.scoring import ScoringRules
-from app.services.settings_store import current_rules, get_settings, league_max_members, save_settings
+from app.services.settings_store import (current_rules, get_settings, league_max_members,
+                                         prediction_days_ahead, save_settings)
 from scripts.make_admin import set_admin
 
 NOW = datetime(2026, 11, 5, 12, 0, tzinfo=UTC)
 
 
 @pytest.mark.parametrize("values, expected", [
-    (("3", "2", "100"), (Settings(3, 2, 100), None)),
-    ((" 5 ", "0", "2"), (Settings(5, 0, 2), None)),
-    (("21", "2", "100"), (None, "error_points")),
-    (("3", "-1", "100"), (None, "error_points")),
-    (("3", "x", "100"), (None, "error_points")),
-    (("3", "2", "1"), (None, "error_league_size")),
-    (("3", "2", "1001"), (None, "error_league_size")),
+    (("3", "2", "100", "14"), (Settings(3, 2, 100, 14), None)),
+    ((" 5 ", "0", "2", " 1 "), (Settings(5, 0, 2, 1), None)),
+    (("3", "2", "100", "30"), (Settings(3, 2, 100, 30), None)),
+    (("21", "2", "100", "14"), (None, "error_points")),
+    (("3", "-1", "100", "14"), (None, "error_points")),
+    (("3", "x", "100", "14"), (None, "error_points")),
+    (("3", "2", "1", "14"), (None, "error_league_size")),
+    (("3", "2", "1001", "14"), (None, "error_league_size")),
+    (("3", "2", "100", "0"), (None, "error_prediction_days")),
+    (("3", "2", "100", "31"), (None, "error_prediction_days")),
+    (("3", "2", "100", ""), (None, "error_prediction_days")),
 ])
 def test_parse_settings(values, expected):
     assert parse_settings(*values) == expected
 
 
 def test_defaults_until_admin_saves(db):
-    assert get_settings(db) == Settings(3, 2, 100)
+    assert get_settings(db) == Settings(3, 2, 100, 14)
     assert current_rules(db) == ScoringRules(3, 2)
+
+
+def test_days_setting_is_saved_without_rescoring(db):
+    prediction = add_scored_prediction(db, add_user(db))
+    assert save_settings(db, Settings(prediction_days_ahead=21), NOW) == 0
+    assert prediction_days_ahead(db) == 21
+    assert prediction.points == 5
 
 
 def add_user(db, nickname="Paul"):

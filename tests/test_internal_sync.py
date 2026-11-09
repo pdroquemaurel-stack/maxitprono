@@ -113,3 +113,15 @@ def test_missing_provider_key_returns_502(client, provider):
     response = client.post("/internal/sync?task=scores", headers=AUTH)
     assert response.status_code == 502
     assert "manquante" in response.json()["error"]
+
+
+def test_fixtures_import_follows_admin_days_setting(client, provider):
+    from app.db import get_db
+    from app.services.game_settings import Settings
+    from app.services.settings_store import save_settings
+    db = next(fastapi_app.dependency_overrides[get_db]())
+    save_settings(db, Settings(prediction_days_ahead=30), utc_now())
+    add_active_competition(client)
+    client.post("/internal/sync?task=fixtures", headers=AUTH)
+    _, date_from, date_to = provider.calls[0]
+    assert (date_to - date_from).days == 33  # J-3 à J+30

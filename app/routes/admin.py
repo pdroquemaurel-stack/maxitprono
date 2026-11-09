@@ -1,5 +1,6 @@
 """Back-office (SPEC §9), réservé aux joueurs avec `is_admin` (scripts/make_admin.py)."""
 from datetime import timedelta
+from urllib.parse import urlencode
 
 from fastapi import APIRouter, Depends, Form, HTTPException, Request
 from sqlalchemy import select
@@ -9,12 +10,14 @@ from app.auth import require_admin
 from app.db import get_db
 from app.jobs.import_competitions import import_competitions
 from app.jobs.score_predictions import rescore_corrected_match
+from app.jobs.sync import Task, run_sync
 from app.models import Competition, Match, User
 from app.models.match import MatchStatus
 from app.models.types import utc_now
 from app.providers import make_provider
 from app.providers.base import ProviderError
 from app.routes.accounts import redirect
+from app.routes.internal import get_provider_factory
 from app.services.admin_matches import STATUSES, parse_correction, parse_new_match
 from app.services import kpi_store
 from app.services.game_settings import parse_settings
@@ -51,11 +54,14 @@ def settings_page(request: Request, db: Session = Depends(get_db),
 @router.post("/settings")
 def settings_submit(request: Request, db: Session = Depends(get_db),
                     user: User = Depends(require_admin), winner_points: str = Form(""),
-                    exact_bonus: str = Form(""), league_max_members: str = Form("")):
-    settings, error = parse_settings(winner_points, exact_bonus, league_max_members)
+                    exact_bonus: str = Form(""), league_max_members: str = Form(""),
+                    prediction_days_ahead: str = Form("")):
+    settings, error = parse_settings(winner_points, exact_bonus, league_max_members,
+                                     prediction_days_ahead)
     if error:
         form = {"winner_points": winner_points, "exact_bonus": exact_bonus,
-                "league_max_members": league_max_members}
+                "league_max_members": league_max_members,
+                "prediction_days_ahead": prediction_days_ahead}
         context = {"user": user, "settings": get_settings(db), "form": form, "error": error,
                    "saved": None, "rescored": None}
         return templates.TemplateResponse(request, "admin/settings.html", context,
@@ -113,9 +119,23 @@ def matches_page(request: Request, db: Session = Depends(get_db),
                          .where(Match.kickoff_at >= now - MATCHES_WINDOW,
                                 Match.kickoff_at <= now + MATCHES_WINDOW)
                          .order_by(Match.kickoff_at)).all()
+    query = request.query_params
+    synced = query.get("synced")
     context = {"user": user, "matches": matches, "tz": resolve_timezone(request.cookies.get("tz")),
-               "notice": request.query_params.get("notice")}
+               "notice": query.get("notice"), "sync_task": query.get("task"),
+               "synced": int(synced) if synced and synced.isdigit() else None,
+               "sync_error": query.get("error")}
     return templates.TemplateResponse(request, "admin/matches.html", context)
+
+
+@router.post("/matches/sync/{task}")
+def sync_matches(task: Task, db: Session = Depends(get_db), user: User = Depends(require_admin),
+                 provider_factory=Depends(get_provider_factory)):
+    """Même synchronisation que la GitHub Action, lancée à la main depuis le back-office."""
+    result = run_sync(db, provider_factory, task, utc_now())
+    if "error" in result:
+        return redirect(f"/admin/matches?{urlencode({'task': task, 'error': result['error']})}")
+    return redirect(f"/admin/matches?task={task}&synced={result['matches']}")
 
 
 @router.get("/matches/new")

@@ -202,7 +202,7 @@
   "profile_admin": "Administration",
   "admin_title": "Administration",
   "admin_settings": "Game settings",
-  "admin_settings_hint": "Points scale and maximum league size.",
+  "admin_settings_hint": "Points scale, maximum league size, days open to predictions.",
   "admin_back": "Administration",
   "field_winner_points": "Points for the right winner or right draw",
   "field_exact_bonus": "Bonus for an exact score",
@@ -274,5 +274,14 @@
   "offline_title": "No connection",
   "offline_text": "Check your network (mobile data or Wi-Fi), then try again. The page reloads by itself when the connection comes back.",
   "retry": "Try again",
-  "back_home": "Back to home"
+  "back_home": "Back to home",
+  "field_prediction_days_ahead": "Days of matches open to predictions",
+  "admin_prediction_days_note": "Players see the matches of the next N days (1 to 30). The import always goes at least 14 days ahead.",
+  "error_prediction_days": "The number of days must be a whole number between 1 and 30.",
+  "admin_sync_fixtures": "Refresh upcoming matches",
+  "admin_sync_scores": "Refresh scores",
+  "admin_sync_hint": "Same sync as the automatic task. Scores only concern matches in progress.",
+  "admin_sync_done_fixtures": "Upcoming matches refreshed: {count} matches imported.",
+  "admin_sync_done_scores": "Scores refreshed: {count} matches updated.",
+  "admin_sync_failed": "Sync failed:"
 }

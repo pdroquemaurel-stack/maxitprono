@@ -16,7 +16,7 @@ from app.providers.base import FootballProvider
 from app.services.fixtures import needs_score_update
 
 DAYS_BACK = 3  # rattrape les matchs restés sans score final
-DAYS_AHEAD = 14
+DAYS_AHEAD = 14  # minimum : on va plus loin si l'admin ouvre plus de jours aux pronostics
 LOCKED_FIELDS = ("status", "home_score", "away_score")  # protégés après correction admin
 
 
@@ -55,10 +55,11 @@ def import_matches(db: Session, provider: FootballProvider, date_from: date, dat
     return count
 
 
-def import_upcoming_matches(db: Session, provider: FootballProvider, today: date) -> int:
-    """Tâche quotidienne : de J-3 à J+14."""
+def import_upcoming_matches(db: Session, provider: FootballProvider, today: date,
+                            days_ahead: int = DAYS_AHEAD) -> int:
+    """Tâche quotidienne : de J-3 à J+14, ou plus loin si days_ahead est plus grand."""
     return import_matches(db, provider, today - timedelta(days=DAYS_BACK),
-                          today + timedelta(days=DAYS_AHEAD))
+                          today + timedelta(days=max(DAYS_AHEAD, days_ahead)))
 
 
 def update_live_scores(db: Session, provider: FootballProvider, now: datetime) -> int:

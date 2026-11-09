@@ -13,12 +13,12 @@ from app.models.types import utc_now
 from app.services.deadlines import is_prediction_open
 from app.services.predictions import save_prediction
 from app.services.probabilities import match_probabilities
+from app.services.settings_store import prediction_days_ahead
 from app.services.timezones import group_by_day_and_competition, resolve_timezone
 from app.templating import templates
 
 router = APIRouter()
 
-DAYS_AHEAD = 7
 RECENT_WINDOW = timedelta(hours=3)  # garde visibles les matchs en cours ou juste finis
 HISTORY_LIMIT = 50
 
@@ -26,11 +26,11 @@ HISTORY_LIMIT = 50
 # --- Lectures en base ---
 
 def upcoming_matches(db: Session, now: datetime) -> list[Match]:
-    """Matchs des compétitions actives, des 3 dernières heures aux 7 prochains jours."""
+    """Matchs des compétitions actives, des 3 dernières heures aux N prochains jours (réglage admin)."""
     query = (select(Match).join(Match.competition).options(joinedload(Match.competition))
              .where(Competition.is_active.is_(True),
                     Match.kickoff_at >= now - RECENT_WINDOW,
-                    Match.kickoff_at <= now + timedelta(days=DAYS_AHEAD))
+                    Match.kickoff_at <= now + timedelta(days=prediction_days_ahead(db)))
              .order_by(Match.kickoff_at))
     return list(db.scalars(query))
 

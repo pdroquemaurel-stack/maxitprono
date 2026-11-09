@@ -202,7 +202,7 @@
   "profile_admin": "Administration",
   "admin_title": "Administration",
   "admin_settings": "Réglages du jeu",
-  "admin_settings_hint": "Barème des points et taille maximale des ligues.",
+  "admin_settings_hint": "Barème des points, taille maximale des ligues, jours ouverts aux pronostics.",
   "admin_back": "Administration",
   "field_winner_points": "Points pour un bon vainqueur ou un bon nul",
   "field_exact_bonus": "Bonus pour un score exact",
@@ -274,5 +274,14 @@
   "offline_title": "Pas de connexion",
   "offline_text": "Vérifie ton réseau (données mobiles ou Wi-Fi), puis réessaie. La page se recharge toute seule quand la connexion revient.",
   "retry": "Réessayer",
-  "back_home": "Retour à l'accueil"
+  "back_home": "Retour à l'accueil",
+  "field_prediction_days_ahead": "Jours de matchs ouverts aux pronostics",
+  "admin_prediction_days_note": "Les joueurs voient les matchs des N prochains jours (1 à 30). L'import va au moins jusqu'à J+14.",
+  "error_prediction_days": "Le nombre de jours doit être un nombre entier entre 1 et 30.",
+  "admin_sync_fixtures": "Actualiser les matchs à venir",
+  "admin_sync_scores": "Actualiser les scores",
+  "admin_sync_hint": "Même synchronisation que la tâche automatique. Les scores ne concernent que les matchs en cours.",
+  "admin_sync_done_fixtures": "Matchs à venir actualisés : {count} matchs importés.",
+  "admin_sync_done_scores": "Scores actualisés : {count} matchs mis à jour.",
+  "admin_sync_failed": "Synchronisation en échec :"
 }

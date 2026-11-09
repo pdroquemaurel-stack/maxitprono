@@ -16,4 +16,5 @@ class GameSettings(Base):
     winner_points: Mapped[int] = mapped_column(Integer)  # bon vainqueur ou bon match nul
     exact_bonus: Mapped[int] = mapped_column(Integer)  # en plus si le score est exact
     league_max_members: Mapped[int] = mapped_column(Integer)
+    prediction_days_ahead: Mapped[int] = mapped_column(Integer, default=14, server_default="14")
     updated_at: Mapped[datetime] = mapped_column(UTCDateTime, default=utc_now)

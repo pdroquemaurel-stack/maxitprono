@@ -1,7 +1,7 @@
 """Lance l'import des matchs à la main, chez le fournisseur choisi (DATA_PROVIDER).
 
 Usage :
-  python -m scripts.run_import                     # J-3 à J+14 + pourcentages 1/N/2
+  python -m scripts.run_import                     # J-3 à J+14 (ou plus, réglage admin) + 1/N/2
   python -m scripts.run_import --season 2024 --from 2024-08-16 --to 2024-08-31
   python -m scripts.run_import --scores            # mise à jour des matchs en cours
 
@@ -11,9 +11,9 @@ import argparse
 from datetime import date
 
 from app.db import SessionLocal
-from app.jobs.import_matches import import_matches, import_upcoming_matches, update_live_scores
-from app.jobs.import_probabilities import import_probabilities
+from app.jobs.import_matches import import_matches
 from app.jobs.score_predictions import score_finished_matches
+from app.jobs.sync import run_sync
 from app.models.types import utc_now
 from app.providers import make_provider
 from app.providers.base import ProviderError
@@ -29,20 +29,28 @@ def main() -> None:
     args = parser.parse_args()
 
     with SessionLocal() as db:
-        try:
-            provider = make_provider(db)
-            if args.scores:
-                print(f"Matchs mis à jour : {update_live_scores(db, provider, utc_now())}")
-            elif args.date_from and args.date_to:
-                count = import_matches(db, provider, args.date_from, args.date_to, args.season)
-                print(f"Matchs importés : {count}")
-            else:
-                print(f"Matchs importés : {import_upcoming_matches(db, provider, date.today())}")
-                print(f"Pourcentages 1/N/2 : {import_probabilities(db, provider, utc_now())}")
-        except ProviderError as exc:
-            print(f"Arrêt : {exc}")
-        # Calcul des points après chaque import, même partiel
-        print(f"Pronostics calculés : {score_finished_matches(db, current_rules(db), utc_now())}")
+        if args.date_from and args.date_to:
+            import_period(db, args)
+        else:
+            result = run_sync(db, make_provider, "scores" if args.scores else "fixtures",
+                              utc_now())
+            if "error" in result:
+                print(f"Arrêt : {result['error']}")
+            print(f"Matchs importés ou mis à jour : {result['matches']}")
+            if "probabilities" in result:
+                print(f"Pourcentages 1/N/2 : {result['probabilities']}")
+            print(f"Pronostics calculés : {result['predictions_scored']}")
+
+
+def import_period(db, args) -> None:
+    """Import d'une période choisie (--from / --to), par exemple une saison passée."""
+    try:
+        count = import_matches(db, make_provider(db), args.date_from, args.date_to, args.season)
+        print(f"Matchs importés : {count}")
+    except ProviderError as exc:
+        print(f"Arrêt : {exc}")
+    # Calcul des points après chaque import, même partiel
+    print(f"Pronostics calculés : {score_finished_matches(db, current_rules(db), utc_now())}")
 
 
 if __name__ == "__main__":
