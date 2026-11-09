@@ -119,11 +119,6 @@
   "live_score_label": "Score en direct",
   "no_prediction": "Pas de prono",
   "todo_count": "{count} à faire",
-  "predictions_submit": "Enregistrer mes pronos",
-  "predictions_saved_one": "1 prono enregistré.",
-  "predictions_saved": "{count} pronos enregistrés.",
-  "predictions_saved_none": "Rien à enregistrer : remplis les deux cases d'au moins un match.",
-  "predictions_some_errors": "Certains pronos n'ont pas été enregistrés : regarde les matchs signalés.",
   "leaderboard_exacts_one": "{count} score exact",
   "leaderboard_exacts_many": "{count} scores exacts",
   "result_back": "Retour aux résultats",
@@ -283,5 +278,9 @@
   "admin_sync_hint": "Même synchronisation que la tâche automatique. Les scores ne concernent que les matchs en cours.",
   "admin_sync_done_fixtures": "Matchs à venir actualisés : {count} matchs importés.",
   "admin_sync_done_scores": "Scores actualisés : {count} matchs mis à jour.",
-  "admin_sync_failed": "Synchronisation en échec :"
+  "admin_sync_failed": "Synchronisation en échec :",
+  "error_prediction_score": "Score invalide : un chiffre de 0 à 9 dans chaque case.",
+  "prediction_saving": "Enregistrement…",
+  "prediction_offline": "Pas enregistré : vérifie ta connexion, le prono repartira tout seul.",
+  "predictions_autosave_hint": "Tape un chiffre par case : chaque prono s'enregistre tout seul dès que ses deux scores sont remplis."
 }

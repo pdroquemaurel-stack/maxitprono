@@ -1,33 +1,31 @@
 {# Carte d'un match dans la liste des pronos. Variables : match + contexte match_context #}
 {% set prediction = predictions.get(match.id) %}
 {% set is_open = match.id in open_ids %}
-{% set error = errors.get(match.id) %}
-{% set typed = entered.get(match.id) %}
-<article class="card match-card{% if error %} has-error{% endif %}" id="m{{ match.id }}">
+<article class="card match-card" id="m{{ match.id }}"{% if is_open and user %} data-match-id="{{ match.id }}"{% if prediction %} data-predicted{% endif %}{% endif %}>
   <p class="card-meta">
     <span>{{ match.competition.name }} · <time datetime="{{ match.kickoff_at.isoformat() }}">{{ format_time(match.kickoff_at, tz) }}</time></span>
     {% if match.status == 'live' %}<span class="badge live">{{ t('status_live') }}</span>
     {% elif match.status == 'finished' %}<span>{{ t('status_finished') }}</span>
     {% elif match.status == 'cancelled' %}<span>{{ t('status_cancelled') }}</span>
     {% elif not is_open %}<span>{{ t('prediction_closed') }}</span>
-    {% elif prediction and not error %}<span>{{ t('prediction_saved_short') }}</span>
-    {% else %}<span class="closing">{{ t('closes').format(when=closing_when(match.kickoff_at, now, tz, lang)) }}</span>
+    {% elif prediction %}<span data-save-status>{{ t('prediction_saved_short') }}</span>
+    {% else %}<span class="closing" data-save-status>{{ t('closes').format(when=closing_when(match.kickoff_at, now, tz, lang)) }}</span>
     {% endif %}
   </p>
 
   <div class="match-grid">
     <span class="team home">{% with url = match.home_logo_url, name = match.home_team %}{% include "_crest.html" %}{% endwith %}<span class="team-name">{{ match.home_team }}</span></span>
     {% if is_open and user %}
-      {# Valeurs : saisie refusée à réafficher, sinon pronostic enregistré #}
-      {% set home_value = typed[0] if typed else (prediction.home_score if prediction else '') %}
-      {% set away_value = typed[1] if typed else (prediction.away_score if prediction else '') %}
-      {% set home_class, away_class = score_classes(prediction.home_score, prediction.away_score) if prediction and not typed else ('', '') %}
+      {# Une case = un chiffre ; l'enregistrement est automatique (static/js/predictions.js) #}
+      {% set home_value = prediction.home_score if prediction else '' %}
+      {% set away_value = prediction.away_score if prediction else '' %}
+      {% set home_class, away_class = score_classes(prediction.home_score, prediction.away_score) if prediction else ('', '') %}
       <input class="score-box {{ home_class }}" name="home_{{ match.id }}" value="{{ home_value }}"
-             type="text" inputmode="numeric" pattern="[0-9]{1,2}" maxlength="2" placeholder="–"
+             type="text" inputmode="numeric" pattern="[0-9]" maxlength="1" placeholder="–"
              autocomplete="off" aria-label="{{ t('score_of') }} {{ match.home_team }}" data-score="home">
       <span class="dash" aria-hidden="true">–</span>
       <input class="score-box {{ away_class }}" name="away_{{ match.id }}" value="{{ away_value }}"
-             type="text" inputmode="numeric" pattern="[0-9]{1,2}" maxlength="2" placeholder="–"
+             type="text" inputmode="numeric" pattern="[0-9]" maxlength="1" placeholder="–"
              autocomplete="off" aria-label="{{ t('score_of') }} {{ match.away_team }}" data-score="away">
     {% else %}
       {# Lecture seule : mon prono s'il existe, sinon des cases vides #}
@@ -59,5 +57,5 @@
     <p class="match-foot">{{ t('no_prediction') }}</p>
   {% endif %}
 
-  {% if error %}<p class="alert" role="alert">{{ t(error) }}</p>{% endif %}
+  {% if is_open and user %}<p class="alert" role="alert" data-save-error hidden></p>{% endif %}
 </article>

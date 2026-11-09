@@ -66,7 +66,8 @@ def test_save_refused_on_live_match(db, setup):
 
 def test_save_refused_with_invalid_score(db, setup):
     user, match = setup
-    assert save_prediction(db, user.id, match.id, "x", "1", BEFORE) == "error_score_format"
+    assert save_prediction(db, user.id, match.id, "x", "1", BEFORE) == "error_prediction_score"
+    assert save_prediction(db, user.id, match.id, "10", "1", BEFORE) == "error_prediction_score"
     assert db.query(Prediction).count() == 0
 
 

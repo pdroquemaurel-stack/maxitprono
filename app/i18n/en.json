@@ -119,11 +119,6 @@
   "live_score_label": "Live score",
   "no_prediction": "No prediction",
   "todo_count": "{count} to do",
-  "predictions_submit": "Save my predictions",
-  "predictions_saved_one": "1 prediction saved.",
-  "predictions_saved": "{count} predictions saved.",
-  "predictions_saved_none": "Nothing to save: fill in both boxes for at least one match.",
-  "predictions_some_errors": "Some predictions were not saved: check the flagged matches.",
   "leaderboard_exacts_one": "{count} exact score",
   "leaderboard_exacts_many": "{count} exact scores",
   "result_back": "Back to results",
@@ -283,5 +278,9 @@
   "admin_sync_hint": "Same sync as the automatic task. Scores only concern matches in progress.",
   "admin_sync_done_fixtures": "Upcoming matches refreshed: {count} matches imported.",
   "admin_sync_done_scores": "Scores refreshed: {count} matches updated.",
-  "admin_sync_failed": "Sync failed:"
+  "admin_sync_failed": "Sync failed:",
+  "error_prediction_score": "Invalid score: one digit from 0 to 9 in each box.",
+  "prediction_saving": "Saving…",
+  "prediction_offline": "Not saved: check your connection, the prediction will be sent again automatically.",
+  "predictions_autosave_hint": "Type one digit per box: each prediction saves itself as soon as both scores are filled in."
 }

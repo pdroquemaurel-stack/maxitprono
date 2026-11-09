@@ -3,18 +3,16 @@
 {% block content %}
   <header class="page-head">
     <h1>{{ t('matches_title') }}</h1>
-    {% if user and to_predict %}<span class="badge todo">{{ t('todo_count').format(count=to_predict) }}</span>{% endif %}
+    {% if user and to_predict %}<span class="badge todo" data-todo-count="{{ to_predict }}">{{ t('todo_count').format(count=to_predict) }}</span>{% endif %}
   </header>
 
-  {% if saved_count is not none %}
-    <p class="notice" role="status">
-      {{ t('predictions_saved_one') if saved_count == 1 else t('predictions_saved').format(count=saved_count) if saved_count else t('predictions_saved_none') }}
-    </p>
-  {% endif %}
-  {% if errors %}<p class="alert" role="alert">{{ t('predictions_some_errors') }}</p>{% endif %}
+  {% if user and open_ids %}<p class="small">{{ t('predictions_autosave_hint') }}</p>{% endif %}
 
   {% if days %}
-    <form method="post" action="/matches/predictions" class="predictions-form">
+    {# Pas d'envoi du formulaire : chaque prono part seul dès que ses deux cases sont remplies #}
+    <form class="predictions-form{% if not user %} with-action{% endif %}" onsubmit="return false"
+          data-msg-saved="{{ t('prediction_saved_short') }}" data-msg-saving="{{ t('prediction_saving') }}"
+          data-msg-offline="{{ t('prediction_offline') }}" data-msg-todo="{{ t('todo_count') }}">
       {% for day, competitions in days %}
         <h2 class="day-title">{{ format_day(day, today) }}</h2>
         {% for competition, matches in competitions %}
@@ -22,13 +20,9 @@
         {% endfor %}
       {% endfor %}
 
-      {% if open_ids %}
+      {% if open_ids and not user %}
         <div class="sticky-action">
-          {% if user %}
-            <button type="submit">{{ t('predictions_submit') }}</button>
-          {% else %}
-            <a class="button" href="/login">{{ t('login_to_predict') }}</a>
-          {% endif %}
+          <a class="button" href="/login">{{ t('login_to_predict') }}</a>
         </div>
       {% endif %}
     </form>
@@ -36,4 +30,5 @@
     <p class="card lead">{{ t('matches_none') }}</p>
   {% endif %}
 {% endblock %}
-{% block scripts %}<script src="{{ static_url('js/score-colors.js') }}" defer></script>{% endblock %}
+{% block scripts %}<script src="{{ static_url('js/score-colors.js') }}" defer></script>
+<script src="{{ static_url('js/predictions.js') }}" defer></script>{% endblock %}

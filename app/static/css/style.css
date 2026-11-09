@@ -647,7 +647,7 @@ span.score-box { color: var(--placeholder); }
 .match-card .alert { margin: 10px 0 0; font-size: 13px; }
 
 /* Bouton collé en bas, au-dessus de la barre de navigation */
-.predictions-form { padding-bottom: 88px; }
+.predictions-form.with-action { padding-bottom: 88px; }  /* place du bouton « Connecte-toi » */
 
 .sticky-action {
   position: fixed;

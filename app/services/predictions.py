@@ -8,16 +8,17 @@ from sqlalchemy.orm import Session
 from app.models import Match, Prediction
 from app.services.deadlines import is_prediction_open
 
-MAX_SCORE = 20
+MAX_SCORE = 20  # score réel saisi par l'admin
+MAX_PREDICTED_SCORE = 9  # pronostic : un seul chiffre par case
 
 
-def parse_score(value: str) -> int | None:
-    """Score saisi par le joueur : entier de 0 à 20, sinon None."""
+def parse_score(value: str, max_score: int = MAX_SCORE) -> int | None:
+    """Score saisi : entier de 0 à max_score, sinon None."""
     value = value.strip()
     if not value.isdigit() or not value.isascii():
         return None
     score = int(value)
-    return score if score <= MAX_SCORE else None
+    return score if score <= max_score else None
 
 
 def prediction_error(match: Match | None, home: int | None, away: int | None,
@@ -28,7 +29,7 @@ def prediction_error(match: Match | None, home: int | None, away: int | None,
     if not is_prediction_open(match.status, match.kickoff_at, now):
         return "error_prediction_closed"
     if home is None or away is None:
-        return "error_score_format"
+        return "error_prediction_score"
     return None
 
 
@@ -36,7 +37,8 @@ def save_prediction(db: Session, user_id: int, match_id: int, home_raw: str, awa
                     now: datetime) -> str | None:
     """Crée ou met à jour le pronostic. Renvoie une clé d'erreur, ou None si enregistré."""
     match = db.get(Match, match_id)
-    home, away = parse_score(home_raw), parse_score(away_raw)
+    home = parse_score(home_raw, MAX_PREDICTED_SCORE)
+    away = parse_score(away_raw, MAX_PREDICTED_SCORE)
     error = prediction_error(match, home, away, now)
     if error:
         return error
