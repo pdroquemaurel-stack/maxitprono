@@ -2,7 +2,7 @@
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from app.models import League, LeagueMember, Match, Prediction, User
+from app.models import LeagueMember, Match, Prediction, User
 from app.models.match import MatchStatus
 from app.services.profile_stats import DayScore, PlayedPick
 from app.services.ranking import PlayerScore
@@ -39,10 +39,9 @@ def daily_scores(db: Session) -> list[DayScore]:
 
 
 def invited_friends(db: Session, user_id: int) -> int:
-    """Membres (autres que moi) des ligues que j'ai créées."""
+    """Joueurs entrés dans une ligue grâce à mon lien d'invitation (et toujours membres)."""
     return db.scalar(select(func.count()).select_from(LeagueMember)
-                     .join(League, League.id == LeagueMember.league_id)
-                     .where(League.owner_id == user_id, LeagueMember.user_id != user_id))
+                     .where(LeagueMember.invited_by_id == user_id))
 
 
 def nickname_taken(db: Session, key: str, user_id: int) -> bool:

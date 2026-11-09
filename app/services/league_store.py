@@ -8,7 +8,8 @@ from sqlalchemy.orm import Session
 from app.models import League, LeagueMember, Match, Prediction, User
 from app.services.activity import ACTIVITY_WINDOW, Event, exact_event, join_event, latest_events
 from app.services.leagues import (clean_name, create_error, generate_code, join_error,
-                                  leave_error, normalize_code, remove_error, validate_league_name)
+                                  leave_error, normalize_code, remove_error, valid_inviter,
+                                  validate_league_name)
 from app.services.settings_store import league_max_members
 
 
@@ -108,13 +109,18 @@ def create_league(db: Session, owner: User, name: str, now: datetime) -> Result:
     return Result(league=league)
 
 
-def join_league(db: Session, league: League, user: User, now: datetime) -> Result:
+def join_league(db: Session, league: League, user: User, now: datetime,
+                ref: str | None = None) -> Result:
+    """`ref` : identifiant du membre qui a partagé le lien d'invitation, s'il y en a un."""
     error = join_error(membership(db, league.id, user.id) is not None,
                        member_count(db, league.id), player_league_count(db, user.id),
                        league_max_members(db))
     if error:
         return Result(league=league, error=error)
-    db.add(LeagueMember(league_id=league.id, user_id=user.id, joined_at=now))
+    member_ids = list(db.scalars(select(LeagueMember.user_id)
+                                 .where(LeagueMember.league_id == league.id)))
+    db.add(LeagueMember(league_id=league.id, user_id=user.id, joined_at=now,
+                        invited_by_id=valid_inviter(ref, member_ids, user.id)))
     db.commit()
     return Result(league=league)
 

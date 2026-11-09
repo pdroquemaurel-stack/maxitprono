@@ -53,6 +53,15 @@ def join_error(is_member: bool, member_count: int, player_league_count: int,
     return create_error(player_league_count)
 
 
+def valid_inviter(ref: str | None, member_ids: list[int], joiner_id: int) -> int | None:
+    """Identifiant du parrain (?ref= du lien) s'il est membre de la ligue et n'est pas
+    le joueur lui-même ; sinon None (lien bricolé ou parrain parti)."""
+    if not ref or not ref.isdigit():
+        return None
+    inviter_id = int(ref)
+    return inviter_id if inviter_id in member_ids and inviter_id != joiner_id else None
+
+
 def leave_error(is_owner: bool) -> str | None:
     """L'admin ne quitte pas sa ligue : il la supprime."""
     return "error_owner_cannot_leave" if is_owner else None

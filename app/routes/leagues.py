@@ -31,9 +31,9 @@ def member_league(db: Session, league_id: int, user: User) -> League:
     return league
 
 
-def share_links(request: Request, league: League) -> dict:
-    """Lien d'invitation et lien WhatsApp avec un message prêt à envoyer."""
-    url = str(request.url_for("join_page", code=league.code))
+def share_links(request: Request, league: League, inviter: User) -> dict:
+    """Lien d'invitation personnel (?ref= : qui a invité) et lien WhatsApp prêt à envoyer."""
+    url = f"{request.url_for('join_page', code=league.code)}?ref={inviter.id}"
     text = translate("league_share_text").format(name=league.name, url=url)
     return {"join_url": url, "share_text": text, "whatsapp_url": "https://wa.me/?text=" + quote(text)}
 
@@ -75,8 +75,9 @@ def join_by_code(request: Request, db: Session = Depends(get_db),
         request, db, user, error=error, form={"code": code}, status_code=400))
 
 
-def join_and_redirect(request: Request, db: Session, league: League, user: User, on_error):
-    result = league_store.join_league(db, league, user, utc_now())
+def join_and_redirect(request: Request, db: Session, league: League, user: User, on_error,
+                      ref: str | None = None):
+    result = league_store.join_league(db, league, user, utc_now(), ref)
     if result.error == "error_already_member":
         return redirect(f"/leagues/{league.id}")  # déjà membre : on l'emmène simplement à sa ligue
     if result.error:
@@ -99,7 +100,7 @@ def render_league(request: Request, db: Session, league: League, user: User,
         "league_joined" if params.get("joined") else None)
     context = {"user": user, "league": league, "members": league_store.members(db, league.id),
                "is_owner": league.owner_id == user.id, "max_members": league_max_members(db),
-               "error": error, "notice": notice, **share_links(request, league)}
+               "error": error, "notice": notice, **share_links(request, league, user)}
     return templates.TemplateResponse(request, "league.html", context, status_code=status_code)
 
 
@@ -146,22 +147,24 @@ def join_page(code: str, request: Request, db: Session = Depends(get_db),
         return render_join(request, db, None, user, error="error_league_code", status_code=404)
     if user and league_store.membership(db, league.id, user.id):
         return redirect(f"/leagues/{league.id}")
-    return render_join(request, db, league, user)
+    return render_join(request, db, league, user, ref=request.query_params.get("ref", ""))
 
 
 def render_join(request: Request, db: Session, league: League | None, user: User | None,
-                error: str | None = None, status_code: int = 200):
-    context = {"user": user, "league": league, "error": error,
+                error: str | None = None, status_code: int = 200, ref: str = ""):
+    ref = ref if ref.isdigit() else ""  # parrain gardé à travers l'inscription ou la connexion
+    next_url = f"/join/{league.code}" + (f"?ref={ref}" if ref else "") if league else "/"
+    context = {"user": user, "league": league, "error": error, "ref": ref,
                "member_count": league_store.member_count(db, league.id) if league else 0,
-               "next": f"/join/{league.code}" if league else "/"}
+               "next": next_url}
     return templates.TemplateResponse(request, "join.html", context, status_code=status_code)
 
 
 @router.post("/join/{code}")
 def join_by_link(code: str, request: Request, db: Session = Depends(get_db),
-                 user: User = Depends(require_user)):
+                 user: User = Depends(require_user), ref: str = Form("")):
     league = league_store.find_by_code(db, code)
     if league is None:
         return render_join(request, db, None, user, error="error_league_code", status_code=404)
     return join_and_redirect(request, db, league, user, on_error=lambda error: render_join(
-        request, db, league, user, error=error, status_code=400))
+        request, db, league, user, error=error, status_code=400, ref=ref), ref=ref)

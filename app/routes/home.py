@@ -49,7 +49,7 @@ def home(request: Request, db: Session = Depends(get_db),
         "activity": league_store.recent_activity(db, league, now) if league else [],
     }
     if league:
-        context.update(share_links(request, league))
+        context.update(share_links(request, league, user))
     response = templates.TemplateResponse(request, "home.html", context)
     if league and request.query_params.get("league"):
         response.set_cookie(LEAGUE_COOKIE, str(league.id), max_age=LEAGUE_COOKIE_AGE,

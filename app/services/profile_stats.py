@@ -180,7 +180,7 @@ BADGE_GOALS = {"prophet": 3, "remontada": 5, "gatherer": 1, "flawless": 5}
 def compute_badges(exacts: int, best_climb: int, invited_friends: int,
                    best_success_streak: int) -> list[Badge]:
     """Prophète : 3 scores exacts. Remontada : +5 places en une journée.
-    Rassembleur : au moins un ami dans une ligue que j'ai créée.
+    Rassembleur : au moins un ami entré dans une ligue grâce à mon lien d'invitation.
     Sans faute : 5 pronos réussis d'affilée."""
     progress = {"prophet": exacts, "remontada": best_climb, "gatherer": invited_friends,
                 "flawless": best_success_streak}

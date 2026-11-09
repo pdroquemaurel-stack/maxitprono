@@ -90,7 +90,7 @@ def rankings(request: Request, db: Session, user: User, picks: list[stats.Played
         now = find_player(leaderboard(db, league_id=league.id, **filters), user.id)
         context.update(league_rank=now, league_change=league_change(db, league.id, user.id, now,
                                                                     picks, start, competition_id))
-        context.update(share_links(request, league))
+        context.update(share_links(request, league, user))
     return context
 
 

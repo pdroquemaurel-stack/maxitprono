@@ -32,6 +32,8 @@ class LeagueMember(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
     # Le classement de la ligue ne compte que les matchs commencés après cette date
     joined_at: Mapped[datetime] = mapped_column(UTCDateTime, default=utc_now)
+    # Membre dont le lien d'invitation (?ref=) a fait venir ce joueur ; vide si code tapé
+    invited_by_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"))
 
     league: Mapped[League] = relationship()
-    user: Mapped[User] = relationship()
+    user: Mapped[User] = relationship(foreign_keys=[user_id])

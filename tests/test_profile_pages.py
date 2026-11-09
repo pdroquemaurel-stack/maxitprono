@@ -104,7 +104,7 @@ def test_league_card_badge_and_challenge_button(client, db_session):
     assert "Bureau Casa" in page and "https://wa.me/?text=" in page  # « Défier un ami »
     logout(client)
     register(client, "Awa")
-    client.post(f"/join/{code}")
+    client.post(f"/join/{code}", data={"ref": str(paul(db_session).id)})  # lien de Paul
     logout(client)
     client.post("/login", data={"nickname": "Paul", "pin": "1234"})
     add_pick(db_session, paul(db_session), (1, 0), (1, 0), hours_ago=-1)  # commencé après l'arrivée
