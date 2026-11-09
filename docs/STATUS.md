@@ -1,6 +1,6 @@
 # MaxitProno — État des lieux
 
-Mis à jour le 4 novembre 2026, après l'étape 9 de la SPEC : **toutes les étapes du découpage (SPEC §12) sont faites**.
+Mis à jour le 9 novembre 2026, après la refonte des écrans Ligues (lot 1). **Toutes les étapes du découpage (SPEC §12) sont faites**.
 
 ## 1. Avancement des étapes (SPEC §12)
 
@@ -11,7 +11,7 @@ Mis à jour le 4 novembre 2026, après l'étape 9 de la SPEC : **toutes les éta
 | 3 | Comptes joueurs (pseudo + PIN, profil, règlement) | **Fait** | `app/auth/` (`pin_auth.py`, `session.py`), `app/services/accounts.py`, `app/services/avatars.py`, `app/routes/accounts.py`, templates `register/login/profile/rules` |
 | 4 | Pronostics + clôture 10 min | **Fait** | `app/models/prediction.py`, `app/services/deadlines.py`, `app/services/predictions.py`, `app/routes/matches.py`, `matches.html`, `_match_card.html` |
 | 5 | Points + classements + départage | **Fait** | `app/services/scoring.py`, `app/services/ranking.py`, `app/services/leaderboards.py`, `app/jobs/score_predictions.py`, `app/routes/leaderboard.py`, `app/routes/results.py` |
-| 6 | Ligues privées + lien de partage | **Fait** | Tables `leagues` + `league_members`, `app/services/leagues.py` (règles pures), `app/services/league_store.py`, `app/routes/leagues.py`, templates `leagues`, `league`, `join`, `_invite`. `app/services/activity.py`, `leaderboard(league_id=…)`, accueil et onglet « Ligue ». carte « Les pronos de la ligue » sur « Match clôturé » (`app/routes/results.py`) |
+| 6 | Ligues privées + lien de partage | **Fait**, écrans refaits le 9 novembre | Tables `leagues` (+ `color`), `league_members`, `league_competitions`, `app/services/leagues.py` (règles pures), `app/services/league_store.py`, `app/routes/leagues.py`, templates `leagues`, `league`, `league_new`, `league_ready`, `league_settings`, `_league_bits`, `_league_form`, `join`, `_invite`, `static/js/league.js`. `app/services/activity.py`, `leaderboard(league_id=…)`, accueil et onglet « Ligue ». carte « Les pronos de la ligue » sur « Match clôturé » (`app/routes/results.py`) |
 | 7 | Pourcentages 1/N/2 | **Fait** | `app/services/probabilities.py`, `app/jobs/import_probabilities.py`, `Match.prob_home/draw/away`, `get_probabilities` des fournisseurs, `_match_card.html` |
 | 8 | Back-office admin + KPIs | **Fait** | Accès admin (`users.is_admin`, `scripts/make_admin.py`, `require_admin`), réglages du jeu (`game_settings`, `app/services/game_settings.py`, `settings_store.py`, `/admin/settings`). compétitions et matchs (`/admin/competitions`, `/admin/matches`, `app/services/admin_matches.py`, `Match.score_locked`). KPIs sur `/admin` (`app/services/kpis.py`, `kpi_store.py`) |
 | 9 | Traductions FR/EN, page d'erreur, finitions mobile | **Fait** | Langue au choix du joueur : `pick_language` / `set_language` (`app/i18n/__init__.py`), middleware dans `app/main.py`, route `/language/{fr,en}`, `_language.html` (276 clés FR/EN). pages d'erreur 404/500 (`error.html`, gestionnaires dans `app/main.py`), page hors connexion (`offline.html`, `static/js/sw.js` servi en `/sw.js`). finitions mobile (compression, cache, icônes, saisies 16 px, écussons des résultats) |
@@ -35,16 +35,27 @@ Hors découpage : `scripts/seed_demo.py` (données de démo sans API ; les joueu
 
 ## 2 bis. Ligues privées
 
-- **Création** par un joueur, qui en devient admin et membre. Nom de 3 à 40 caractères, **code d'invitation** de 6 caractères sans 0/O/1/I/L (ex. `K7PM4X`), tapé librement (minuscules, espaces, tirets acceptés).
-- **Limites** : 100 membres par ligue (constante `MAX_MEMBERS`, en attendant le back-office), 10 ligues par joueur.
-- **Rejoindre** : par code (`/leagues`) ou par lien `/join/{code}`. Le lien affiche la ligue et un bouton ; l'adhésion se fait toujours par **POST** (les aperçus de lien de WhatsApp ne font jamais adhérer). Sans compte : inscription ou connexion puis **retour au lien** (paramètre `next`, limité aux chemins du site).
-- **Lien personnel** : chaque membre partage `/join/CODE?ref=<son id>` ; le parrain est gardé à travers l'inscription ou la connexion et enregistré dans `league_members.invited_by_id` s'il est membre de la ligue (ignoré sinon). Code tapé à la main : pas de parrain. Si le filleul quitte la ligue, il ne compte plus.
-- **Partage** : bouton « Inviter des potes par WhatsApp » (`wa.me` + message), partage natif du téléphone s'il existe (`static/js/share.js`). `render.yaml` démarre uvicorn avec `--forwarded-allow-ips='*'` pour que les liens partagés soient en https.
-- **Admin** : retire un membre, supprime la ligue (confirmation) ; ne peut pas la quitter. Un membre peut la quitter. Un non-membre reçoit une 404.
-- **Classement de la ligue** : membres seulement, et pour chacun les matchs commencés **après son arrivée** (`league_members.joined_at`). Onglet « Ligue » en tête des classements, ouvert par défaut pour un membre (menu si plusieurs ligues) ; onglet « Compét. » raccourci : les 5 onglets tiennent à 360 px.
-- **Accueil « Ma ligue »** : sélecteur de ligue (menu `<details>`, sans JavaScript ; choix mémorisé dans le cookie `league`, par défaut la ligue rejointe en dernier), podium et nombre de joueurs de la ligue, fil « Dans la ligue » (créée / a rejoint / score exact, 5 événements des 7 derniers jours, temps relatif « 2 h », « hier »), bouton d'invitation WhatsApp. Sans ligue : podium général et carte « Joue avec tes potes ». « a pronostiqué les 5 matchs du week-end » (maquette) reporté.
-- **Match clôturé** : carte « Les pronos de la ligue » (ligue choisie sur l'accueil) avec le score pronostiqué coloré et le badge de points de chaque membre ; moi d'abord, puis par points, les membres sans prono en dernier. Seulement après la clôture : avant, on ne voit jamais les pronos des autres (seulement la tendance 1/N/2).
-- Après connexion demandée par une page, retour à cette page (`/login?next=…`).
+Écrans refaits le 9 novembre 2026 (« lot 1 »), même charte que la page Profil. Le fil de discussion, le duel de la semaine, la ligue événement « Défi des pays » et le barème « Expert » ont été proposés puis **écartés** : ils ne sont pas prévus (SPEC §7 : pas de chat ni de commentaires).
+
+- **Création** (`/leagues/new`) par un joueur, qui en devient admin et membre : nom de **3 à 30 caractères**, **couleur** de l'icône (orange, noir, vert, pêche ; `leagues.color`), **compétitions** comptées (table `league_competitions` ; aucune ligne = toutes), aperçu en direct. Le barème affiché est celui du jeu (réglé dans le back-office), il n'y a pas de barème par ligue. Puis écran de succès `/leagues/{id}/ready` : code, lien, WhatsApp, « Copier le lien ».
+- **Code d'invitation** de 6 caractères sans 0/O/1/I/L, affiché en deux groupes (`K7P-M4X`, `format_code`) et tapé librement (minuscules, espaces, tirets acceptés).
+- **Limites** : taille maximale réglée dans le back-office (100 par défaut), 10 ligues par joueur.
+- **Rejoindre** : par code sur `/leagues`, avec un message clair pour un code inconnu, une ligue pleine ou si l'on est déjà membre. Ou par lien court **`/j/{code}`**, qui redirige vers `/join/{code}` (toujours valable) : la page affiche la ligue et un bouton, l'adhésion se fait toujours par **POST** (les aperçus de lien de WhatsApp ne font jamais adhérer). Sans compte : l'**inscription ou la connexion** depuis le lien (paramètre `next`) **fait rejoindre la ligue directement** (`join_from_invite`), puis ouvre la ligue.
+- **Lien personnel** : chaque membre partage `/j/CODE?ref=<son id>` ; le parrain est gardé à travers l'inscription ou la connexion et enregistré dans `league_members.invited_by_id` s'il est membre de la ligue (ignoré sinon). Code tapé à la main : pas de parrain.
+- **Partage** : bouton « Inviter par WhatsApp » (`wa.me` + message) ; si la web-view refuse d'ouvrir le lien, partage natif du téléphone. « Copier » utilise le presse-papiers, sinon le partage natif. `render.yaml` démarre uvicorn avec `--forwarded-allow-ips='*'` pour que les liens partagés soient en https.
+- **Mes ligues** (`/leagues`) : créer / rejoindre côte à côte, carte noire « N pronos à faire » (masquée s'il n'y en a pas), puis une carte par ligue : icône colorée, membres et compétitions, ma place (« 3e ») et son évolution (▲ / ▼ / =), 3 avatars + « +N », dernière activité. État vide illustré sans ligue.
+- **Détail** (`/leagues/{id}`) :
+  - en-tête noir avec menu « … » (réglages ou membres, quitter, retirer un membre, supprimer) et les cartes ma place / mes points / écart avec le 1er ;
+  - carte d'invitation ;
+  - **prochain match** des compétitions de la ligue, avec compte à rebours, tendance V/N/D de la ligue et qui a déjà joué. **Les scores des autres ne quittent jamais le serveur avant le coup d'envoi** ;
+  - onglet **Classement** : podium 2 – 1 – 3, liste à partir du 4e (7 lignes plus la mienne, puis « Voir les N membres » avec `?all=1`), membres pas encore classés en fin de liste, Joueur de la semaine et Lanterne rouge ;
+  - onglet **Matchs** : un match terminé au choix (10 derniers), score final et pronos de chaque membre avec ses points. Seuls les matchs terminés sont proposés.
+- **Évolution des places** : classement actuel comparé à celui de la veille du dernier jour de matchs comptés (comme sur le Profil). **Joueur de la semaine / Lanterne rouge** : semaine (lundi-dimanche) de ce dernier jour ; pas de lanterne rouge s'il n'y a qu'un joueur.
+- **Réglages** (`/leagues/{id}/settings`) : l'admin modifie nom, couleur et compétitions, retire un membre, supprime la ligue (confirmation) ; il ne peut pas la quitter. Un membre y voit la liste et peut quitter. Un non-membre reçoit une 404.
+- **Classement de la ligue** : membres seulement, et pour chacun les matchs commencés **après son arrivée** (`league_members.joined_at`), dans les **compétitions de la ligue** (`league_competition_filter`, appliqué partout : accueil, onglet « Ligue » des classements, Profil, fil d'activité). Onglet « Ligue » en tête des classements, ouvert par défaut pour un membre.
+- **Accueil « Ma ligue »** : sélecteur de ligue (cookie `league`), podium, fil « Dans la ligue », bouton d'invitation. L'onglet « Ma ligue » de la barre du bas est aussi actif sur `/leagues`, `/join` et `/j/`.
+- **Match clôturé** : carte « Les pronos de la ligue » (ligue choisie sur l'accueil), seulement après la clôture.
+- **Migration** `a7b8c9d0e1f2` : `leagues.color` (orange par défaut) et `league_competitions`. Les ligues existantes deviennent orange et comptent toutes les compétitions.
 
 ## 2 ter. Back-office
 
@@ -112,17 +123,20 @@ Socle en place (`app/static/css/style.css`) : variables de couleur, polices Outf
 | Match clôturé | **Conforme** : carte score final (écussons 44 px), bandeau du prono, pronos des membres de la ligue avec leurs points |
 | Classements | **Conforme** (liste, onglets) avec l'onglet « Ligue » ; les 5 onglets tiennent à 360 px |
 | Résultats | Conforme au style général (pas de maquette dédiée), avec écussons |
+| Ligues (mes ligues, détail, création, réglages) | **Refait** le 9 novembre avec la charte de la page Profil ; vérifié à 390 px |
 | Profil, connexion, inscription, règles | Composants de base (cartes, formulaires, boutons) ; pas de maquette dédiée |
 
 Écussons d'équipes (`_crest.html`) : logo du fournisseur chargé en différé (`loading="lazy"`), directement depuis le site du fournisseur (pas de copie locale) ; initiales en dessous (`app/services/teams.py`), visibles s'il n'y a pas de logo ou s'il ne charge pas. Affichés sur les cartes de pronos, la liste des résultats et l'écran « Match clôturé ».
 
 ## 5. Tests
 
-`pytest` (via `.venv`, **Python 3.12.3**) : **484 tests passent, 0 échec**, 1 avertissement (dépréciation `httpx` dans le TestClient de Starlette).
+`pytest` (via `.venv`, **Python 3.12.3**) : **577 tests passent, 0 échec**, 1 avertissement (dépréciation `httpx` dans le TestClient de Starlette).
 
 ## 6. Incohérences et dettes
 
 1. **Couverture football-data.org** limitée aux compétitions européennes : CAN, CAF et championnats locaux demandent API-Football.
 2. Avertissement de dépréciation `httpx` / `starlette.testclient` (sans effet aujourd'hui).
+3. **Mes ligues** fait environ 5 requêtes par ligue (50 au plus avec 10 ligues) : suffisant pour le POC.
+4. Les ligues créées avant le 9 novembre peuvent avoir un nom de 31 à 40 caractères : il faudra le raccourcir pour enregistrer leurs réglages.
 
 Réglé à l'étape 1 de la PARTIE 2 : `.venv` recréé en Python 3.12, couplage à API-Football, compétition démo identifiée par un faux `api_id`, README limité à API-Football. Étape 3 : planification (SPEC §10) via `/internal/sync` + GitHub Action, CLAUDE.md sans APScheduler.
