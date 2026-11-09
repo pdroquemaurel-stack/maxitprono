@@ -998,10 +998,11 @@ html { scroll-padding-bottom: calc(var(--tabbar-height) + 96px); }
   --p-miss-bg: #FDE3E1;
   padding: 12px 20px 20px;
   color: var(--p-ink);
-  font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 
-.profile h1, .profile h2 { font-family: inherit; }
+/* Titres et chiffres en Outfit, comme le reste de l'app (DESIGN.md §3) */
+.p-logo, .p-ring-value, .p-hero-points, .p-tile strong, .p-rank-value, .p-form li,
+.p-initials { font-family: var(--font-title); }
 
 .profile h2 { margin: 0; font-size: 17px; font-weight: 700; }
 

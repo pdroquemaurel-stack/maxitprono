@@ -1,12 +1,6 @@
 {% extends "base.html" %}
 {% from "_icons.html" import icon %}
 {% block title %}{{ t('profile_title') }} · {{ t('app_name') }}{% endblock %}
-{% block head %}
-  {# Inter pour la page Profil seulement ; repli system-ui si Google Fonts ne répond pas #}
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap">
-{% endblock %}
 {% block main_class %} profile{% endblock %}
 {% block content %}
   {% set s = summary %}

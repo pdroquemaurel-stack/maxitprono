@@ -86,7 +86,7 @@ Hors découpage : `scripts/seed_demo.py` (données de démo sans API ; les joueu
 - **Badges** calculés à la volée sur toute la carrière (pas filtrés par la période) : Prophète (3 exacts), Remontada (+5 places au général en une journée), Rassembleur (au moins un membre dans une ligue que j'ai créée), Sans faute (5 pronos réussis d'affilée). Remontada relit tous les pronostics calculés à chaque affichage : à stocker si la base grossit.
 - **`/profile/edit`** (bouton « Modifier » et engrenage) : photo avec aperçu, pseudo (aussi identifiant de connexion, unicité vérifiée), pays, langue, mes pronostics, mes ligues, règlement, Administration (admins), déconnexion. Le formulaire poste toujours sur `POST /profile`.
 - **`/profile/history`** : l'historique des pronostics, auparavant en bas du profil.
-- Police **Inter** chargée depuis Google Fonts sur ces pages seulement (repli system-ui).
+- Polices de l'app (Outfit pour les titres et chiffres, DM Sans pour le texte) : pas d'Inter ni de Google Fonts, pour garder une seule charte, une page légère en 3G et des polices disponibles hors connexion.
 
 ## 3. Déploiement
 
