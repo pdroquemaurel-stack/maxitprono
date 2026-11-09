@@ -3,6 +3,7 @@ from datetime import timedelta
 
 from app.models import Prediction, User
 from app.models.match import MatchStatus
+from app.models.types import utc_now
 from tests.test_league_pages import create_league, logout, register
 from tests.test_match_pages import add_match, db_session  # noqa: F401
 
@@ -202,3 +203,23 @@ def test_public_stats_page_ignores_a_league_of_someone_else(client):
 
 def test_public_stats_unknown_player(client):
     assert client.get("/players/999").status_code == 404
+
+
+def test_remontada_badge_from_rank_history(client, db_session):
+    """6 joueurs devant Paul le 1er jour, il en double 5 le lendemain."""
+    from app.jobs.score_predictions import score_finished_matches
+    from app.services.scoring import ScoringRules
+    from tests.test_leaderboard_page import add_player
+    register(client)
+    day1 = add_match(db_session, -48, status=MatchStatus.FINISHED, score=(1, 0))
+    day2 = add_match(db_session, -24, status=MatchStatus.FINISHED, score=(4, 4))
+    rivals = [add_player(db_session, name) for name in ("Ali", "Bea", "Cyr", "Dan", "Eva", "Fred")]
+    for rival in rivals:
+        db_session.add(Prediction(user_id=rival.id, match_id=day1.id, home_score=2, away_score=0))
+    db_session.add(Prediction(user_id=rivals[0].id, match_id=day2.id, home_score=4, away_score=4))
+    db_session.add(Prediction(user_id=paul(db_session).id, match_id=day1.id, home_score=0, away_score=1))
+    db_session.add(Prediction(user_id=paul(db_session).id, match_id=day2.id, home_score=4, away_score=4))
+    db_session.commit()
+    score_finished_matches(db_session, ScoringRules(), utc_now())
+    page = client.get("/profile").text
+    assert page.count('class="unlocked"') == 1  # Remontada : 7e -> 2e

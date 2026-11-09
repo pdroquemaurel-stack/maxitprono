@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.models import Match, Prediction
 from app.models.match import MatchStatus
+from app.services.rank_history import refresh_rank_snapshots
 from app.services.scoring import ScoringRules, score_prediction
 
 # Les matchs récents sont recalculés à chaque passage : si l'API corrige
@@ -33,6 +34,7 @@ def score_match(db: Session, match: Match, rules: ScoringRules, now: datetime) -
     for prediction in predictions:
         apply_result(prediction, match, rules, now)
     db.commit()
+    refresh_rank_snapshots(db, since=match.kickoff_at.date())
     return len(predictions)
 
 
@@ -50,6 +52,8 @@ def score_finished_matches(db: Session, rules: ScoringRules, now: datetime) -> i
     for prediction, match in rows:
         apply_result(prediction, match, rules, now)
     db.commit()
+    if rows:  # historique des rangs refait à partir de la plus ancienne journée touchée
+        refresh_rank_snapshots(db, since=min(match.kickoff_at.date() for _, match in rows))
     return len(rows)
 
 
@@ -63,6 +67,7 @@ def rescore_all(db: Session, rules: ScoringRules, now: datetime) -> int:
     for prediction, match in rows:
         apply_result(prediction, match, rules, now)
     db.commit()
+    refresh_rank_snapshots(db)  # nouveau barème : tout l'historique change
     return len(rows)
 
 
@@ -76,4 +81,5 @@ def rescore_corrected_match(db: Session, match: Match, rules: ScoringRules, now:
         prediction.points, prediction.is_exact, prediction.is_winner = None, False, False
         prediction.scored_at = None
     db.commit()
+    refresh_rank_snapshots(db, since=match.kickoff_at.date())
     return len(predictions)

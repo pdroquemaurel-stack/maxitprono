@@ -2,10 +2,10 @@
 
 Fonctions pures : aucune base de données (les lectures sont dans profile_store.py).
 """
-from dataclasses import dataclass, replace
+from dataclasses import dataclass
 from datetime import date, datetime
 
-from app.services.ranking import PlayerScore, find_player, rank_players
+from app.services.ranking import PlayerScore
 from app.services.scoring import ScoringRules, score_prediction
 
 EXACT, GOOD, MISS = "exact", "good", "miss"
@@ -122,43 +122,20 @@ def strongest_competition(stats: list[CompetitionStat],
     return max(eligible, key=lambda stat: (stat.success_rate, stat.played), default=None)
 
 
-# --- Évolution dans un classement, journée par journée ---
+# --- Évolution au classement général, journée par journée ---
 
-@dataclass(frozen=True)
-class DayScore:
-    """Résultat d'un prono calculé, avec le jour (UTC) du coup d'envoi."""
+def best_climb(ranks: list[tuple[date, int]], played_days: set[date]) -> int:
+    """Le plus grand nombre de places gagnées en une journée où le joueur a joué.
 
-    player: PlayerScore  # identité du joueur + points, exact (0/1), bon vainqueur (0/1)
-    day: date
-
-
-def best_daily_climb(day_scores: list[DayScore], user_id: int) -> int:
-    """Le plus grand nombre de places gagnées par le joueur en une journée où il a joué.
-
-    Rang avant la journée comparé au rang après ; il faut être déjà classé avant.
+    `ranks` : (jour, rang) tirés de l'historique des rangs ; on compare le rang
+    du jour à celui de la journée précédente où le joueur était classé.
     """
-    by_day: dict[date, list[PlayerScore]] = {}
-    for score in day_scores:
-        by_day.setdefault(score.day, []).append(score.player)
-
-    totals: dict[int, PlayerScore] = {}
-    best = 0
-    for day in sorted(by_day):
-        before = find_player(rank_players(list(totals.values())), user_id)
-        for player in by_day[day]:
-            totals[player.user_id] = _add(totals.get(player.user_id), player)
-        played_today = any(player.user_id == user_id for player in by_day[day])
-        if before and played_today:
-            after = find_player(rank_players(list(totals.values())), user_id)
-            best = max(best, before.rank - after.rank)
+    best, previous = 0, None
+    for day, rank in sorted(ranks):
+        if previous is not None and day in played_days:
+            best = max(best, previous - rank)
+        previous = rank
     return best
-
-
-def _add(total: PlayerScore | None, day: PlayerScore) -> PlayerScore:
-    if total is None:
-        return day
-    return replace(total, points=total.points + day.points, exacts=total.exacts + day.exacts,
-                   winners=total.winners + day.winners)
 
 
 # --- Badges (calculés à la volée) ---

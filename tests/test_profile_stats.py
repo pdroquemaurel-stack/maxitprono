@@ -2,7 +2,7 @@
 from datetime import UTC, date, datetime, timedelta
 
 from app.services import profile_stats as stats
-from app.services.profile_stats import DayScore, PlayedPick
+from app.services.profile_stats import PlayedPick
 from app.services.ranking import PlayerScore
 
 START = datetime(2026, 11, 1, 20, 0, tzinfo=UTC)
@@ -70,17 +70,13 @@ def test_by_competition_and_strongest():
     assert stats.strongest_competition([]) is None
 
 
-def player(user_id, points):
-    return PlayerScore(user_id, f"p{user_id}", "CM", START - timedelta(days=user_id), points, 0, 0)
-
-
-def test_best_daily_climb():
-    day1, day2 = date(2026, 11, 1), date(2026, 11, 2)
-    scores = [DayScore(player(i, 10 - i), day1) for i in range(1, 8)]  # joueur 7 dernier
-    scores.append(DayScore(player(7, 9), day2))  # 1 + 9 = 10 points : il passe 1er
-    assert stats.best_daily_climb(scores, 7) == 6
-    assert stats.best_daily_climb(scores, 1) == 0
-    assert stats.best_daily_climb([], 1) == 0
+def test_best_climb():
+    d1, d2, d3, d4 = (date(2026, 11, day) for day in (1, 2, 3, 4))
+    ranks = [(d1, 9), (d2, 3), (d3, 4), (d4, 1)]
+    assert stats.best_climb(ranks, {d1, d2, d3, d4}) == 6  # 9e -> 3e
+    assert stats.best_climb(ranks, {d4}) == 3  # seules comptent les journées jouées
+    assert stats.best_climb([(d1, 5)], {d1}) == 0  # pas classé avant
+    assert stats.best_climb([], set()) == 0
 
 
 def test_badges_and_next_badge():

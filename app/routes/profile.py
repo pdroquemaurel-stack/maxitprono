@@ -15,7 +15,7 @@ from app.models.types import utc_now
 from app.routes.accounts import read_avatar
 from app.routes.leagues import share_links
 from app.routes.matches import prediction_history
-from app.services import league_store, profile_store
+from app.services import league_store, profile_store, rank_history
 from app.services import profile_stats as stats
 from app.services.accounts import nickname_key, validate_country, validate_nickname
 from app.services.leaderboards import leaderboard
@@ -110,7 +110,8 @@ def badges_context(db: Session, user: User, all_picks: list[stats.PlayedPick]) -
     """Badges sur toute la carrière du joueur (pas filtrés par la période)."""
     badges = stats.compute_badges(
         exacts=stats.summarize(all_picks).exacts,
-        best_climb=stats.best_daily_climb(profile_store.daily_scores(db), user.id),
+        best_climb=stats.best_climb(rank_history.player_ranks(db, user.id),
+                                    {pick.kickoff_at.date() for pick in all_picks}),
         invited_friends=profile_store.invited_friends(db, user.id),
         best_success_streak=stats.best_streak(stats.chronological_outcomes(all_picks)),
     )
