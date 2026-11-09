@@ -22,7 +22,7 @@
   {% set path = request.url.path %}
   {% set profile_href = '/profile' if user else '/login' %}
   {% set nav_tabs = [
-    ('/', 'nav_league', 'league', path == '/'),
+    ('/', 'nav_league', 'league', path == '/' or path.startswith(('/leagues', '/join', '/j/'))),
     ('/matches', 'nav_predictions', 'calendar', path.startswith('/matches')),
     ('/leaderboard', 'nav_leaderboard', 'chart', path.startswith('/leaderboard')),
     ('/results', 'nav_results', 'check', path.startswith('/results')),

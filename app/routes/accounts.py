@@ -11,6 +11,7 @@ from app.db import get_db
 from app.i18n import SUPPORTED_LANGUAGES
 from app.models import User
 from app.models.types import utc_now
+from app.services import league_store
 from app.services.accounts import MAX_AVATAR_BYTES, avatar_mime, decode_data_url
 from app.services.redirects import safe_next
 from app.templating import templates
@@ -70,9 +71,15 @@ def register_submit(request: Request, db: Session = Depends(get_db),
         user = db.get(User, result.user_id)
         user.avatar, user.avatar_mime = avatar, mime
         db.commit()
-    response = redirect(safe_next(next))
+    response = redirect(after_login(db, result.user_id, safe_next(next)))
     start_session(response, result.user_id)
     return response
+
+
+def after_login(db: Session, user_id: int, next_url: str) -> str:
+    """Où aller après connexion : arrivé par un lien d'invitation, le joueur rejoint
+    directement la ligue (c'est un POST, donc un vrai geste du joueur)."""
+    return league_store.join_from_invite(db, db.get(User, user_id), next_url, utc_now()) or next_url
 
 
 # --- Connexion / déconnexion ---
@@ -93,7 +100,7 @@ def login_submit(request: Request, db: Session = Depends(get_db),
         return templates.TemplateResponse(request, "login.html",
                                           {"form": {"nickname": nickname}, "error": result.error,
                                            "next": safe_next(next)}, status_code=400)
-    response = redirect(safe_next(next))
+    response = redirect(after_login(db, result.user_id, safe_next(next)))
     start_session(response, result.user_id)
     return response
 

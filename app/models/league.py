@@ -18,6 +18,8 @@ class League(Base):
     code: Mapped[str] = mapped_column(String(6), unique=True)  # code d'invitation, ex. K7PM4X
     owner_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     created_at: Mapped[datetime] = mapped_column(UTCDateTime, default=utc_now)
+    # Couleur de l'icône, une clé de LEAGUE_COLORS (app/services/leagues.py)
+    color: Mapped[str] = mapped_column(String(10), default="orange", server_default="orange")
 
     owner: Mapped[User] = relationship()
 
@@ -37,3 +39,15 @@ class LeagueMember(Base):
 
     league: Mapped[League] = relationship()
     user: Mapped[User] = relationship(foreign_keys=[user_id])
+
+
+class LeagueCompetition(Base):
+    """Compétition comptée par une ligue. Aucune ligne pour une ligue = toutes les compétitions."""
+
+    __tablename__ = "league_competitions"
+    __table_args__ = (UniqueConstraint("league_id", "competition_id",
+                                       name="uq_league_competitions_league_competition"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    league_id: Mapped[int] = mapped_column(ForeignKey("leagues.id"), index=True)
+    competition_id: Mapped[int] = mapped_column(ForeignKey("competitions.id"))

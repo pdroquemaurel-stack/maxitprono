@@ -62,7 +62,7 @@ def test_save_settings_updates_rules_page_and_league_count(admin):
     assert response.headers["location"] == "/admin/settings?saved=1"
     assert "Réglages enregistrés" in admin.get("/admin/settings?saved=1").text
     assert "4 points" in admin.get("/rules").text and "1 points de bonus" in admin.get("/rules").text
-    assert "1 / 50 membres" in admin.get(f"/leagues/{league_id}").text
+    assert "1 / 50 membres" in admin.get(f"/leagues/{league_id}/settings").text
     assert 'value="21"' in admin.get("/admin/settings").text
 
 

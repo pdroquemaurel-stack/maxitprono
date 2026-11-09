@@ -25,7 +25,7 @@ def test_league_page_shares_a_personal_link(client):
     register(client)
     league_id, code = create_league(client)
     page = client.get(f"/leagues/{league_id}").text
-    assert f"/join/{code}?ref=1" in page
+    assert f"/j/{code}?ref=1" in page
 
 
 def test_ref_is_kept_through_sign_up(client, db_session):
@@ -35,11 +35,19 @@ def test_ref_is_kept_through_sign_up(client, db_session):
     page = client.get(f"/join/{code}?ref=1").text
     next_url = re.search(r'href="/register\?next=([^"]+)"', page).group(1)
     assert next_url == f"/join/{code}%3Fref%3D1"  # le parrain suit jusqu'au retour
-    register(client, "Awa", next_url=f"/join/{code}?ref=1")
+    # L'inscription (un POST) fait rejoindre la ligue directement, parrain compris
+    response = register(client, "Awa", next_url=f"/join/{code}?ref=1")
+    assert response.headers["location"].endswith("?joined=1")
+    assert member(db_session, "Awa").invited_by_id == 1
+
+
+def test_join_page_keeps_ref_for_logged_in_player(client):
+    register(client)
+    _, code = create_league(client)
+    logout(client)
+    register(client, "Awa")
     page = client.get(f"/join/{code}?ref=1").text
     assert '<input type="hidden" name="ref" value="1">' in page
-    client.post(f"/join/{code}", data={"ref": "1"})
-    assert member(db_session, "Awa").invited_by_id == 1
 
 
 def test_ref_of_a_non_member_is_ignored(client, db_session):

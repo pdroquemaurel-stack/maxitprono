@@ -1,42 +1,94 @@
 {% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% from "_league_bits.html" import avatar, league_icon, move_badge, members_label, competitions_label, face_stack %}
 {% block title %}{{ t('leagues_title') }} · {{ t('app_name') }}{% endblock %}
+{% block main_class %} lg{% endblock %}
 {% block content %}
-  <h1>{{ t('leagues_title') }}</h1>
+  {# 1. Titre #}
+  <header class="lg-page-head">
+    <h1>{{ t('leagues_title') }}</h1>
+    <p class="lg-muted">{{ t('leagues_subtitle') }}</p>
+  </header>
   {% if notice %}<p class="notice" role="status">{{ t(notice) }}</p>{% endif %}
   {% include "_error.html" %}
 
-  {% if leagues %}
-    <ul class="card list-card">
-      {% for league, count in leagues %}
+  {# 5. État vide : illustration, puis les deux actions juste en dessous #}
+  {% if not cards %}
+    <section class="lg-card lg-empty">
+      <svg class="lg-empty-art" viewBox="0 0 120 80" width="120" height="80" aria-hidden="true" fill="none"
+           stroke="#111111" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="34" cy="26" r="10"/><path d="M16 66c0-11 8-18 18-18s18 7 18 18"/>
+        <circle cx="86" cy="26" r="10"/><path d="M68 66c0-11 8-18 18-18s18 7 18 18"/>
+        <circle cx="60" cy="58" r="9" fill="#FF7900" stroke="#111111"/>
+      </svg>
+      <h2>{{ t('leagues_empty_title') }}</h2>
+      <p class="lg-muted">{{ t('leagues_empty') }}</p>
+    </section>
+  {% endif %}
+
+  {# 2. Créer / Rejoindre #}
+  <div class="lg-duo{% if not cards %} lg-duo-highlight{% endif %}">
+    <a class="lg-create" href="/leagues/new">
+      <span class="lg-create-icon">{{ icon('plus', 22) }}</span>
+      <strong>{{ t('league_create_title') }}</strong>
+      <span>{{ t('league_create_fast') }}</span>
+    </a>
+    <form class="lg-card lg-join" method="post" action="/leagues/join">
+      <label for="code"><strong>{{ t('league_join_short') }}</strong></label>
+      <input id="code" name="code" value="{{ form.code or '' }}" required maxlength="12"
+             autocomplete="off" autocapitalize="characters" spellcheck="false"
+             placeholder="{{ t('league_code_placeholder') }}">
+      <button type="submit" class="lg-btn lg-btn-dark">{{ t('league_join_validate') }}</button>
+    </form>
+  </div>
+
+  {# 3. Rappel des pronos à faire #}
+  {% if to_predict %}
+    {% set first = to_predict[0] %}
+    <section class="lg-reminder">
+      <div>
+        <strong>{{ t('league_todo_one') if to_predict|length == 1 else t('league_todo_many').format(count=to_predict|length) }}</strong>
+        <p>{{ t('league_first_match').format(home=first.home_team, away=first.away_team, when=closing_when(first.kickoff_at, now, tz, lang)) }}</p>
+      </div>
+      <a class="lg-reminder-link" href="/matches">{{ t('home_play') }}</a>
+    </section>
+  {% endif %}
+
+  {# 4. Mes ligues privées #}
+  {% if cards %}
+    <h2 class="lg-section-title">{{ t('leagues_private').format(count=cards|length) }}</h2>
+    <ul class="lg-league-list">
+      {% for card in cards %}
+        {% set league = card.league %}
         <li>
-          <a class="league-row" href="/leagues/{{ league.id }}">
-            <span class="league-badge">{{ initials(league.name) }}</span>
-            <span class="player">
-              <strong>{{ league.name }}</strong>
-              <small>{{ t('league_members_one') if count == 1 else t('league_members_many').format(count=count) }}{% if league.owner_id == user.id %} · {{ t('league_admin') }}{% endif %}</small>
+          <a class="lg-card lg-league" href="/leagues/{{ league.id }}">
+            <span class="lg-league-top">
+              {{ league_icon(league, 48) }}
+              <span class="lg-league-main">
+                <strong class="lg-league-name">{{ league.name }}</strong>
+                <span class="lg-muted lg-small">{{ members_label(card.member_count) }} · {{ competitions_label(card.competitions) }}</span>
+              </span>
+              <span class="lg-league-rank">
+                {% if card.me %}
+                  <strong>{{ format_rank(card.me.rank) }}</strong>{{ move_badge(card.move) }}
+                {% else %}
+                  <span class="lg-muted lg-small">{{ t('league_not_ranked') }}</span>
+                {% endif %}
+              </span>
             </span>
-            <span aria-hidden="true">›</span>
+            <span class="lg-league-foot">
+              {{ face_stack(card.faces, card.member_count) }}
+              {% if card.activity %}
+                {% set event = card.activity %}
+                <span class="lg-activity">{{ t('home_me') if event.nickname == user.nickname else event.nickname }}
+                  {{ t('activity_' ~ event.kind).format(match=event.match) }}</span>
+              {% else %}
+                <span class="lg-activity lg-muted">{{ t('league_no_activity') }}</span>
+              {% endif %}
+            </span>
           </a>
         </li>
       {% endfor %}
     </ul>
-  {% else %}
-    <p class="lead">{{ t('leagues_empty') }}</p>
   {% endif %}
-
-  <form class="card form" method="post" action="/leagues/join">
-    <h2>{{ t('league_join_title') }}</h2>
-    <label for="code">{{ t('field_league_code') }}</label>
-    <input id="code" name="code" value="{{ form.code or '' }}" required maxlength="12"
-           autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="K7PM4X">
-    <button type="submit">{{ t('league_join_submit') }}</button>
-  </form>
-
-  <form class="card form" method="post" action="/leagues">
-    <h2>{{ t('league_create_title') }}</h2>
-    <label for="name">{{ t('field_league_name') }}</label>
-    <input id="name" name="name" value="{{ form.name or '' }}" required minlength="3" maxlength="40"
-           autocomplete="off" placeholder="{{ t('league_name_placeholder') }}">
-    <button type="submit" class="secondary">{{ t('league_create_submit') }}</button>
-  </form>
 {% endblock %}

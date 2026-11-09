@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% block title %}{{ t('league_create_title') }} · {{ t('app_name') }}{% endblock %}
+{% block main_class %} lg{% endblock %}
+{% block content %}
+  <header class="lg-back-head">
+    <a class="lg-icon-btn" href="/leagues" aria-label="{{ t('leagues_title') }}">{{ icon('back') }}</a>
+    <h1>{{ t('league_create_title') }}</h1>
+  </header>
+  {% include "_error.html" %}
+  <form class="lg-form" method="post" action="/leagues" data-league-form>
+    {% set show_scoring = true %}
+    {% include "_league_form.html" %}
+    <button type="submit" class="lg-btn lg-btn-orange lg-btn-big">{{ t('league_create_submit') }}</button>
+  </form>
+{% endblock %}
+{% block scripts %}
+  <script src="{{ static_url('js/league.js') }}" defer></script>
+{% endblock %}

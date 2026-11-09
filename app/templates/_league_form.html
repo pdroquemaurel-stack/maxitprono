@@ -1,0 +1,61 @@
+{# Champs d'une ligue, partagés par la création et les réglages.
+   Variables : form (name, color, competitions), colors, available_competitions, show_scoring #}
+{% from "_league_bits.html" import league_icon %}
+<section class="lg-preview" aria-hidden="true">
+  <span class="lg-league-icon lg-color-{{ form.color or 'orange' }}" style="--size: 60px" data-preview-icon>{{ initials(form.name) if form.name else '?' }}</span>
+  <span class="lg-preview-text">
+    <span class="lg-preview-label">{{ t('league_preview') }}</span>
+    <strong data-preview-name data-empty="{{ t('league_preview_empty') }}">{{ form.name or t('league_preview_empty') }}</strong>
+  </span>
+</section>
+
+<section class="lg-card">
+  <label class="lg-field-label" for="name">{{ t('field_league_name') }}</label>
+  <input id="name" name="name" value="{{ form.name or '' }}" required minlength="3" maxlength="30"
+         autocomplete="off" placeholder="{{ t('league_name_placeholder') }}" data-preview-input>
+  <p class="lg-hint">{{ t('league_name_hint') }}</p>
+
+  <fieldset class="lg-fieldset">
+    <legend class="lg-field-label">{{ t('league_color') }}</legend>
+    <div class="lg-swatches">
+      {% for color in colors %}
+        <label class="lg-swatch lg-color-{{ color }}">
+          <input type="radio" name="color" value="{{ color }}"{% if (form.color or 'orange') == color %} checked{% endif %} data-preview-color>
+          <span class="visually-hidden">{{ t('league_color_' ~ color) }}</span>
+        </label>
+      {% endfor %}
+    </div>
+  </fieldset>
+</section>
+
+<section class="lg-card">
+  <fieldset class="lg-fieldset">
+    <legend class="lg-field-label">{{ t('league_competitions') }}</legend>
+    <div class="lg-chips">
+      <label class="lg-chip"><input type="checkbox" name="competitions" value="all"{% if not form.competitions %} checked{% endif %} data-chip-all><span>{{ t('league_competitions_all') }}</span></label>
+      {% for competition in available_competitions %}
+        <label class="lg-chip"><input type="checkbox" name="competitions" value="{{ competition.id }}"{% if competition.id in form.competitions %} checked{% endif %}><span>{{ competition.name }}</span></label>
+      {% endfor %}
+    </div>
+    <p class="lg-hint">{{ t('league_competitions_hint') }}</p>
+  </fieldset>
+</section>
+
+{% if show_scoring %}
+  {# Un seul barème pour tout le jeu pour l'instant : « Expert » viendra plus tard #}
+  <section class="lg-card">
+    <fieldset class="lg-fieldset">
+      <legend class="lg-field-label">{{ t('league_scoring') }}</legend>
+      <label class="lg-option">
+        <input type="radio" name="scoring" value="classic" checked>
+        <strong>{{ t('league_scoring_classic') }}</strong>
+        <span>{{ t('league_scoring_classic_detail').format(exact=exact_points, winner=winner_points) }}</span>
+      </label>
+      <div class="lg-option disabled" aria-disabled="true">
+        <strong>{{ t('league_scoring_expert') }}</strong>
+        <span>{{ t('league_scoring_expert_detail') }}</span>
+        <span class="lg-soon">{{ t('league_soon') }}</span>
+      </div>
+    </fieldset>
+  </section>
+{% endif %}

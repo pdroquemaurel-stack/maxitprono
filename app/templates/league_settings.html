@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% from "_league_bits.html" import avatar %}
+{% block title %}{{ league.name }} · {{ t('app_name') }}{% endblock %}
+{% block main_class %} lg{% endblock %}
+{% block content %}
+  <header class="lg-back-head">
+    <a class="lg-icon-btn" href="/leagues/{{ league.id }}" aria-label="{{ league.name }}">{{ icon('back') }}</a>
+    <h1>{{ t('league_settings') if is_owner else t('league_members_title') }}</h1>
+  </header>
+  {% if notice %}<p class="notice" role="status">{{ t(notice) }}</p>{% endif %}
+  {% include "_error.html" %}
+
+  {# Réglages : seulement pour l'admin de la ligue #}
+  {% if is_owner %}
+    <form class="lg-form" method="post" action="/leagues/{{ league.id }}/settings" data-league-form>
+      {% set show_scoring = false %}
+      {% include "_league_form.html" %}
+      <button type="submit" class="lg-btn lg-btn-orange lg-btn-big">{{ t('league_save') }}</button>
+    </form>
+  {% endif %}
+
+  <section class="lg-card" id="members">
+    <div class="lg-card-head">
+      <h2>{{ t('league_members_title') }}</h2>
+      <span class="lg-muted lg-small">{{ t('league_members_count').format(count=members|length, max=max_members) }}</span>
+    </div>
+    <ul class="lg-member-list">
+      {% for member in members %}
+        {% set is_me = member.user_id == user.id %}
+        <li>
+          {{ avatar(member.user_id, member.nickname, member.has_photo, 36, is_me) }}
+          <span class="lg-row-player">
+            <strong>{{ t('home_me') if is_me else member.nickname }}</strong>
+            {% if member.user_id == league.owner_id %}<small>{{ t('league_admin') }}</small>{% endif %}
+          </span>
+          {% if is_owner and not is_me %}
+            <form method="post" action="/leagues/{{ league.id }}/members/{{ member.user_id }}/remove"
+                  onsubmit='return confirm({{ t("league_remove_confirm").format(name=member.nickname)|tojson }})'>
+              <button type="submit" class="lg-link-btn">{{ t('league_remove') }}</button>
+            </form>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  </section>
+
+  {% if is_owner %}
+    <details class="lg-card lg-danger" id="delete">
+      <summary>{{ t('league_delete') }}</summary>
+      <form method="post" action="/leagues/{{ league.id }}/delete">
+        <p class="lg-muted">{{ t('league_delete_warning') }}</p>
+        <input type="hidden" name="confirm" value="yes">
+        <button type="submit" class="lg-btn lg-btn-danger">{{ t('league_delete_submit') }}</button>
+      </form>
+    </details>
+  {% else %}
+    <form method="post" action="/leagues/{{ league.id }}/leave"
+          onsubmit='return confirm({{ t("league_leave_confirm")|tojson }})'>
+      <button type="submit" class="lg-btn lg-btn-light">{{ t('league_leave') }}</button>
+    </form>
+  {% endif %}
+{% endblock %}
+{% block scripts %}
+  <script src="{{ static_url('js/league.js') }}" defer></script>
+{% endblock %}

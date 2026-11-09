@@ -100,3 +100,11 @@ def time_ago(moment: datetime, now: datetime, lang: str | None = None) -> str:
     if minutes < 48 * 60:
         return translate("ago_yesterday", lang)
     return translate("ago_days", lang).format(count=minutes // (24 * 60))
+
+
+def format_rank(rank: int, lang: str | None = None) -> str:
+    """Place au classement : « 1er », « 3e » en français ; « 1st », « 3rd » en anglais."""
+    if (lang or current_language()) == "en":
+        suffix = "th" if 10 <= rank % 100 <= 20 else {1: "st", 2: "nd", 3: "rd"}.get(rank % 10, "th")
+        return f"{rank}{suffix}"
+    return "1er" if rank == 1 else f"{rank}e"

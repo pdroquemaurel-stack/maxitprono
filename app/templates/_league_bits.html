@@ -1,0 +1,50 @@
+{# Petits composants des écrans Ligues #}
+
+{# Avatar rond : la photo si le joueur en a une, sinon ses initiales #}
+{% macro avatar(user_id, nickname, has_photo, size=36, me=false) %}
+  {%- if has_photo -%}
+    <img class="lg-avatar{% if me %} me{% endif %}" src="/avatars/{{ user_id }}" alt="" width="{{ size }}" height="{{ size }}"
+         style="--size: {{ size }}px" loading="lazy">
+  {%- else -%}
+    <span class="lg-avatar lg-initials{% if me %} me{% endif %}" style="--size: {{ size }}px" aria-hidden="true">{{ initials(nickname) }}</span>
+  {%- endif -%}
+{% endmacro %}
+
+{# Icône carrée arrondie aux initiales de la ligue, dans sa couleur #}
+{% macro league_icon(league, size=48) %}
+  <span class="lg-league-icon lg-color-{{ league.color or 'orange' }}" style="--size: {{ size }}px" aria-hidden="true">{{ initials(league.name) }}</span>
+{% endmacro %}
+
+{# Évolution au classement : ▲ 2 (vert), ▼ 3 (rouge), = (gris) ; rien pour un nouvel entrant #}
+{% macro move_badge(move) %}
+  {%- if move is not none -%}
+    {%- if move > 0 -%}<span class="lg-move up" title="{{ t('league_move_up').format(count=move) }}"><span aria-hidden="true">▲</span> {{ move }}</span>
+    {%- elif move < 0 -%}<span class="lg-move down" title="{{ t('league_move_down').format(count=-move) }}"><span aria-hidden="true">▼</span> {{ -move }}</span>
+    {%- else -%}<span class="lg-move same" title="{{ t('league_move_same') }}">=</span>{%- endif -%}
+  {%- endif -%}
+{% endmacro %}
+
+{% macro members_label(count) -%}
+  {{ t('league_members_one') if count == 1 else t('league_members_many').format(count=count) }}
+{%- endmacro %}
+
+{# « Toutes compétitions », ou les deux premières et « +N » #}
+{% macro competitions_label(competitions) -%}
+  {%- if not competitions -%}{{ t('league_all_competitions') }}
+  {%- else -%}{{ competitions[:2]|map(attribute='name')|join(', ') }}{% if competitions|length > 2 %} +{{ competitions|length - 2 }}{% endif %}{%- endif -%}
+{%- endmacro %}
+
+{# Pile d'avatars qui se chevauchent, puis « +N ». members : objets Member #}
+{% macro face_stack(members, total, size=28) %}
+  <span class="lg-faces">
+    {%- for member in members -%}{{ avatar(member.user_id, member.nickname, member.has_photo, size) }}{%- endfor -%}
+    {%- if total > members|length -%}<span class="lg-faces-more" style="--size: {{ size }}px">+{{ total - members|length }}</span>{%- endif -%}
+  </span>
+{% endmacro %}
+
+{# Pastille de points d'un prono compté : exact (vert foncé), bon résultat (vert clair), raté (rouge pâle) #}
+{% macro points_pill(prediction) %}
+  {%- if prediction.points is not none -%}
+    <span class="lg-pts {{ 'exact' if prediction.is_exact else 'good' if prediction.is_winner else 'miss' }}">{{ '+%d' % prediction.points if prediction.points else '0' }}</span>
+  {%- endif -%}
+{% endmacro %}

@@ -5,10 +5,10 @@ un joueur sans aucun pronostic calculé n'apparaît pas.
 """
 from datetime import datetime
 
-from sqlalchemy import case, func, select
+from sqlalchemy import case, exists, func, or_, select
 from sqlalchemy.orm import Session
 
-from app.models import LeagueMember, Match, Prediction, User
+from app.models import LeagueCompetition, LeagueMember, Match, Prediction, User
 from app.services.ranking import PlayerScore, rank_players
 
 
@@ -18,7 +18,7 @@ def leaderboard(db: Session, country_code: str | None = None, competition_id: in
     """Classement complet, filtré par pays du joueur, compétition, semaine ou ligue.
 
     Pour une ligue : ses membres seulement, et pour chacun les matchs commencés
-    après son arrivée dans la ligue.
+    après son arrivée dans la ligue, dans les compétitions de la ligue (toutes si aucune).
     """
     query = (
         select(User.id, User.nickname, User.country_code, User.created_at,
@@ -39,9 +39,17 @@ def leaderboard(db: Session, country_code: str | None = None, competition_id: in
     if league_id:
         query = (query.join(LeagueMember, LeagueMember.user_id == User.id)
                  .where(LeagueMember.league_id == league_id,
-                        Match.kickoff_at >= LeagueMember.joined_at))
+                        Match.kickoff_at >= LeagueMember.joined_at)
+                 .where(league_competition_filter(league_id)))
 
     players = [PlayerScore(user_id, nickname, country, created_at, points, exacts, winners)
                for user_id, nickname, country, created_at, points, exacts, winners
                in db.execute(query)]
     return rank_players(players)
+
+
+def league_competition_filter(league_id: int):
+    """Condition SQL : le match compte pour la ligue (aucune compétition choisie = toutes)."""
+    chosen = (select(LeagueCompetition.competition_id)
+              .where(LeagueCompetition.league_id == league_id))
+    return or_(~exists(chosen), Match.competition_id.in_(chosen))

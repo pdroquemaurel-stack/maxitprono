@@ -2,6 +2,7 @@
 import re
 
 from app.models import League, LeagueMember
+from app.services.leagues import format_code
 
 
 def register(client, nickname="Paul", next_url=None):
@@ -16,13 +17,13 @@ def logout(client):
     client.cookies.clear()
 
 
-def create_league(client, name="Bureau Casa"):
-    response = client.post("/leagues", data={"name": name}, follow_redirects=False)
+def create_league(client, name="Bureau Casa", **fields):
+    response = client.post("/leagues", data={"name": name, **fields}, follow_redirects=False)
     assert response.status_code == 303
-    page = client.get(response.headers["location"]).text
-    code = re.search(r'<strong>([A-Z0-9]{6})</strong>', page).group(1)
+    page = client.get(response.headers["location"]).text  # écran « Ta ligue est prête »
+    code = re.search(r'class="lg-code-big">([A-Z0-9]{3})-([A-Z0-9]{3})</strong>', page).groups()
     league_id = int(response.headers["location"].split("/")[2].split("?")[0])
-    return league_id, code
+    return league_id, "".join(code)
 
 
 def test_leagues_page_requires_login(client):
@@ -34,10 +35,10 @@ def test_create_league_shows_code_and_invite_buttons(client):
     register(client)
     league_id, code = create_league(client)
     page = client.get(f"/leagues/{league_id}").text
-    assert "Bureau Casa" in page and code in page
-    assert f"/join/{code}" in page
+    assert "Bureau Casa" in page and format_code(code) in page
+    assert f"/j/{code}?ref=1" in page
     assert "https://wa.me/?text=" in page and "Bureau%20Casa" in page
-    assert "Inviter des potes par WhatsApp" in page
+    assert "Inviter par WhatsApp" in page
     assert "Supprimer la ligue" in page  # l'admin peut supprimer
     assert "Bureau Casa" in client.get("/leagues").text
 
@@ -46,7 +47,7 @@ def test_create_league_with_bad_name_shows_error(client):
     register(client)
     response = client.post("/leagues", data={"name": "ab"})
     assert response.status_code == 400
-    assert "entre 3 et 40 caractères" in response.text
+    assert "entre 3 et 30 caractères" in response.text
 
 
 def test_join_with_code_typed_in_lowercase(client):
@@ -86,10 +87,8 @@ def test_join_link_without_account_brings_back_after_sign_up(client):
     page = client.get(f"/join/{code}").text
     assert f"/register?next=/join/{code}" in page
     response = register(client, "Awa", next_url=f"/join/{code}")
-    assert response.headers["location"] == f"/join/{code}"
-
-    joined = client.post(f"/join/{code}", follow_redirects=False)
-    assert joined.headers["location"] == f"/leagues/{league_id}?joined=1"
+    assert response.headers["location"] == f"/leagues/{league_id}?joined=1"  # rejoint d'office
+    assert "Bienvenue dans la ligue" in client.get(response.headers["location"]).text
 
 
 def test_join_link_when_already_member_goes_to_league(client):
@@ -151,11 +150,11 @@ def test_owner_removes_member_and_member_cannot_remove(client):
     assert client.post(f"/leagues/{league_id}/members/1/remove").status_code == 403
     logout(client)
     client.post("/login", data={"nickname": "Paul", "pin": "1234"})
-    page = client.get(f"/leagues/{league_id}").text
-    assert "Retirer" in page
+    page = client.get(f"/leagues/{league_id}/settings").text
+    assert "Retirer" in page and "Awa" in page
     response = client.post(f"/leagues/{league_id}/members/2/remove", follow_redirects=False)
     assert response.status_code == 303
-    assert "Awa" not in client.get(f"/leagues/{league_id}").text
+    assert "Awa" not in client.get(f"/leagues/{league_id}/settings").text
 
 
 def test_delete_needs_confirmation(client):

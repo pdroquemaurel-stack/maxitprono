@@ -17,7 +17,7 @@ def test_home_shows_selected_league_with_feed_and_invite(client):
     page = client.get("/").text
     assert 'class="league-picker"' in page and "Bureau Casa" in page
     assert "Dans la ligue" in page and "a créé la ligue" in page
-    assert "Inviter des potes par WhatsApp" in page and f"/join/{code}" in page
+    assert "Inviter des potes par WhatsApp" in page and f"/j/{code}" in page
     assert "1 joueur" in page
 
 

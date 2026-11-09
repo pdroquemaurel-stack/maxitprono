@@ -80,4 +80,4 @@ def test_whatsapp_text_in_player_language(client):
     league_id, _ = create_league(client)
     page = client.get(f"/leagues/{league_id}").text
     assert "Join%20my%20league" in page
-    assert "Invite friends on WhatsApp" in page
+    assert "Invite via WhatsApp" in page

@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% block title %}{{ league.name }} · {{ t('app_name') }}{% endblock %}
+{% block main_class %} lg{% endblock %}
+{% block content %}
+  <section class="lg-ready">
+    <span class="lg-ready-check">{{ icon('check', 36) }}</span>
+    <h1>{{ t('league_ready_title') }}</h1>
+    <p class="lg-muted">{{ t('league_ready_text').format(name=league.name) }}</p>
+  </section>
+
+  <section class="lg-card lg-ready-code">
+    <span class="lg-label">{{ t('league_invite_code') }}</span>
+    <strong class="lg-code-big">{{ format_code(league.code) }}</strong>
+    <span class="lg-label">{{ t('league_invite_link_label') }}</span>
+    <span class="lg-link">{{ join_url }}</span>
+  </section>
+
+  <a class="lg-btn lg-btn-orange lg-btn-big" href="{{ whatsapp_url }}" target="_blank" rel="noopener"
+     data-whatsapp data-share-text="{{ share_text }}">{{ icon('message', 20) }}<span>{{ t('league_invite_whatsapp_short') }}</span></a>
+  <button type="button" class="lg-btn lg-btn-light" data-copy="{{ join_url }}"
+          data-copied="{{ t('league_link_copied') }}">{{ icon('copy', 20) }}<span>{{ t('league_copy_link') }}</span></button>
+  <p class="lg-copy-status lg-small lg-muted" role="status" hidden></p>
+  <a class="lg-go" href="/leagues/{{ league.id }}">{{ t('league_go') }}</a>
+{% endblock %}
+{% block scripts %}
+  <script src="{{ static_url('js/league.js') }}" defer></script>
+{% endblock %}

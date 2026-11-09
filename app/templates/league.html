@@ -1,59 +1,218 @@
 {% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% from "_league_bits.html" import avatar, league_icon, move_badge, members_label, competitions_label, face_stack, points_pill %}
 {% block title %}{{ league.name }} · {{ t('app_name') }}{% endblock %}
+{% block main_class %} lg{% endblock %}
 {% block content %}
-  <header class="back-head">
-    <a href="/leagues" aria-label="{{ t('leagues_title') }}">
-      <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="currentColor"
-           stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
-    </a>
-    <span>{{ t('leagues_title') }}</span>
-  </header>
-  {% if notice %}<p class="notice" role="status">{{ t(notice) }}</p>{% endif %}
-  {% include "_error.html" %}
+  {% set base_url = '/leagues/%d' % league.id %}
 
-  <section class="card-dark league-card">
-    <h1>{{ league.name }}</h1>
-    <p>{{ t('league_members_count').format(count=members|length, max=max_members) }}</p>
-    <p class="league-code">{{ t('field_league_code') }} <strong>{{ league.code }}</strong></p>
-  </section>
-
-  {% include "_invite.html" %}
-
-  <section class="card">
-    <h2>{{ t('league_members_title') }}</h2>
-    <ul class="member-list">
-      {% for member in members %}
-        {% set is_me = member.user_id == user.id %}
-        <li class="rank-row{% if is_me %} me{% endif %}">
-          <span class="initials">{{ initials(member.user.nickname) }}</span>
-          <span class="player">
-            <strong>{{ t('home_me') if is_me else member.user.nickname }}</strong>
-            {% if member.user_id == league.owner_id %}<small>{{ t('league_admin') }}</small>{% endif %}
-          </span>
-          {% if is_owner and not is_me %}
-            <form method="post" action="/leagues/{{ league.id }}/members/{{ member.user_id }}/remove"
-                  onsubmit='return confirm({{ t("league_remove_confirm").format(name=member.user.nickname)|tojson }})'>
-              <button type="submit" class="link-button">{{ t('league_remove') }}</button>
+  {# 1. En-tête noir #}
+  <section class="lg-hero">
+    <div class="lg-hero-bar">
+      <a class="lg-icon-btn" href="/leagues" aria-label="{{ t('leagues_title') }}">{{ icon('back') }}</a>
+      <details class="lg-menu">
+        <summary class="lg-icon-btn" aria-label="{{ t('league_menu') }}">{{ icon('dots') }}</summary>
+        <div class="lg-menu-list">
+          <a href="{{ base_url }}/settings">{{ t('league_settings') if is_owner else t('league_members_title') }}</a>
+          {% if is_owner %}
+            <a href="{{ base_url }}/settings#members">{{ t('league_remove_member') }}</a>
+            <form method="post" action="{{ base_url }}/delete"
+                  onsubmit='return confirm({{ t("league_delete_warning")|tojson }})'>
+              <input type="hidden" name="confirm" value="yes">
+              <button type="submit" class="lg-menu-danger">{{ t('league_delete') }}</button>
+            </form>
+          {% else %}
+            <form method="post" action="{{ base_url }}/leave"
+                  onsubmit='return confirm({{ t("league_leave_confirm")|tojson }})'>
+              <button type="submit" class="lg-menu-danger">{{ t('league_leave') }}</button>
             </form>
           {% endif %}
-        </li>
-      {% endfor %}
-    </ul>
+        </div>
+      </details>
+    </div>
+    {{ league_icon(league, 60) }}
+    <h1>{{ league.name }}</h1>
+    <p class="lg-hero-sub">{{ members_label(members|length) }} · {{ competitions_label(competitions) }} ·
+      {{ t('league_created_by_me') if is_owner else t('league_created_by').format(name=league.owner.nickname) }}</p>
+    <div class="lg-hero-stats">
+      <div class="lg-stat lg-stat-me"><span>{{ t('league_my_place') }}</span>
+        <strong>{{ format_rank(me.rank) if me else '–' }}</strong></div>
+      <div class="lg-stat"><span>{{ t('league_my_points') }}</span><strong>{{ me.points if me else 0 }}</strong></div>
+      <div class="lg-stat"><span>{{ t('league_gap') }}</span>
+        <strong>{% if gap is none %}–{% elif gap == 0 %}{{ t('league_leader') }}{% else %}−{{ gap }}{% endif %}</strong></div>
+    </div>
+  </section>
+  {% if notice %}<p class="notice" role="status">{{ t(notice) }}</p>{% endif %}
+
+  {# 2. Invitation #}
+  <section class="lg-card lg-invite">
+    <div class="lg-invite-code">
+      <span>
+        <span class="lg-label">{{ t('league_invite_code') }}</span>
+        <strong class="lg-code">{{ format_code(league.code) }}</strong>
+      </span>
+      <button type="button" class="lg-icon-btn lg-copy" data-copy="{{ format_code(league.code) }}"
+              data-copied="{{ t('league_code_copied') }}" aria-label="{{ t('league_copy_code') }}">{{ icon('copy', 22) }}</button>
+    </div>
+    <a class="lg-btn lg-btn-orange" href="{{ whatsapp_url }}" target="_blank" rel="noopener"
+       data-whatsapp data-share-text="{{ share_text }}">{{ icon('message', 20) }}<span>{{ t('league_invite_whatsapp_short') }}</span></a>
+    <p class="lg-copy-status lg-small lg-muted" role="status" hidden></p>
   </section>
 
-  {% if is_owner %}
-    <details class="danger-zone">
-      <summary>{{ t('league_delete') }}</summary>
-      <form method="post" action="/leagues/{{ league.id }}/delete">
-        <p>{{ t('league_delete_warning') }}</p>
-        <input type="hidden" name="confirm" value="yes">
-        <button type="submit" class="danger">{{ t('league_delete_submit') }}</button>
-      </form>
-    </details>
+  {# 3. Prochain match : qui a joué et tendance, jamais les scores des autres avant le coup d'envoi #}
+  <section class="lg-card lg-next">
+    <div class="lg-card-head">
+      <h2>{{ t('league_next_match') }}</h2>
+      {% if next_match %}
+        <span class="lg-pill" data-deadline="{{ deadline }}" data-hours="{{ t('league_closes_hours') }}"
+              data-minutes="{{ t('league_closes_minutes') }}" data-closed="{{ t('league_closed') }}">{{ icon('clock', 14) }}<span>{{ t('league_closes').format(when=closing_when(next_match.kickoff_at, now, tz, lang)) }}</span></span>
+      {% endif %}
+    </div>
+    {% if next_match %}
+      <p class="lg-muted lg-small">{{ next_match.competition.name }}</p>
+      <div class="lg-teams">
+        <span class="lg-team">{% with url = next_match.home_logo_url, name = next_match.home_team %}{% include "_crest.html" %}{% endwith %}<span>{{ next_match.home_team }}</span></span>
+        <span class="lg-kickoff">
+          <strong>{{ format_time(next_match.kickoff_at, tz) }}</strong>
+          <span class="lg-small lg-muted">{{ format_day(next_match.kickoff_at.astimezone(tz).date(), now.astimezone(tz).date(), lang) }}</span>
+        </span>
+        <span class="lg-team">{% with url = next_match.away_logo_url, name = next_match.away_team %}{% include "_crest.html" %}{% endwith %}<span>{{ next_match.away_team }}</span></span>
+      </div>
+
+      <h3 class="lg-subtitle">{{ t('league_trend') }}</h3>
+      {% if trend %}
+        {% set labels = (t('league_trend_home'), t('league_trend_draw'), t('league_trend_away')) %}
+        <div class="lg-trend" role="img" aria-label="{{ t('league_trend_label').format(home=trend[0], draw=trend[1], away=trend[2]) }}">
+          {% for share in trend %}{% if share %}<span class="lg-trend-{{ loop.index }}" style="width: {{ share }}%">{% if share >= 12 %}{{ share }} %{% endif %}</span>{% endif %}{% endfor %}
+        </div>
+        <ul class="lg-trend-legend">
+          {% for label in labels %}<li><span class="lg-dot lg-trend-{{ loop.index }}"></span>{{ label }} · {{ trend[loop.index0] }} %</li>{% endfor %}
+        </ul>
+      {% else %}
+        <p class="lg-muted lg-small">{{ t('league_trend_empty') }}</p>
+      {% endif %}
+      <div class="lg-played">
+        {% if played %}{{ face_stack(played[:5], played|length, 28) }}{% endif %}
+        <span class="lg-small lg-muted">{{ t('league_played').format(count=played|length, total=members|length) }}</span>
+      </div>
+      <a class="lg-btn lg-btn-dark" href="/matches">{{ t('league_edit_pick') if i_played else t('league_make_pick') }}</a>
+    {% else %}
+      <p class="lg-muted">{{ t('league_no_next_match') }}</p>
+    {% endif %}
+  </section>
+
+  {# 4. Onglets (le Fil arrivera avec le lot 2) #}
+  <nav class="lg-segments" id="tabs" aria-label="{{ t('league_tabs') }}">
+    {% for key in ('ranking', 'matches') %}
+      <a href="{{ base_url }}?tab={{ key }}#tabs"{% if key == tab %} class="active" aria-current="page"{% endif %}>{{ t('league_tab_' ~ key) }}</a>
+    {% endfor %}
+  </nav>
+
+  {% if tab == 'ranking' %}
+    {# Podium : ordre 2 – 1 – 3 #}
+    <section class="lg-card lg-podium-card">
+      {% if podium %}
+        <ol class="lg-podium">
+          {% for place in (2, 1, 3) if podium|length >= place %}
+            {% set player = podium[place - 1] %}
+            {% set is_me = player.user_id == user.id %}
+            <li class="lg-step lg-step-{{ place }}" value="{{ place }}">
+              {% if place == 1 %}<span class="lg-crown">{{ icon('crown', 22) }}</span>{% endif %}
+              {{ avatar(player.user_id, player.nickname, player.user_id in photo_ids, 56 if place == 1 else 46, is_me) }}
+              <span class="lg-podium-name">{{ t('home_me') if is_me else player.nickname }}</span>
+              <span class="lg-podium-points">{{ player.points }} {{ t('league_pts') }}</span>
+              <span class="lg-step-block">{{ place }}</span>
+            </li>
+          {% endfor %}
+        </ol>
+      {% else %}
+        <p class="lg-muted">{{ t('league_ranking_empty') }}</p>
+      {% endif %}
+    </section>
+
+    {% if rows %}
+      <ul class="lg-card lg-rows" id="ranking">
+        {% for row in rows %}
+          {% set is_me = row.user_id == user.id %}
+          <li class="lg-row{% if is_me %} me{% endif %}">
+            <span class="lg-row-rank">{{ row.rank or '–' }}</span>
+            {{ avatar(row.user_id, row.nickname, row.user_id in photo_ids, 36) }}
+            <span class="lg-row-player">
+              <strong>{{ t('home_me') if is_me else row.nickname }}</strong>
+              <small>{{ t('leaderboard_exacts_one' if row.exacts <= 1 else 'leaderboard_exacts_many').format(count=row.exacts) }}</small>
+            </span>
+            {{ move_badge(moves.get(row.user_id)) }}
+            <strong class="lg-row-points">{{ row.points }}</strong>
+          </li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+    {% if hidden_rows and not show_all %}
+      <a class="lg-more" href="{{ base_url }}?tab=ranking&amp;all=1#ranking">{{ t('league_see_all').format(count=members|length) }}</a>
+    {% endif %}
+
+    {% if week_best %}
+      <div class="lg-duo">
+        {% for kind, player in (('best', week_best), ('worst', week_worst)) if player %}
+          <section class="lg-card lg-week">
+            <span class="lg-tag lg-tag-{{ kind }}">{{ t('league_week_' ~ kind) }}</span>
+            <span class="lg-week-player">
+              {{ avatar(player.user_id, player.nickname, player.user_id in photo_ids, 32, player.user_id == user.id) }}
+              <strong>{{ t('home_me') if player.user_id == user.id else player.nickname }}</strong>
+            </span>
+            <span class="lg-muted lg-small">{{ t('league_week_points').format(points=player.points) }}</span>
+          </section>
+        {% endfor %}
+      </div>
+    {% endif %}
+
   {% else %}
-    <form method="post" action="/leagues/{{ league.id }}/leave"
-          onsubmit='return confirm({{ t("league_leave_confirm")|tojson }})'>
-      <button type="submit" class="secondary">{{ t('league_leave') }}</button>
-    </form>
+    {# Onglet Matchs : uniquement des matchs terminés #}
+    {% if match %}
+      {% if finished|length > 1 %}
+        <form class="lg-match-pick" method="get" action="{{ base_url }}">
+          <input type="hidden" name="tab" value="matches">
+          <label class="visually-hidden" for="match">{{ t('league_pick_match') }}</label>
+          <select id="match" name="match" data-autosubmit>
+            {% for m in finished %}
+              <option value="{{ m.id }}"{% if m.id == match.id %} selected{% endif %}>{{ m.home_team }} – {{ m.away_team }} · {{ format_date_time(m.kickoff_at, tz) }}</option>
+            {% endfor %}
+          </select>
+          <noscript><button type="submit" class="lg-btn lg-btn-dark">{{ t('profile_show') }}</button></noscript>
+        </form>
+      {% endif %}
+      <section class="lg-card lg-final">
+        <p class="lg-muted lg-small">{{ match.competition.name }} · {{ format_date_time(match.kickoff_at, tz) }}</p>
+        <div class="lg-final-row">
+          <span class="lg-team">{% with url = match.home_logo_url, name = match.home_team %}{% include "_crest.html" %}{% endwith %}<span>{{ match.home_team }}</span></span>
+          <span class="lg-final-score">{% with home = match.home_score, away = match.away_score %}{% include "_score.html" %}{% endwith %}</span>
+          <span class="lg-team">{% with url = match.away_logo_url, name = match.away_team %}{% include "_crest.html" %}{% endwith %}<span>{{ match.away_team }}</span></span>
+        </div>
+      </section>
+      <section class="lg-card">
+        <h2>{{ t('result_league_picks') }}</h2>
+        <ul class="lg-picks">
+          {% for user_id, nickname, pick in picks %}
+            {% set is_me = user_id == user.id %}
+            <li class="{% if is_me %}me{% endif %}">
+              {{ avatar(user_id, nickname, user_id in photo_ids, 32) }}
+              <span class="lg-picks-name">{{ t('home_me') if is_me else nickname }}</span>
+              {% if pick %}
+                <span class="lg-picks-score">{% with home = pick.home_score, away = pick.away_score %}{% include "_score.html" %}{% endwith %}</span>
+                {{ points_pill(pick) }}
+              {% else %}
+                <span class="lg-muted lg-small">{{ t('result_no_pick') }}</span>
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+        <p class="lg-note">{{ t('league_exacts_on_match_one' if exact_count == 1 else 'league_exacts_on_match').format(count=exact_count) }}</p>
+      </section>
+    {% else %}
+      <section class="lg-card"><p class="lg-muted">{{ t('league_no_finished_match') }}</p></section>
+    {% endif %}
   {% endif %}
+{% endblock %}
+{% block scripts %}
+  <script src="{{ static_url('js/league.js') }}" defer></script>
 {% endblock %}

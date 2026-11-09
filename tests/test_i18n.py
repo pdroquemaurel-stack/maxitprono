@@ -36,3 +36,10 @@ def test_closing_when_texts():
     assert closing_when(kickoff, deadline - timedelta(minutes=8), UTC, "en") == "in 8 min"
     assert closing_when(kickoff, datetime(2026, 11, 13, 9, 0, tzinfo=UTC), UTC) == "demain"
     assert closing_when(kickoff, datetime(2026, 11, 11, 9, 0, tzinfo=UTC), UTC, "en") == "Saturday"
+
+
+def test_format_rank_in_french_and_english():
+    from app.i18n import format_rank
+    assert [format_rank(n, "fr") for n in (1, 2, 3, 11)] == ["1er", "2e", "3e", "11e"]
+    assert [format_rank(n, "en") for n in (1, 2, 3, 4, 11, 12, 13, 21, 22, 101)] == [
+        "1st", "2nd", "3rd", "4th", "11th", "12th", "13th", "21st", "22nd", "101st"]
