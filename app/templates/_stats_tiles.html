@@ -1,0 +1,21 @@
+{# Tuiles KPI et répartition. Variables : s (Summary), split_title (facultatif) #}
+  <section class="p-tiles">
+    <div class="p-tile"><strong>{{ s.played }}</strong><span>{{ t('profile_played') }}</span></div>
+    <div class="p-tile"><strong class="p-exact-text">{{ s.exacts }}</strong><span>{{ t('profile_exacts') }}</span></div>
+    <div class="p-tile"><strong>{{ s.goods }}</strong><span>{{ t('profile_goods') }}</span></div>
+  </section>
+
+  {# 6. Répartition #}
+  <section class="p-card">
+    <h2>{{ t(split_title or 'profile_split') }}</h2>
+    <div class="p-stack" role="img" aria-label="{{ t('profile_split_aria').format(exact=s.exact_pct, good=s.good_pct, miss=s.miss_pct) }}">
+      <span class="p-exact" style="width: {{ s.exact_pct }}%"></span><span class="p-good" style="width: {{ s.good_pct }}%"></span>
+    </div>
+    <ul class="p-legend">
+      <li><span class="p-dot p-exact"></span>{{ t('profile_exacts') }}<strong>{{ s.exact_pct }} %</strong></li>
+      <li><span class="p-dot p-good"></span>{{ t('profile_goods') }}<strong>{{ s.good_pct }} %</strong></li>
+      <li><span class="p-dot p-miss"></span>{{ t('profile_misses') }}<strong>{{ s.miss_pct }} %</strong></li>
+    </ul>
+    <p class="p-note">{{ t('profile_split_note') }}</p>
+  </section>
+

@@ -350,5 +350,10 @@
   "profile_share_text": "{points} pts et {rate} % de réussite sur MaxitProno. Viens me défier !",
   "profile_link_copied": "Lien copié !",
   "profile_challenge": "Défier un ami",
-  "profile_matchday": "Journée {number}"
+  "profile_matchday": "Journée {number}",
+  "public_title": "{name} sur MaxitProno",
+  "public_description": "{points} pts · {rate} % de réussite. Viens le défier !",
+  "public_join": "Rejoindre la ligue « {name} »",
+  "public_play": "Jouer à MaxitProno",
+  "public_split": "Répartition des pronos"
 }

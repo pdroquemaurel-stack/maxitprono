@@ -1,0 +1,22 @@
+{# Forme et séries. Variables : form, current_streak, best_streak, history_url (facultatif) #}
+  <section class="p-card">
+    <div class="p-card-head">
+      <h2>{{ t('profile_form') }}</h2>
+      {% if history_url %}<a href="{{ history_url }}">{{ t('profile_history_link') }}</a>{% endif %}
+    </div>
+    {% if form %}
+      <ol class="p-form">
+        {% for outcome in form %}<li class="p-form-{{ outcome }}" title="{{ t('profile_outcome_' ~ outcome) }}">{{ t('profile_letter_' ~ outcome) }}</li>{% endfor %}
+      </ol>
+      <p class="p-note">
+        <span class="p-letter p-form-exact">{{ t('profile_letter_exact') }}</span> {{ t('profile_outcome_exact') }}
+        <span class="p-letter p-form-good">{{ t('profile_letter_good') }}</span> {{ t('profile_outcome_good') }}
+        <span class="p-letter p-form-miss">{{ t('profile_letter_miss') }}</span> {{ t('profile_outcome_miss') }}
+      </p>
+    {% else %}<p class="p-muted">{{ t('profile_form_empty') }}</p>{% endif %}
+    <div class="p-tiles p-tiles-2">
+      <div class="p-tile p-tile-soft"><strong>{{ current_streak }}</strong><span>{{ t('profile_current_streak') }}</span></div>
+      <div class="p-tile p-tile-soft"><strong>{{ best_streak }}</strong><span>{{ t('profile_best_streak') }}</span></div>
+    </div>
+  </section>
+

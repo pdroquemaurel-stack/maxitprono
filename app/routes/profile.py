@@ -1,13 +1,13 @@
 """Page Profil (statistiques), modification du profil et historique des pronostics."""
 from datetime import UTC, datetime, time
 
-from fastapi import APIRouter, Depends, File, Form, Request, UploadFile
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile
 from fastapi.responses import RedirectResponse
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app.auth import require_user
+from app.auth import current_user, require_user
 from app.db import get_db
 from app.i18n.countries import COUNTRY_CODES
 from app.models import Competition, User
@@ -70,7 +70,7 @@ def profile(request: Request, db: Session = Depends(get_db), user: User = Depend
     if period != "competition" or competition_id:
         context.update(rankings(request, db, user, picks, start, end, competition_id))
     context.update(badges_context(db, user, all_picks))
-    context["share_stats_url"] = context.get("join_url") or str(request.base_url)
+    context["share_stats_url"] = public_url(request, user, context.get("league"))
     return templates.TemplateResponse(request, "profile.html", context)
 
 
@@ -116,6 +116,35 @@ def badges_context(db: Session, user: User, all_picks: list[stats.PlayedPick]) -
     )
     return {"badges": badges, "next_badge": stats.next_badge(badges),
             "badges_unlocked": sum(badge.unlocked for badge in badges)}
+
+
+# --- Stats publiques (lien de « Partager mes stats ») ---
+
+def public_url(request: Request, player: User, league) -> str:
+    """Page publique du joueur ; avec sa ligue, la page propose de la rejoindre."""
+    url = str(request.url_for("public_stats", player_id=player.id))
+    return f"{url}?league={league.code}" if league else url
+
+
+@router.get("/players/{player_id}", name="public_stats")
+def public_stats(player_id: int, request: Request, db: Session = Depends(get_db),
+                 user: User | None = Depends(current_user)):
+    """Stats de la saison visibles sans compte : rien d'autre que ce que montrent déjà
+    les classements publics (pseudo, pays) et les pronos des matchs terminés."""
+    player = db.get(User, player_id)
+    if player is None:
+        raise HTTPException(404)
+    picks = profile_store.played_picks(db, player.id)
+    outcomes = stats.chronological_outcomes(picks)
+    league = league_store.find_by_code(db, request.query_params.get("league", ""))
+    if league and league_store.membership(db, league.id, player.id) is None:
+        league = None  # code d'une ligue dont le joueur n'est pas membre
+    context = {"user": user, "player": player, "summary": stats.summarize(picks),
+               "form": stats.recent_form(outcomes), "current_streak": stats.current_streak(outcomes),
+               "best_streak": stats.best_streak(outcomes), "league": league,
+               "join_url": f"/join/{league.code}?ref={player.id}" if league else None,
+               **badges_context(db, player, picks)}
+    return templates.TemplateResponse(request, "public_stats.html", context)
 
 
 # --- Modifier mon profil ---

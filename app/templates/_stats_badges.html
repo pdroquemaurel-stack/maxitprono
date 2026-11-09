@@ -1,0 +1,22 @@
+{% from "_icons.html" import icon %}
+{# Badges. Variables : badges, badges_unlocked, next_badge, show_next #}
+  <section class="p-card">
+    <div class="p-card-head">
+      <h2>{{ t('profile_badges') }}</h2>
+      <span class="p-muted">{{ badges_unlocked }} / {{ badges|length }}</span>
+    </div>
+    <ul class="p-badges">
+      {% for badge in badges %}
+        <li class="{{ 'unlocked' if badge.unlocked else 'locked' }}">
+          <span class="p-badge-circle">{{ icon(badge.icon if badge.unlocked else 'lock', 24) }}</span>
+          <span class="p-badge-name">{{ t('badge_' ~ badge.key) }}</span>
+          {% if not badge.unlocked %}<span class="visually-hidden">{{ t('profile_badge_locked') }}</span>{% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+    {% if not show_next %}
+    {% elif next_badge %}
+      <p class="p-note">{{ t('profile_next_badge').format(badge=t('badge_' ~ next_badge.key), rule=t('badge_' ~ next_badge.key ~ '_rule'), count=next_badge.remaining) }}</p>
+    {% else %}<p class="p-note">{{ t('profile_all_badges') }}</p>{% endif %}
+  </section>
+

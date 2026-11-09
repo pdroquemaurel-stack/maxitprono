@@ -1,0 +1,13 @@
+{# Identité du joueur. Variables : player, league (facultatif), edit_url (facultatif) #}
+  <section class="p-card p-identity">
+    {% if player.avatar %}<img class="p-avatar" src="/avatars/{{ player.id }}" alt="">
+    {% else %}<span class="p-avatar p-initials" aria-hidden="true">{{ initials(player.nickname) }}</span>{% endif %}
+    <div class="p-identity-text">
+      <h1>{{ player.nickname }}</h1>
+      <p class="p-muted">{{ country_name(player.country_code, lang) }} ·
+        {{ t('profile_member_since').format(month=t('month_%d' % player.created_at.month), year=player.created_at.year) }}</p>
+      {% if league %}<span class="p-pill">{{ league.name }}</span>{% endif %}
+    </div>
+    {% if edit_url %}<a class="p-edit" href="{{ edit_url }}">{{ t('profile_edit') }}</a>{% endif %}
+  </section>
+

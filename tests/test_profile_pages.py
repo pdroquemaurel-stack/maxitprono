@@ -167,3 +167,38 @@ def test_week_shows_matchday_when_known(client, db_session):
     match.matchday = 12
     db_session.commit()
     assert "Journée 12" in client.get("/profile?period=week").text
+
+
+# --- Page publique (« Partager mes stats ») ---
+
+def test_public_stats_page_without_account(client, db_session):
+    register(client)
+    add_pick(db_session, paul(db_session), (2, 1), (2, 1))
+    logout(client)
+    page = client.get("/players/1").text
+    assert "<h1>Paul</h1>" in page and "100 %" in page
+    assert "Répartition des pronos" in page and "de mes pronos" not in page
+    assert 'content="5 pts · 100 % de réussite' in page  # aperçu WhatsApp
+    assert 'href="/register"' in page and "Jouer à MaxitProno" in page
+    assert 'href="/profile/edit"' not in page and "Prochain :" not in page
+
+
+def test_public_stats_page_offers_the_league(client, db_session):
+    register(client)
+    _, code = create_league(client)
+    assert f"/players/1?league={code}" in client.get("/profile").text  # lien partagé
+    logout(client)
+    page = client.get(f"/players/1?league={code}").text
+    assert f'href="/join/{code}?ref=1"' in page and "Rejoindre la ligue « Bureau Casa »" in page
+
+
+def test_public_stats_page_ignores_a_league_of_someone_else(client):
+    register(client)
+    _, code = create_league(client)
+    logout(client)
+    register(client, "Awa")
+    assert "/join/" not in client.get(f"/players/2?league={code}").text
+
+
+def test_public_stats_unknown_player(client):
+    assert client.get("/players/999").status_code == 404

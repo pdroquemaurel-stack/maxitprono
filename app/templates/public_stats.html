@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{# Page publique de « Partager mes stats » : visible sans compte #}
+{% block title %}{{ t('public_title').format(name=player.nickname) }}{% endblock %}
+{% block head %}
+  {% set s = summary %}
+  {# Aperçu du lien dans WhatsApp et les réseaux sociaux #}
+  <meta property="og:title" content="{{ t('public_title').format(name=player.nickname) }}">
+  <meta property="og:description" content="{{ t('public_description').format(points=s.points, rate=s.success_rate) }}">
+  <meta name="description" content="{{ t('public_description').format(points=s.points, rate=s.success_rate) }}">
+{% endblock %}
+{% block main_class %} profile{% endblock %}
+{% block content %}
+  {% set s = summary %}
+  <header class="p-header">
+    <a class="p-logo" href="/">Maxit <span class="p-logo-pill">Prono</span></a>
+  </header>
+
+  {% include "_stats_identity.html" %}
+
+  {% set hero_sub = t('profile_average').format(average=('%.1f' % s.average_points)|replace('.', t('decimal_separator'))) %}
+  {% include "_stats_hero.html" %}
+  {% set split_title = 'public_split' %}
+  {% include "_stats_tiles.html" %}
+  {% include "_stats_form.html" %}
+  {% include "_stats_badges.html" %}
+
+  <div class="p-actions">
+    {% if join_url %}
+      <a class="p-share" href="{{ join_url }}">{{ t('public_join').format(name=league.name) }}</a>
+    {% elif user %}
+      <a class="p-share" href="/matches">{{ t('profile_go_predict') }}</a>
+    {% else %}
+      <a class="p-share" href="/register">{{ t('public_play') }}</a>
+    {% endif %}
+  </div>
+{% endblock %}
