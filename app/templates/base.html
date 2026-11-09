@@ -11,9 +11,10 @@
   <link rel="preload" href="/static/fonts/dm-sans.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/static/fonts/outfit.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="{{ static_url('css/style.css') }}">
+  {% block head %}{% endblock %}
 </head>
 <body>
-  <main class="content">
+  <main class="content{% block main_class %}{% endblock %}">
     {% block content %}{% endblock %}
   </main>
 
@@ -25,7 +26,7 @@
     ('/matches', 'nav_predictions', 'calendar', path.startswith('/matches')),
     ('/leaderboard', 'nav_leaderboard', 'chart', path.startswith('/leaderboard')),
     ('/results', 'nav_results', 'check', path.startswith('/results')),
-    (profile_href, 'nav_profile', 'person', path in ('/profile', '/login', '/register', '/rules')),
+    (profile_href, 'nav_profile', 'person', path.startswith('/profile') or path in ('/login', '/register', '/rules')),
   ] %}
   <nav class="tabbar" aria-label="{{ t('nav_label') }}">
     {% for href, label, icon, active in nav_tabs %}

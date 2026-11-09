@@ -39,9 +39,11 @@ def test_settings_post_hidden_from_players(client):
 
 
 def test_profile_shows_admin_link_to_admins_only(admin):
-    assert 'href="/admin"' in admin.get("/profile").text
+    # Le lien est dans « Modifier mon profil » (bouton Modifier et engrenage du profil)
+    assert 'href="/admin"' in admin.get("/profile/edit").text
     logout(admin)
     register(admin, "Awa")
+    assert 'href="/admin"' not in admin.get("/profile/edit").text
     assert 'href="/admin"' not in admin.get("/profile").text
 
 

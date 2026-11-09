@@ -114,7 +114,7 @@ def test_home_shows_my_rank(client, db_session):
 def test_history_shows_points(client, db_session):
     login(client)
     add_scored(db_session, paul(db_session), 5)
-    assert "+5" in client.get("/profile").text
+    assert "+5" in client.get("/profile/history").text
 
 
 def test_home_podium_shows_top_three_and_my_rank_below(client, db_session):

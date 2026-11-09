@@ -186,13 +186,13 @@ def test_times_shown_in_player_timezone(client, db_session):
     assert expected in client.get("/matches").text
 
 
-def test_profile_shows_history_with_final_score(client, db_session):
+def test_profile_history_shows_final_score(client, db_session):
     match = add_match(db_session, 24, home="Lions", away="Étalons")
     login(client)
     predict(client, match, "2", "1")
     match.status, match.home_score, match.away_score = MatchStatus.FINISHED, 3, 1
     db_session.commit()
-    page = client.get("/profile").text
+    page = client.get("/profile/history").text
     assert "Lions – Étalons" in page
     assert "score final 3–1" in page
     assert '<span class="win">2</span>' in page

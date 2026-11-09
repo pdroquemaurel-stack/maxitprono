@@ -46,7 +46,7 @@ Hors découpage : `scripts/seed_demo.py` (données de démo sans API ; les joueu
 
 ## 2 ter. Back-office
 
-- **Accès** : drapeau `users.is_admin`, donné par `python -m scripts.make_admin <pseudo>` ; les pages `/admin/…` utilisent la connexion normale et répondent **404** aux autres joueurs. Lien « Administration » sur le profil des admins.
+- **Accès** : drapeau `users.is_admin`, donné par `python -m scripts.make_admin <pseudo>` ; les pages `/admin/…` utilisent la connexion normale et répondent **404** aux autres joueurs. Lien « Administration » dans « Modifier mon profil » (`/profile/edit`) pour les admins seulement.
 - **Réglages du jeu** (`/admin/settings`, table `game_settings` à une ligne, valeurs par défaut tant que rien n'est enregistré) : points du bon vainqueur (0-20), bonus du score exact (0-20), taille maximale des ligues (2-1000).
 - **Changement de barème** : **recalcul complet** de tous les pronostics déjà notés (`rescore_all`), tous les classements suivent. La page des règles et le compteur « N / max membres » affichent les valeurs réglées. Une ligue déjà plus grande qu'une nouvelle limite garde ses membres mais n'en accepte plus.
 - **Compétitions** (`/admin/competitions`) : interrupteur actif / inactif par compétition ; bouton « Actualiser la liste du fournisseur » (1 appel, nouvelles compétitions inactives). `scripts/activate_competition.py` reste pour le local.
@@ -58,7 +58,7 @@ Hors découpage : `scripts/seed_demo.py` (données de démo sans API ; les joueu
 
 - **Ordre** : choix du joueur (cookie `lang`, un an), sinon langue du téléphone (`Accept-Language`, la première langue connue l'emporte), sinon français. Cookie seul : rien n'est enregistré sur le compte (Max it passera sa langue plus tard par le même mécanisme).
 - **Mise en œuvre** : un middleware pose la langue de la requête ; `t()`, les dates, les temps relatifs, les noms de pays, `<html lang>` et les messages construits côté serveur (texte WhatsApp) la suivent sans paramètre.
-- **Choix** : liens « Français · English » (`/language/{fr,en}?next=…`) sur le profil, l'accueil sans compte, la connexion et l'inscription.
+- **Choix** : liens « Français · English » (`/language/{fr,en}?next=…`) sur « Modifier mon profil », l'accueil sans compte, la connexion et l'inscription.
 
 ## 2 quinquies. Erreurs et hors connexion (étape 9b)
 
@@ -75,6 +75,17 @@ Hors découpage : `scripts/seed_demo.py` (données de démo sans API ; les joueu
 - **Écussons** aussi dans la liste des résultats ; noms d'équipe longs coupés en fin de mot ou par trait d'union (plus « Strasbour/g »).
 - Onglet « Compét. » (« Comp. » en anglais) : les 5 onglets tiennent à 360 px.
 - **Passe à 360 px** en émulation mobile (accueil, pronos, classements, résultats, profil) : aucun débordement horizontal.
+
+## 2 septies. Page Profil (statistiques)
+
+- **`/profile`** : en-tête (logo, engrenage), identité (avatar ou initiales, pays, membre depuis, ligue), sélecteur **Saison / Semaine / Compét.** (`?period=season|week|competition&competition=<id>`) qui filtre toute la page, carte héro (anneau de réussite, points), 3 tuiles, répartition, mes classements (ligue, pays, général), forme sur 10 pronos et séries, par compétition, badges, partage.
+- **Calculs** : `app/services/profile_stats.py` (fonctions pures), lectures dans `app/services/profile_store.py`, route `app/routes/profile.py`. Prono joué = match terminé avec un score final ; réussite = (exacts + bons résultats) / joués, arrondie à l'entier (0,5 vers le haut).
+- **Saison** = tous les matchs joués (pas de notion de saison commune aux compétitions). **Semaine** = lundi-dimanche UTC, comme les classements. **Compét.** = compétition choisie, sinon la Ligue des champions si elle est active, sinon la première active.
+- **Évolution dans ma ligue** : rang actuel comparé au rang avant ma dernière journée jouée (2 requêtes de classement).
+- **Badges** calculés à la volée sur toute la carrière (pas filtrés par la période) : Prophète (3 exacts), Remontada (+5 places au général en une journée), Rassembleur (au moins un membre dans une ligue que j'ai créée), Sans faute (5 pronos réussis d'affilée). Remontada relit tous les pronostics calculés à chaque affichage : à stocker si la base grossit.
+- **`/profile/edit`** (bouton « Modifier » et engrenage) : photo avec aperçu, pseudo (aussi identifiant de connexion, unicité vérifiée), pays, langue, mes pronostics, mes ligues, règlement, Administration (admins), déconnexion. Le formulaire poste toujours sur `POST /profile`.
+- **`/profile/history`** : l'historique des pronostics, auparavant en bas du profil.
+- Police **Inter** chargée depuis Google Fonts sur ces pages seulement (repli system-ui).
 
 ## 3. Déploiement
 

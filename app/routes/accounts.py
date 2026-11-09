@@ -1,18 +1,17 @@
-"""Pages d'inscription, de connexion, de déconnexion et de profil."""
+"""Pages d'inscription, de connexion, de déconnexion ; langue et photos de profil.
+
+La page Profil est dans profile.py."""
 from fastapi import APIRouter, Depends, File, Form, Request, Response, UploadFile
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 
-from app.auth import current_user, end_session, require_user, start_session
+from app.auth import current_user, end_session, start_session
 from app.auth import pin_auth
 from app.db import get_db
 from app.i18n import SUPPORTED_LANGUAGES
-from app.i18n.countries import COUNTRY_CODES
 from app.models import User
 from app.models.types import utc_now
-from app.routes.matches import prediction_history
-from app.services.timezones import resolve_timezone
-from app.services.accounts import MAX_AVATAR_BYTES, avatar_mime, decode_data_url, validate_country
+from app.services.accounts import MAX_AVATAR_BYTES, avatar_mime, decode_data_url
 from app.services.redirects import safe_next
 from app.templating import templates
 
@@ -104,35 +103,6 @@ def logout():
     response = redirect("/")
     end_session(response)
     return response
-
-
-# --- Profil ---
-
-@router.get("/profile")
-def profile(request: Request, db: Session = Depends(get_db), user: User = Depends(require_user)):
-    return templates.TemplateResponse(request, "profile.html", profile_context(request, db, user))
-
-
-def profile_context(request: Request, db: Session, user: User, error: str | None = None) -> dict:
-    return {"user": user, "error": error, "history": prediction_history(db, user),
-            "tz": resolve_timezone(request.cookies.get("tz"))}
-
-
-@router.post("/profile")
-def profile_submit(request: Request, db: Session = Depends(get_db),
-                   user: User = Depends(require_user), country_code: str = Form(""),
-                   avatar_data: str = Form(""), avatar_file: UploadFile | None = File(None)):
-    avatar, mime, error = read_avatar(avatar_data, avatar_file)
-    error = error or validate_country(country_code, COUNTRY_CODES)
-    if error:
-        return templates.TemplateResponse(request, "profile.html",
-                                          profile_context(request, db, user, error),
-                                          status_code=400)
-    user.country_code = country_code
-    if avatar:
-        user.avatar, user.avatar_mime = avatar, mime
-    db.commit()
-    return redirect("/profile?saved=1")
 
 
 @router.get("/language/{lang}")

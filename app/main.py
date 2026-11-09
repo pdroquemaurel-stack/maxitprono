@@ -12,7 +12,8 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.auth import LoginRequired
 from app.i18n import pick_language, set_language
-from app.routes import accounts, admin, home, internal, leaderboard, leagues, matches, results
+from app.routes import (accounts, admin, home, internal, leaderboard, leagues, matches, profile,
+                        results)
 from app.templating import templates
 
 STATIC_DIR = Path(__file__).parent / "static"
@@ -48,6 +49,7 @@ async def use_player_language(request, call_next):
 app.mount("/static", CachedStaticFiles(directory=STATIC_DIR), name="static")
 app.include_router(home.router)
 app.include_router(accounts.router)
+app.include_router(profile.router)
 app.include_router(matches.router)
 app.include_router(leaderboard.router)
 app.include_router(results.router)

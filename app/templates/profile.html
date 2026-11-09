@@ -1,43 +1,204 @@
 {% extends "base.html" %}
+{% from "_icons.html" import icon %}
 {% block title %}{{ t('profile_title') }} · {{ t('app_name') }}{% endblock %}
+{% block head %}
+  {# Inter pour la page Profil seulement ; repli system-ui si Google Fonts ne répond pas #}
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap">
+{% endblock %}
+{% block main_class %} profile{% endblock %}
 {% block content %}
-  <h1>{{ t('profile_title') }}</h1>
-  {% include "_error.html" %}
-  {% if request.query_params.get('saved') %}<p class="notice">{{ t('profile_saved') }}</p>{% endif %}
-  <form class="card form" method="post" action="/profile" enctype="multipart/form-data">
-    <p><strong>{{ user.nickname }}</strong></p>
-    {% with avatar_url = '/avatars/%d' % user.id if user.avatar else None %}
-      {% include "_avatar_input.html" %}
-    {% endwith %}
-    {% with selected_country = user.country_code %}{% include "_country_select.html" %}{% endwith %}
-    <button type="submit">{{ t('profile_submit') }}</button>
-  </form>
+  {% set s = summary %}
+  {% set period_query = 'period=' ~ period ~ ('&competition=%s' % competition_id if competition_id else '') %}
 
-  <section class="card">
-    <h2>{{ t('profile_history') }}</h2>
-    {% for prediction in history %}
-      {% set match = prediction.match %}
-      <div class="history-row">
-        <span class="history-date">{{ format_date_time(match.kickoff_at, tz) }}</span>
-        <span class="history-teams">{{ match.home_team }} – {{ match.away_team }}</span>
-        <span class="history-scores">
-          {% with home = prediction.home_score, away = prediction.away_score %}{% include "_score.html" %}{% endwith %}
-          {% if match.status == 'cancelled' %}<small>{{ t('status_cancelled') }}</small>
-          {% elif match.home_score is not none %}<small>{{ t('final_score') }} {{ match.home_score }}–{{ match.away_score }}</small>
-          {% endif %}
-          {% include "_points_badge.html" %}
-        </span>
-      </div>
-    {% else %}
-      <p class="lead">{{ t('profile_history_empty') }}</p>
-    {% endfor %}
+  {# 1. En-tête #}
+  <header class="p-header">
+    <span class="p-logo">Maxit <span class="p-logo-pill">Prono</span></span>
+    <a class="p-icon-button" href="/profile/edit" aria-label="{{ t('profile_settings') }}">{{ icon('gear') }}</a>
+  </header>
+
+  {# 2. Identité #}
+  <section class="p-card p-identity">
+    {% if user.avatar %}<img class="p-avatar" src="/avatars/{{ user.id }}" alt="">
+    {% else %}<span class="p-avatar p-initials" aria-hidden="true">{{ initials(user.nickname) }}</span>{% endif %}
+    <div class="p-identity-text">
+      <h1>{{ user.nickname }}</h1>
+      <p class="p-muted">{{ country_name(user.country_code, lang) }} ·
+        {{ t('profile_member_since').format(month=t('month_%d' % user.created_at.month), year=user.created_at.year) }}</p>
+      {% if league %}<span class="p-pill">{{ league.name }}</span>{% endif %}
+    </div>
+    <a class="p-edit" href="/profile/edit">{{ t('profile_edit') }}</a>
   </section>
 
-  <p class="small"><a href="/rules">{{ t('rules_title') }}</a></p>
-  {% include "_language.html" %}
-  {% if user.is_admin %}<a class="button secondary" href="/admin">{{ t('profile_admin') }}</a>{% endif %}
-  <form method="post" action="/logout">
-    <button type="submit" class="secondary">{{ t('logout') }}</button>
-  </form>
+  {# 3. Sélecteur de période : filtre toutes les stats de la page #}
+  <nav class="p-segments" aria-label="{{ t('profile_period') }}">
+    {% for key in periods %}
+      <a href="/profile?period={{ key }}"{% if key == period %} class="active" aria-current="page"{% endif %}>{{ t('profile_period_' ~ key) }}</a>
+    {% endfor %}
+  </nav>
+  {% if period == 'competition' and competitions %}
+    <form class="p-competition-pick" method="get" action="/profile">
+      <input type="hidden" name="period" value="competition">
+      <label class="visually-hidden" for="competition">{{ t('profile_period_competition') }}</label>
+      <select id="competition" name="competition" data-autosubmit>
+        {% for id, name in competitions %}<option value="{{ id }}"{% if id == competition_id %} selected{% endif %}>{{ name }}</option>{% endfor %}
+      </select>
+      <noscript><button type="submit" class="secondary">{{ t('profile_show') }}</button></noscript>
+    </form>
+  {% endif %}
+
+  {# 4. Carte héro : taux de réussite et points #}
+  {% set circumference = 289.03 %}
+  <section class="p-hero">
+    <svg class="p-ring" viewBox="0 0 104 104" width="104" height="104" role="img"
+         aria-label="{{ t('profile_success_aria').format(rate=s.success_rate) }}">
+      <circle cx="52" cy="52" r="46" fill="none" stroke="#33363F" stroke-width="10"/>
+      {% if s.success_rate %}
+        <circle cx="52" cy="52" r="46" fill="none" stroke="#FF7900" stroke-width="10" stroke-linecap="round"
+                stroke-dasharray="{{ circumference }}"
+                stroke-dashoffset="{{ '%.2f' % (circumference * (100 - s.success_rate) / 100) }}"
+                transform="rotate(-90 52 52)"/>
+      {% endif %}
+      <text x="52" y="52" text-anchor="middle" class="p-ring-value">{{ s.success_rate }} %</text>
+      <text x="52" y="70" text-anchor="middle" class="p-ring-label">{{ t('profile_success') }}</text>
+    </svg>
+    <div class="p-hero-text">
+      <p class="p-hero-label">{{ t('profile_points') }}</p>
+      <p class="p-hero-points">{{ s.points }}</p>
+      <p class="p-hero-sub">
+        {% if period == 'week' %}{{ t('profile_week_of').format(day=week.day, month=t('month_%d' % week.month)) }}
+        {% elif period == 'competition' %}{{ competition_name or t('profile_no_competition') }}
+        {% else %}{{ t('profile_average').format(average=('%.1f' % s.average_points)|replace('.', t('decimal_separator'))) }}{% endif %}
+      </p>
+    </div>
+  </section>
+  {% if not s.played %}<p class="p-card p-empty">{{ t('profile_first_prediction') }} <a href="/matches">{{ t('profile_go_predict') }}</a></p>{% endif %}
+
+  {# 5. Tuiles KPI #}
+  <section class="p-tiles">
+    <div class="p-tile"><strong>{{ s.played }}</strong><span>{{ t('profile_played') }}</span></div>
+    <div class="p-tile"><strong class="p-exact-text">{{ s.exacts }}</strong><span>{{ t('profile_exacts') }}</span></div>
+    <div class="p-tile"><strong>{{ s.goods }}</strong><span>{{ t('profile_goods') }}</span></div>
+  </section>
+
+  {# 6. Répartition #}
+  <section class="p-card">
+    <h2>{{ t('profile_split') }}</h2>
+    <div class="p-stack" role="img" aria-label="{{ t('profile_split_aria').format(exact=s.exact_pct, good=s.good_pct, miss=s.miss_pct) }}">
+      <span class="p-exact" style="width: {{ s.exact_pct }}%"></span><span class="p-good" style="width: {{ s.good_pct }}%"></span>
+    </div>
+    <ul class="p-legend">
+      <li><span class="p-dot p-exact"></span>{{ t('profile_exacts') }}<strong>{{ s.exact_pct }} %</strong></li>
+      <li><span class="p-dot p-good"></span>{{ t('profile_goods') }}<strong>{{ s.good_pct }} %</strong></li>
+      <li><span class="p-dot p-miss"></span>{{ t('profile_misses') }}<strong>{{ s.miss_pct }} %</strong></li>
+    </ul>
+    <p class="p-note">{{ t('profile_split_note') }}</p>
+  </section>
+
+  {# 7. Mes classements #}
+  <section class="p-card">
+    <div class="p-card-head">
+      <h2>{{ t('profile_rankings') }}</h2>
+      <a href="/leaderboard">{{ t('profile_see_all') }}</a>
+    </div>
+    <div class="p-ranks">
+      <a class="p-rank p-rank-league" href="/leaderboard?tab=league">
+        <span class="p-rank-label">{{ t('profile_rank_league') }}</span>
+        {% if league and league_rank %}
+          <span class="p-rank-value">{{ league_rank.rank }}<small>/{{ league_members }}</small></span>
+          {% if league_change %}
+            <span class="{{ 'p-up' if league_change > 0 else 'p-down' }}">
+              {{ '▲' if league_change > 0 else '▼' }}
+              {{ t('profile_places' if league_change|abs > 1 else 'profile_place').format(count=league_change|abs) }}</span>
+          {% endif %}
+        {% elif league %}<span class="p-rank-none">{{ t('profile_not_ranked') }}</span>
+        {% else %}<span class="p-rank-none">{{ t('profile_join_league') }}</span>{% endif %}
+      </a>
+      {% for key, ranked, total, tab in [('profile_rank_country', country_rank, country_total, 'country'),
+                                         ('profile_rank_general', general_rank, general_total, 'general')] %}
+        <a class="p-rank" href="/leaderboard?tab={{ tab }}">
+          <span class="p-rank-label">{{ t(key) }}</span>
+          {% if ranked %}<span class="p-rank-value">{{ ranked.rank }}<small>/{{ total }}</small></span>
+          {% else %}<span class="p-rank-none">{{ t('profile_not_ranked') }}</span>{% endif %}
+        </a>
+      {% endfor %}
+    </div>
+  </section>
+
+  {# 8. Forme : 10 derniers pronos, du plus ancien au plus récent #}
+  <section class="p-card">
+    <div class="p-card-head">
+      <h2>{{ t('profile_form') }}</h2>
+      <a href="/profile/history">{{ t('profile_history_link') }}</a>
+    </div>
+    {% if form %}
+      <ol class="p-form">
+        {% for outcome in form %}<li class="p-form-{{ outcome }}" title="{{ t('profile_outcome_' ~ outcome) }}">{{ t('profile_letter_' ~ outcome) }}</li>{% endfor %}
+      </ol>
+      <p class="p-note">
+        <span class="p-letter p-form-exact">{{ t('profile_letter_exact') }}</span> {{ t('profile_outcome_exact') }}
+        <span class="p-letter p-form-good">{{ t('profile_letter_good') }}</span> {{ t('profile_outcome_good') }}
+        <span class="p-letter p-form-miss">{{ t('profile_letter_miss') }}</span> {{ t('profile_outcome_miss') }}
+      </p>
+    {% else %}<p class="p-muted">{{ t('profile_form_empty') }}</p>{% endif %}
+    <div class="p-tiles p-tiles-2">
+      <div class="p-tile p-tile-soft"><strong>{{ current_streak }}</strong><span>{{ t('profile_current_streak') }}</span></div>
+      <div class="p-tile p-tile-soft"><strong>{{ best_streak }}</strong><span>{{ t('profile_best_streak') }}</span></div>
+    </div>
+  </section>
+
+  {# 9. Par compétition #}
+  <section class="p-card">
+    <h2>{{ t('profile_by_competition') }}</h2>
+    {% for stat in competition_stats %}
+      <div class="p-competition">
+        <div class="p-competition-line"><span>{{ stat.name }}</span>
+          <span class="p-muted">{{ t('profile_competition_line').format(count=stat.played, rate=stat.success_rate) }}</span></div>
+        <div class="p-bar"><span style="width: {{ stat.success_rate }}%"></span></div>
+      </div>
+    {% else %}<p class="p-muted">{{ t('profile_form_empty') }}</p>{% endfor %}
+    {% if strongest %}<p class="p-note">{{ t('profile_strongest') }} <strong>{{ strongest.name }}</strong></p>
+    {% elif competition_stats %}<p class="p-note">{{ t('profile_strongest_none') }}</p>{% endif %}
+  </section>
+
+  {# 10. Badges (sur toute la carrière, pas filtrés par la période) #}
+  <section class="p-card">
+    <div class="p-card-head">
+      <h2>{{ t('profile_badges') }}</h2>
+      <span class="p-muted">{{ badges_unlocked }} / {{ badges|length }}</span>
+    </div>
+    <ul class="p-badges">
+      {% for badge in badges %}
+        <li class="{{ 'unlocked' if badge.unlocked else 'locked' }}">
+          <span class="p-badge-circle">{{ icon(badge.icon if badge.unlocked else 'lock', 24) }}</span>
+          <span class="p-badge-name">{{ t('badge_' ~ badge.key) }}</span>
+          {% if not badge.unlocked %}<span class="visually-hidden">{{ t('profile_badge_locked') }}</span>{% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+    {% if next_badge %}
+      <p class="p-note">{{ t('profile_next_badge').format(badge=t('badge_' ~ next_badge.key), rule=t('badge_' ~ next_badge.key ~ '_rule'), count=next_badge.remaining) }}</p>
+    {% else %}<p class="p-note">{{ t('profile_all_badges') }}</p>{% endif %}
+  </section>
+
+  {# 11. Partage #}
+  <div class="p-actions">
+    <button type="button" class="p-share" data-share-stats
+            data-text="{{ t('profile_share_text').format(points=s.points, rate=s.success_rate) }}"
+            data-url="{{ share_stats_url }}" data-copied="{{ t('profile_link_copied') }}">
+      {{ icon('share', 20) }}<span>{{ t('profile_share') }}</span>
+    </button>
+    <p class="p-note p-share-status" role="status" hidden></p>
+    {% if league %}
+      <a class="p-challenge" href="{{ whatsapp_url }}" target="_blank" rel="noopener"
+         data-share-text="{{ share_text }}">{{ icon('swords', 20) }}<span>{{ t('profile_challenge') }}</span></a>
+    {% else %}
+      <a class="p-challenge" href="/leagues">{{ icon('swords', 20) }}<span>{{ t('profile_challenge') }}</span></a>
+    {% endif %}
+  </div>
 {% endblock %}
-{% block scripts %}<script src="{{ static_url('js/avatar.js') }}" defer></script>{% endblock %}
+{% block scripts %}
+  <script src="{{ static_url('js/share.js') }}" defer></script>
+  <script src="{{ static_url('js/profile.js') }}" defer></script>
+{% endblock %}

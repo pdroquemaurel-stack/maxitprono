@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% block title %}{{ t('profile_edit_title') }} · {{ t('app_name') }}{% endblock %}
+{% block head %}
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap">
+{% endblock %}
+{% block main_class %} profile{% endblock %}
+{% block content %}
+  <header class="p-header">
+    <a class="p-icon-button" href="/profile" aria-label="{{ t('profile_back') }}">{{ icon('back') }}</a>
+    <h1 class="p-page-title">{{ t('profile_edit_title') }}</h1>
+    <span class="p-icon-button" aria-hidden="true"></span>
+  </header>
+  {% include "_error.html" %}
+  {% if request.query_params.get('saved') %}<p class="notice">{{ t('profile_saved') }}</p>{% endif %}
+
+  {# Photo, pseudo, pays #}
+  <form class="p-card form" method="post" action="/profile" enctype="multipart/form-data">
+    {% with avatar_url = '/avatars/%d' % user.id if user.avatar else None %}
+      {% include "_avatar_input.html" %}
+    {% endwith %}
+    <label for="nickname">{{ t('field_nickname') }}</label>
+    <input id="nickname" name="nickname" value="{{ form.nickname }}" required minlength="3" maxlength="20"
+           pattern="[A-Za-z0-9_\-]{3,20}" autocomplete="nickname" autocapitalize="off">
+    <small>{{ t('profile_nickname_help') }}</small>
+    {% with selected_country = form.country_code %}{% include "_country_select.html" %}{% endwith %}
+    <button type="submit">{{ t('profile_submit') }}</button>
+  </form>
+
+  {# Langue #}
+  <section class="p-card">
+    <h2>{{ t('language_label') }}</h2>
+    {% include "_language.html" %}
+  </section>
+
+  {# Liens du compte #}
+  <nav class="p-card p-menu" aria-label="{{ t('profile_account') }}">
+    <a href="/profile/history"><span>{{ t('profile_history') }}</span>{{ icon('chevron', 20) }}</a>
+    <a href="/leagues"><span>{{ t('leagues_title') }}</span>{{ icon('chevron', 20) }}</a>
+    <a href="/rules"><span>{{ t('rules_title') }}</span>{{ icon('chevron', 20) }}</a>
+    {% if user.is_admin %}<a href="/admin"><span>{{ t('profile_admin') }}</span>{{ icon('chevron', 20) }}</a>{% endif %}
+  </nav>
+
+  <form method="post" action="/logout">
+    <button type="submit" class="secondary">{{ t('logout') }}</button>
+  </form>
+{% endblock %}
+{% block scripts %}<script src="{{ static_url('js/avatar.js') }}" defer></script>{% endblock %}
