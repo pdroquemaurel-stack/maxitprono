@@ -38,6 +38,9 @@ class Match(Base):
     status: Mapped[str] = mapped_column(String(20), default=MatchStatus.SCHEDULED)
     home_score: Mapped[int | None] = mapped_column(Integer)
     away_score: Mapped[int | None] = mapped_column(Integer)
+    # Minute de jeu donnée par le fournisseur, seulement pendant le jeu (vide à la mi-temps,
+    # avant et après le match). Mise à jour à chaque synchro des scores (toutes les 10 min).
+    minute: Mapped[int | None] = mapped_column(Integer)
     synced_at: Mapped[datetime | None] = mapped_column(UTCDateTime)  # dernière mise à jour API
     # Pourcentages 1 / N / 2 prédits par le fournisseur (somme = 100), vides s'il n'en donne pas
     prob_home: Mapped[int | None] = mapped_column(Integer)

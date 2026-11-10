@@ -2,9 +2,10 @@
 
 
 def fixture_item(api_id=1001, date="2024-08-16T19:00:00+00:00", status="NS",
-                 home="Le Havre", away="PSG", goals=(None, None), league=61, season=2024):
+                 home="Le Havre", away="PSG", goals=(None, None), league=61, season=2024,
+                 elapsed=None):
     return {
-        "fixture": {"id": api_id, "date": date, "status": {"short": status, "long": ""}},
+        "fixture": {"id": api_id, "date": date, "status": {"short": status, "long": "", "elapsed": elapsed}},
         "league": {"id": league, "season": season, "round": "Regular Season - 1"},
         "teams": {
             "home": {"id": 1, "name": home, "logo": f"https://x/{home}.png"},

@@ -519,5 +519,6 @@
   "month_short_9": "sept.",
   "month_short_10": "oct.",
   "month_short_11": "nov.",
-  "month_short_12": "déc."
+  "month_short_12": "déc.",
+  "match_state_live_minute": "En direct · {minute}'"
 }

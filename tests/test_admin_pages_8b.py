@@ -50,6 +50,7 @@ def test_refresh_competitions_shows_provider_error(admin, monkeypatch):
 
 def test_correct_match_locks_it_and_scores_predictions(admin, db):
     match = add_match(db, -3, status=MatchStatus.LIVE, score=(1, 0))
+    match.minute = 54
     paul = db.query(User).filter_by(nickname="Paul").one()
     db.add(Prediction(user_id=paul.id, match_id=match.id, home_score=2, away_score=1))
     db.commit()
@@ -64,6 +65,7 @@ def test_correct_match_locks_it_and_scores_predictions(admin, db):
     match = db.get(Match, match.id)
     assert (match.status, match.home_score, match.away_score, match.score_locked) == (
         MatchStatus.FINISHED, 2, 1, True)
+    assert match.minute is None  # plus de minute après correction
     assert db.query(Prediction).one().points == 5
     assert "corrigé à la main" in admin.get(f"/admin/matches/{match.id}").text
 

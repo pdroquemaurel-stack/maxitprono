@@ -152,3 +152,26 @@ def test_update_live_scores_ignores_matches_of_other_providers(db):
 
     assert update_live_scores(db, provider, NOW) == 0
     assert provider.calls == []
+
+
+def test_update_live_scores_saves_then_clears_minute(db):
+    competition = add_competition(db)
+    add_match(db, competition, 1, NOW - timedelta(minutes=60))
+    playing = fixture_item(1, status="2H", goals=(1, 0), elapsed=54)
+    update_live_scores(db, FakeProvider(fixtures={61: [playing]}), NOW)
+    assert db.query(Match).one().minute == 54
+
+    finished = fixture_item(1, status="FT", goals=(2, 0), elapsed=90)
+    update_live_scores(db, FakeProvider(fixtures={61: [finished]}), NOW)
+    match = db.query(Match).one()
+    assert (match.status, match.minute) == (MatchStatus.FINISHED, None)
+
+
+def test_locked_match_keeps_no_minute(db):
+    competition = add_competition(db)
+    add_match(db, competition, 1, NOW - timedelta(minutes=60), MatchStatus.LIVE)
+    db.query(Match).one().score_locked = True
+    db.commit()
+    playing = fixture_item(1, status="2H", goals=(1, 0), elapsed=54)
+    update_live_scores(db, FakeProvider(fixtures={61: [playing]}), NOW)
+    assert db.query(Match).one().minute is None

@@ -202,6 +202,7 @@ def correct_match(match_id: int, request: Request, db: Session = Depends(get_db)
     for name, value in fields.items():
         setattr(match, name, value)
     match.score_locked = True  # la synchro ne doit pas écraser la correction
+    match.minute = None  # minute du fournisseur : plus suivie après correction
     db.commit()
     rescore_corrected_match(db, match, current_rules(db), utc_now())
     return redirect("/admin/matches?notice=admin_match_corrected")

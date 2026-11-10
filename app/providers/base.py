@@ -14,6 +14,18 @@ from sqlalchemy.orm import Session
 from app.models import ApiCallLog
 
 
+MAX_MINUTE = 130  # prolongations et arrêts de jeu compris ; au-delà, valeur jugée fausse
+
+
+def parse_minute(value) -> int | None:
+    """Minute de jeu reçue du fournisseur (entier ou texte « 54 »), sinon None (fonction pure)."""
+    if isinstance(value, str) and value.strip().isdigit():
+        value = int(value)
+    if isinstance(value, int) and not isinstance(value, bool) and 0 < value <= MAX_MINUTE:
+        return value
+    return None
+
+
 class ProviderError(Exception):
     """Fournisseur injoignable, clé manquante ou réponse en erreur."""
 

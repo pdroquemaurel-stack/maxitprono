@@ -184,3 +184,12 @@ def test_parse_match_keeps_matchday():
     assert parse_match(match_item())["matchday"] == 12
     knockout = match_item() | {"matchday": None}  # phase à élimination directe
     assert parse_match(knockout)["matchday"] is None
+
+
+def test_parse_match_minute_when_given():
+    """Offre gratuite : pas de champ « minute », le match reste « En direct » sans minute."""
+    assert parse_match(match_item(status="IN_PLAY"))["minute"] is None
+    assert parse_match({**match_item(status="IN_PLAY"), "minute": 54})["minute"] == 54
+    assert parse_match({**match_item(status="IN_PLAY"), "minute": "54"})["minute"] == 54
+    assert parse_match({**match_item(status="PAUSED"), "minute": 45})["minute"] is None
+    assert parse_match({**match_item(status="FINISHED"), "minute": 90})["minute"] is None

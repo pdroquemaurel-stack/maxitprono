@@ -13,7 +13,7 @@ from sqlalchemy.orm import Session
 from app.models import ApiCallLog
 from app.models.match import MatchStatus
 from app.providers import FOOTBALL_DATA
-from app.providers.base import ProviderError, save_call_log
+from app.providers.base import ProviderError, parse_minute, save_call_log
 
 BASE_URL = "https://api.football-data.org/v4"
 
@@ -138,6 +138,8 @@ def parse_match(item: dict) -> dict:
         "away_logo_url": away.get("crest") or "",
         "home_score": home_score,
         "away_score": away_score,
+        # Absente de l'offre gratuite (vérifié le 10 novembre 2026) : le match reste « En direct »
+        "minute": parse_minute(item.get("minute")) if item["status"] == "IN_PLAY" else None,
     }
 
 

@@ -13,7 +13,7 @@ from sqlalchemy.orm import Session
 from app.models import ApiCallLog
 from app.models.match import MatchStatus
 from app.providers import API_FOOTBALL
-from app.providers.base import ProviderError, save_call_log
+from app.providers.base import ProviderError, parse_minute, save_call_log
 from app.services.probabilities import round_to_100
 
 BASE_URL = "https://v3.football.api-sports.io"
@@ -31,6 +31,9 @@ POC_LEAGUE_IDS = {
 }
 # Championnats locaux : identifiants inconnus, on cherche par pays
 POC_COUNTRIES = ["Cameroon", "Burkina-Faso"]
+
+# Ballon en jeu : seuls ces codes ont une minute (pas la mi-temps, les pauses, les tirs au but)
+_PLAYING_CODES = ("1H", "2H", "ET", "LIVE")
 
 # Codes "short" de l'API -> nos statuts
 # https://www.api-football.com/documentation-v3#tag/Fixtures
@@ -183,6 +186,8 @@ def parse_fixture(item: dict) -> dict:
         # Score final, prolongations comprises (hors tirs au but)
         "home_score": goals["home"],
         "away_score": goals["away"],
+        "minute": (parse_minute(fixture["status"].get("elapsed"))
+                   if fixture["status"]["short"] in _PLAYING_CODES else None),
     }
 
 

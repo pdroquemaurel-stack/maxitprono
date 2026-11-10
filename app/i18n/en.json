@@ -519,5 +519,6 @@
   "month_short_9": "Sep",
   "month_short_10": "Oct",
   "month_short_11": "Nov",
-  "month_short_12": "Dec"
+  "month_short_12": "Dec",
+  "match_state_live_minute": "Live · {minute}'"
 }

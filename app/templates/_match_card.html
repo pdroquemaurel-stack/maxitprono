@@ -26,6 +26,7 @@
           {{ t('closes_in_pill') }} <span data-countdown="{{ closing_at(match.kickoff_at).isoformat() }}"
             data-fmt-days="{{ t('countdown_days') }}" data-fmt-hours="{{ t('countdown_hours') }}"
             data-fmt-minutes="{{ t('countdown_minutes') }}">{{ format_countdown(match.kickoff_at, now) }}</span>
+        {%- elif state == 'live' and match.minute %}{{ t('match_state_live_minute').format(minute=match.minute) }}
         {%- else %}{{ t('match_state_' ~ state) }}{% endif -%}
       </span>
     </span>

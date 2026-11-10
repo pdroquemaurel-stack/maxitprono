@@ -17,7 +17,7 @@ from app.services.fixtures import needs_score_update
 
 DAYS_BACK = 3  # rattrape les matchs restés sans score final
 DAYS_AHEAD = 14  # minimum : on va plus loin si l'admin ouvre plus de jours aux pronostics
-LOCKED_FIELDS = ("status", "home_score", "away_score")  # protégés après correction admin
+LOCKED_FIELDS = ("status", "home_score", "away_score", "minute")  # protégés après correction admin
 
 
 def upsert_match(db: Session, competition: Competition, fields: dict) -> Match:

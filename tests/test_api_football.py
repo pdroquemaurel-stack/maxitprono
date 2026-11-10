@@ -183,3 +183,13 @@ def test_parse_round_gives_matchday():
     assert parse_round("League Stage - 5") == 5
     assert parse_round("Round of 16") is None
     assert parse_round(None) is None
+
+
+@pytest.mark.parametrize("status, elapsed, expected", [
+    ("1H", 23, 23), ("2H", 54, 54), ("ET", 105, 105),
+    ("HT", 45, None),  # mi-temps : « En direct » sans minute
+    ("P", 120, None), ("FT", 90, None), ("NS", None, None),
+    ("2H", None, None), ("2H", 0, None), ("2H", 999, None),  # valeur absente ou incohérente
+])
+def test_parse_fixture_minute_only_while_playing(status, elapsed, expected):
+    assert parse_fixture(fixture_item(status=status, elapsed=elapsed))["minute"] == expected

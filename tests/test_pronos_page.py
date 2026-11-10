@@ -188,3 +188,15 @@ def test_english_texts(client, db_session):
     client.cookies.set("lang", "en")
     page = client.get("/matches").text
     assert "To play" in page and "My picks" in page and ">All<" in page
+
+
+def test_live_pill_shows_minute_when_known(client, db_session):
+    match = add_match(db_session, -1, status=MatchStatus.LIVE, score=(1, 0))
+    page = client.get("/matches?status=all").text
+    assert ">En direct</span>" in page  # minute inconnue
+    match.minute = 54
+    db_session.commit()
+    page = client.get("/matches?status=all").text
+    assert "En direct · 54&#39;" in page
+    client.cookies.set("lang", "en")
+    assert "Live · 54&#39;" in client.get("/matches?status=all").text
