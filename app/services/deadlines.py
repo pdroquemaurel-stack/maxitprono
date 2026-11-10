@@ -47,3 +47,19 @@ def closing_info(kickoff_at: datetime, now: datetime, tz: tzinfo) -> ClosingInfo
     if (deadline_day - today).days == 1:
         return ClosingInfo("tomorrow")
     return ClosingInfo("later", day=deadline_day)
+
+
+# --- Compte à rebours jusqu'à la clôture (« 2 j 4 h », « 1 h 42 », « 8 min ») ---
+
+@dataclass(frozen=True)
+class Countdown:
+    days: int
+    hours: int
+    minutes: int
+
+
+def countdown_to_closing(kickoff_at: datetime, now: datetime) -> Countdown:
+    """Temps restant avant la clôture du pronostic, arrondi à la minute (1 min au minimum)."""
+    remaining = max(prediction_deadline(kickoff_at) - now, timedelta(0))
+    total_minutes = max(1, int(remaining.total_seconds() // 60))
+    return Countdown(total_minutes // (24 * 60), total_minutes // 60 % 24, total_minutes % 60)

@@ -13,7 +13,7 @@
   <link rel="stylesheet" href="{{ static_url('css/style.css') }}">
   {% block head %}{% endblock %}
 </head>
-<body>
+<body{% block body_attrs %}{% endblock %}>
   <main class="content{% block main_class %}{% endblock %}">
     {% block content %}{% endblock %}
   </main>

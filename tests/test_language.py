@@ -37,7 +37,7 @@ def test_unknown_language_falls_back_to_default():
 
 def test_phone_language_is_used_without_cookie(client):
     page = client.get("/", headers={"Accept-Language": "en-GB,en;q=0.9"}).text
-    assert '<html lang="en">' in page and "English" in page
+    assert '<html lang="en">' in page and "Play for free" in page
     assert '<html lang="fr">' in client.get("/").text  # requête suivante : retour au défaut
 
 

@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icon, ball_watermark %}
+{% block title %}{{ t('app_name') }} · {{ t('guest_tagline') }}{% endblock %}
+{% block body_attrs %} class="no-tabbar"{% endblock %}
+{% block main_class %} lg home-guest{% endblock %}
+{% block content %}
+  {# 1. Héro noir #}
+  <section class="hg-hero">
+    {{ ball_watermark(220) }}
+    <div class="hg-top">
+      <span class="p-logo">Maxit <span class="p-logo-pill">Prono</span></span>
+      <p class="hg-lang" aria-label="{{ t('language_label') }}">
+        {% for code in ('fr', 'en') %}
+          {% if code == lang %}<strong aria-current="true">{{ code|upper }}</strong>
+          {% else %}<a href="/language/{{ code }}?next=/" lang="{{ code }}" hreflang="{{ code }}">{{ code|upper }}</a>{% endif %}
+          {% if not loop.last %}<span aria-hidden="true">·</span>{% endif %}
+        {% endfor %}
+      </p>
+    </div>
+    <h1 class="hg-title">{{ t('guest_title_1') }}<br><span>{{ t('guest_title_2') }}</span></h1>
+    <p class="hg-sub">{{ t('guest_subtitle') }}</p>
+    <a class="lg-btn lg-btn-orange lg-btn-big hg-cta" href="/register">{{ t('guest_play_free') }}</a>
+    <a class="hg-login" href="/login">{{ t('guest_have_account') }}</a>
+  </section>
+
+  {# 2. Comment ça marche #}
+  <section class="hg-section">
+    <h2>{{ t('guest_how') }}</h2>
+    <ol class="hg-steps">
+      <li class="h-card hg-step">
+        <span class="hg-num hg-num-orange">1</span>
+        <div><h3>{{ t('guest_step1_title') }}</h3><p class="lg-muted">{{ t('guest_step1_text') }}</p></div>
+      </li>
+      <li class="h-card hg-step">
+        <span class="hg-num hg-num-black">2</span>
+        <div><h3>{{ t('guest_step2_title') }}</h3>
+          <p class="hg-pills">
+            <span class="h-pts h-pts-exact">{{ t('guest_exact_pts').format(points=exact_points) }}</span>
+            <span class="h-pts h-pts-good">{{ t('guest_good_pts').format(points=good_points) }}</span>
+          </p></div>
+      </li>
+      <li class="h-card hg-step">
+        <span class="hg-num hg-num-peach">3</span>
+        <div><h3>{{ t('guest_step3_title') }}</h3><p class="lg-muted">{{ t('guest_step3_text') }}</p></div>
+      </li>
+    </ol>
+  </section>
+
+  {# 3. À pronostiquer : les 3 prochains matchs ouverts #}
+  {% if next_matches %}
+    <section class="hg-section">
+      <h2>{{ t('guest_to_predict') }}</h2>
+      <ul class="h-card h-list">
+        {% for match in next_matches %}
+          <li><a class="hg-match" href="/register">
+            <span class="hg-match-text">
+              <strong>{{ match.home_team }} – {{ match.away_team }}</strong>
+              <span class="lg-muted lg-small">{{ match.competition.name }} ·
+                <time datetime="{{ match.kickoff_at.isoformat() }}">{{ format_day(match.kickoff_at.astimezone(tz).date(), today) }} {{ format_time(match.kickoff_at, tz) }}</time></span>
+            </span>
+            {% if loop.first %}{% include "_countdown_pill.html" %}{% endif %}
+            {{ icon('chevron', 20) }}
+          </a></li>
+        {% endfor %}
+      </ul>
+    </section>
+  {% endif %}
+
+  {# 4. Compétition du moment #}
+  {% if featured %}
+    <section class="hg-featured">
+      <p class="hg-eyebrow">{{ t('guest_now') }}</p>
+      <h2>{{ featured.name }}</h2>
+      <p>{{ t('guest_featured_text').format(name=featured.name) }}</p>
+      <a class="lg-btn lg-btn-dark" href="/register">{{ t('guest_join_in') }}</a>
+    </section>
+  {% endif %}
+
+  {# 5. Pied de page #}
+  <footer class="hg-footer">
+    <nav aria-label="{{ t('footer_label') }}">
+      <a href="/rules">{{ t('rules_title') }}</a>
+      <a href="/help">{{ t('footer_help') }}</a>
+      <a href="/privacy">{{ t('footer_privacy') }}</a>
+      <a href="/legal">{{ t('footer_legal') }}</a>
+    </nav>
+    <p>{{ t('footer_by') }}</p>
+  </footer>
+{% endblock %}
+{% block tabbar %}{% endblock %}
+{% block scripts %}<script src="{{ static_url('js/countdown.js') }}" defer></script>{% endblock %}

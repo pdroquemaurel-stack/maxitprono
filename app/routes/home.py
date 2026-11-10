@@ -7,8 +7,10 @@ from app.db import get_db
 from app.models import User
 from app.models.types import utc_now
 from app.routes.leagues import share_links
-from app.routes.matches import matches_to_predict
+from app.routes.matches import matches_to_predict, upcoming_matches
 from app.services import league_store
+from app.services.deadlines import is_prediction_open
+from app.services.home import featured_competition
 from app.services.leaderboards import leaderboard
 from app.services.leagues import pick_league
 from app.services.settings_store import current_rules
@@ -26,7 +28,7 @@ LEAGUE_COOKIE_AGE = 365 * 24 * 3600
 def home(request: Request, db: Session = Depends(get_db),
          user: User | None = Depends(current_user)):
     if user is None:
-        return templates.TemplateResponse(request, "home.html", {"user": None})
+        return guest_home(request, db)
     now = utc_now()
     leagues = league_store.my_leagues(db, user.id)
     wanted = request.query_params.get("league") or request.cookies.get(LEAGUE_COOKIE)
@@ -57,11 +59,44 @@ def home(request: Request, db: Session = Depends(get_db),
     return response
 
 
+def guest_home(request: Request, db: Session):
+    """Accueil du visiteur : présentation, 3 prochains matchs, compétition du moment."""
+    now = utc_now()
+    open_matches = [m for m in upcoming_matches(db, now)
+                    if is_prediction_open(m.status, m.kickoff_at, now)]
+    rules = current_rules(db)
+    tz = resolve_timezone(request.cookies.get("tz"))
+    return templates.TemplateResponse(request, "home_guest.html", {
+        "user": None,
+        "now": now,
+        "tz": tz,
+        "today": now.astimezone(tz).date(),
+        "next_matches": open_matches[:3],
+        "featured": featured_competition(open_matches, now),
+        "exact_points": rules.winner_points + rules.exact_bonus,
+        "good_points": rules.winner_points,
+    })
+
+
 @router.get("/rules")
 def rules(request: Request, db: Session = Depends(get_db),
           user: User | None = Depends(current_user)):
     return templates.TemplateResponse(request, "rules.html",
                                       {"user": user, "rules": current_rules(db)})
+
+
+# Pages du pied de page pas encore rédigées
+COMING_SOON_PAGES = {"/help": "footer_help", "/privacy": "footer_privacy", "/legal": "footer_legal"}
+
+
+def coming_soon(request: Request, user: User | None = Depends(current_user)):
+    title_key = COMING_SOON_PAGES[request.url.path]
+    return templates.TemplateResponse(request, "coming_soon.html",
+                                      {"user": user, "title_key": title_key})
+
+
+for _path in COMING_SOON_PAGES:
+    router.add_api_route(_path, coming_soon, methods=["GET"])
 
 
 @router.get("/health")

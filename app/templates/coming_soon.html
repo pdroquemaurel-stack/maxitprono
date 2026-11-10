@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% block title %}{{ t(title_key) }} · {{ t('app_name') }}{% endblock %}
+{% block main_class %} profile{% endblock %}
+{% block content %}
+  <header class="p-header">
+    <a class="p-icon-button" href="/" aria-label="{{ t('back_home') }}">{{ icon('back') }}</a>
+    <h1 class="p-page-title">{{ t(title_key) }}</h1>
+    <span class="p-icon-button" aria-hidden="true"></span>
+  </header>
+  <p class="p-card p-muted">{{ t('coming_soon') }}</p>
+{% endblock %}

@@ -1993,3 +1993,169 @@ a.p-logo { display: inline-flex; align-items: center; gap: 4px; min-height: 44px
 .lg-danger summary { display: flex; align-items: center; min-height: 44px; color: var(--lg-red); font-weight: 700; cursor: pointer; }
 
 .lg-member-list form { margin: 0 0 0 auto; }
+
+/* ==========================================================================
+   Accueil (visiteur et joueur) : même charte que Profil et Ligues (classe .lg)
+   ========================================================================== */
+.h-card { display: block; padding: 16px; border-radius: 16px; background: #FFFFFF; color: var(--lg-ink); }
+
+.h-list { margin: 0; padding: 0 16px; list-style: none; }
+
+.h-list > li + li { border-top: 1px solid var(--lg-bar); }
+
+/* Pastilles de points : +3 score exact, +1 bon résultat, 0 */
+.h-pts {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.h-pts-exact { background: #0E7A43; color: #FFFFFF; }
+.h-pts-good { background: #D6F2E1; color: #0E5A33; }
+.h-pts-miss { background: #FDE3E1; color: #B42318; }
+
+/* Compte à rebours en pastille orange pâle */
+.h-countdown {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  min-height: 26px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: var(--lg-soft-2);
+  color: var(--lg-soft-text);
+  font-size: 12px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* --- Accueil du visiteur --- */
+.content.home-guest { padding: 0 0 24px; }
+
+.home-guest > :not(.hg-hero) { margin-left: 16px; margin-right: 16px; }
+
+.hg-hero {
+  position: relative;
+  overflow: hidden;
+  padding: 12px 16px 28px;
+  background: #111111;
+  color: #FFFFFF;
+}
+
+.hg-hero > :not(.hg-ball) { position: relative; }
+
+.hg-ball { position: absolute; top: 70px; right: -70px; color: #23262E; }
+
+.hg-top { display: flex; align-items: center; justify-content: space-between; min-height: 44px; }
+
+.hg-top .p-logo { color: #FFFFFF; }
+
+.hg-lang { display: flex; align-items: center; gap: 6px; margin: 0; color: #C9CCD6; font-size: 14px; }
+
+.hg-lang a, .hg-lang strong {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  color: #C9CCD6;
+  text-decoration: none;
+}
+
+.hg-lang strong { color: #FFFFFF; }
+
+.lg .hg-title { margin: 28px 0 12px; font-size: 34px; font-weight: 800; line-height: 1.1; letter-spacing: -0.035em; }
+
+.hg-title span { color: var(--orange); }
+
+.hg-sub { margin: 0; color: #C9CCD6; font-size: 15px; max-width: 30ch; }
+
+.hg-cta { margin-top: 24px; }
+
+.hg-login {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  margin-top: 8px;
+  color: #FFFFFF;
+  font-weight: 600;
+}
+
+.home-guest .hg-section { margin-top: 24px; }
+
+.hg-section h2 { margin-bottom: 10px; }
+
+.hg-steps { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+
+.hg-step { display: flex; align-items: flex-start; gap: 12px; }
+
+.hg-step h3 { margin: 0 0 4px; font-size: 16px; }
+
+.hg-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  font: 800 18px var(--font-title);
+}
+.hg-num-orange { background: #FF7900; color: #000000; }
+.hg-num-black { background: #111111; color: #FFFFFF; }
+.hg-num-peach { background: #FFE7D1; color: #7A3900; }
+
+.hg-pills { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 0; }
+
+.hg-match {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 60px;
+  padding: 8px 0;
+  color: var(--lg-ink);
+  text-decoration: none;
+}
+
+.hg-match-text { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+
+.hg-match-text strong, .hg-match-text span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.hg-match > svg { flex-shrink: 0; color: var(--lg-muted); }
+
+.home-guest .hg-featured {
+  margin-top: 24px;
+  padding: 20px;
+  border-radius: 16px;
+  background: #FF7900;
+  color: #000000;
+}
+
+.hg-eyebrow { margin: 0 0 4px; font-size: 12px; font-weight: 800; letter-spacing: 0.08em; }
+
+.lg .hg-featured h2 { font-size: 22px; font-weight: 800; }
+
+.hg-featured p:not(.hg-eyebrow) { margin: 6px 0 0; }
+
+.home-guest .hg-footer {
+  margin: 28px 0 0;
+  padding: 20px 16px;
+  background: #FFFFFF;
+  color: var(--lg-muted);
+  font-size: 13px;
+  text-align: center;
+}
+
+.hg-footer nav { display: flex; flex-wrap: wrap; justify-content: center; column-gap: 16px; }
+
+.hg-footer a { display: inline-flex; align-items: center; min-height: 44px; color: var(--lg-ink); }
+
+.hg-footer p { margin: 8px 0 0; }

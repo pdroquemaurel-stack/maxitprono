@@ -10,7 +10,7 @@ from datetime import date, datetime, tzinfo
 from pathlib import Path
 
 from app.config import settings
-from app.services.deadlines import closing_info
+from app.services.deadlines import closing_info, countdown_to_closing
 
 I18N_DIR = Path(__file__).parent
 SUPPORTED_LANGUAGES = ("fr", "en")
@@ -86,6 +86,16 @@ def closing_when(kickoff_at: datetime, now: datetime, tz: tzinfo,
     if info.kind == "tomorrow":
         return translate("tomorrow", lang).lower()
     return translate(f"weekday_{info.day.weekday()}", lang)
+
+
+def format_countdown(kickoff_at: datetime, now: datetime, lang: str | None = None) -> str:
+    """Temps avant la clôture : « 2 j 4 h », « 1 h 42 », « 8 min »."""
+    left = countdown_to_closing(kickoff_at, now)
+    if left.days:
+        return translate("countdown_days", lang).format(days=left.days, hours=left.hours)
+    if left.hours:
+        return translate("countdown_hours", lang).format(hours=left.hours, minutes=f"{left.minutes:02d}")
+    return translate("countdown_minutes", lang).format(minutes=left.minutes)
 
 
 def time_ago(moment: datetime, now: datetime, lang: str | None = None) -> str:

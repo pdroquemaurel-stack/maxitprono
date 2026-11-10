@@ -41,6 +41,18 @@
     <circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>
   {% elif name == 'ball' %}
     <circle cx="12" cy="12" r="9"/><path d="M12 7l4 3-1.5 4.5h-5L8 10z"/><path d="M12 3v4M16 10l4.5-1.5M14.5 14.5l2.5 4M9.5 14.5 7 18.5M8 10 3.5 8.5"/>
+  {% elif name == 'lock_dashed' %}
+    <rect x="5" y="11" width="14" height="10" rx="2" stroke-dasharray="3 2.5"/><path d="M8 11V7a4 4 0 0 1 8 0v4" stroke-dasharray="3 2.5"/>
   {% endif %}
+</svg>
+{% endmacro %}
+
+{# Ballon décoratif en filigrane du héro (trait fin, couleur #23262E via la classe) #}
+{% macro ball_watermark(size=220) %}
+<svg class="hg-ball" viewBox="0 0 100 100" width="{{ size }}" height="{{ size }}" aria-hidden="true" fill="none"
+     stroke="currentColor" stroke-width="3" stroke-linejoin="round">
+  <circle cx="50" cy="50" r="46"/>
+  <path d="M50 30l17 12-6.5 20h-21L33 42z"/>
+  <path d="M50 30V8M67 42l20-8M60.5 62l12 18M39.5 62l-12 18M33 42l-20-8"/>
 </svg>
 {% endmacro %}

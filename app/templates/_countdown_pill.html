@@ -1,0 +1,4 @@
+{# Pastille « Ferme dans 1 h 42 », mise à jour par static/js/countdown.js. Variables : match, now #}
+<span class="h-countdown">{{ icon('clock', 16) }}<span data-countdown="{{ closing_at(match.kickoff_at).isoformat() }}"
+  data-fmt-days="{{ t('countdown_days') }}" data-fmt-hours="{{ t('countdown_hours') }}"
+  data-fmt-minutes="{{ t('countdown_minutes') }}">{{ format_countdown(match.kickoff_at, now) }}</span></span>
