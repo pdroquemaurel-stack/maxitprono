@@ -1,6 +1,6 @@
 # MaxitProno — État des lieux
 
-Mis à jour le 9 novembre 2026, après la refonte des écrans Ligues (lot 1). **Toutes les étapes du découpage (SPEC §12) sont faites**.
+Mis à jour le 10 novembre 2026, après la nouvelle barre de navigation, les deux accueils (visiteur, joueur) et la stabilisation du Profil. **Toutes les étapes du découpage (SPEC §12) sont faites**.
 
 ## 1. Avancement des étapes (SPEC §12)
 
@@ -53,7 +53,7 @@ Hors découpage : `scripts/seed_demo.py` (données de démo sans API ; les joueu
 - **Évolution des places** : classement actuel comparé à celui de la veille du dernier jour de matchs comptés (comme sur le Profil). **Joueur de la semaine / Lanterne rouge** : semaine (lundi-dimanche) de ce dernier jour ; pas de lanterne rouge s'il n'y a qu'un joueur.
 - **Réglages** (`/leagues/{id}/settings`) : l'admin modifie nom, couleur et compétitions, retire un membre, supprime la ligue (confirmation) ; il ne peut pas la quitter. Un membre y voit la liste et peut quitter. Un non-membre reçoit une 404.
 - **Classement de la ligue** : membres seulement, et pour chacun les matchs commencés **après son arrivée** (`league_members.joined_at`), dans les **compétitions de la ligue** (`league_competition_filter`, appliqué partout : accueil, onglet « Ligue » des classements, Profil, fil d'activité). Onglet « Ligue » en tête des classements, ouvert par défaut pour un membre.
-- **Accueil « Ma ligue »** : sélecteur de ligue (cookie `league`), podium, fil « Dans la ligue », bouton d'invitation. L'onglet « Ma ligue » de la barre du bas est aussi actif sur `/leagues`, `/join` et `/j/`.
+- **Ligue principale** (cookie `league`) : la dernière ligue ouverte (`/leagues/{id}`), sinon la plus récemment rejointe ; `/?league=<id>` marche encore. Elle sert à l'accueil (mini-carte), au Profil, aux Résultats et à l'onglet « Ligue » des classements. L'onglet « Ligues » de la barre du bas est actif sur `/leagues`, `/join` et `/j/`.
 - **Match clôturé** : carte « Les pronos de la ligue » (ligue choisie sur l'accueil), seulement après la clôture.
 - **Migration** `a7b8c9d0e1f2` : `leagues.color` (orange par défaut) et `league_competitions`. Les ligues existantes deviennent orange et comptent toutes les compétitions.
 
@@ -97,9 +97,10 @@ Hors découpage : `scripts/seed_demo.py` (données de démo sans API ; les joueu
 - **Évolution dans ma ligue** : rang actuel comparé au rang avant ma dernière journée jouée (2 requêtes de classement).
 - **Badges** calculés à la volée sur toute la carrière (pas filtrés par la période) : Prophète (3 exacts), Remontada (+5 places au général en une journée, d'après l'historique des rangs), Rassembleur (au moins un ami entré dans une ligue par mon lien d'invitation), Sans faute (5 pronos réussis d'affilée).
 - **Historique des rangs** (`rank_snapshots`, `app/services/rank_history.py`) : rang et points au classement général à la fin de chaque journée de matchs (jour UTC). Refait par les fonctions de calcul des points elles-mêmes (`app/jobs/score_predictions.py`) : après une synchro, à partir de la plus ancienne journée touchée ; après une correction admin, à partir du jour du match ; après un changement de barème, en entier. Table vide (premier passage après déploiement) : tout est reconstruit.
-- **`/profile/edit`** (bouton « Modifier » et engrenage) : photo avec aperçu, pseudo (aussi identifiant de connexion, unicité vérifiée), pays, langue, mes pronostics, mes ligues, règlement, Administration (admins), déconnexion. Le formulaire poste toujours sur `POST /profile`.
+- **`/profile/edit`** (seul accès : l'engrenage, `aria-label` « Paramètres et profil ») : photo avec aperçu, pseudo (aussi identifiant de connexion, unicité vérifiée), pays, langue, mes pronostics, mes ligues, règlement, Administration (admins), déconnexion. Le formulaire poste toujours sur `POST /profile`.
 - **`/players/{id}`** (page publique, sans compte) : identité, saison (anneau, points, tuiles, répartition), forme, badges ; aperçu WhatsApp (`og:title`, `og:description`). « Partager mes stats » envoie ce lien, avec `?league=CODE` si le joueur a une ligue : la page propose alors « Rejoindre la ligue » (lien avec `?ref=` du joueur). Cartes communes au profil : `_stats_identity`, `_stats_hero`, `_stats_tiles`, `_stats_form`, `_stats_badges`.
 - **`/profile/history`** : l'historique des pronostics, auparavant en bas du profil.
+- **Mise en page immobile d'un filtre à l'autre** : chiffres tabulaires, grilles `repeat(N, minmax(0, 1fr))`, hauteurs réservées, textes variables sur une ligne (`.p-one-line`), ligne de hauteur fixe sous le sélecteur (choix de la compétition ou rappel de la période). États vides de même hauteur : « Pas encore de prono sur cette période », Forme toujours en 10 cases, « Par compétition » garde les lignes de toute la carrière (`stable_competition_rows`). Le changement de filtre recharge la page : la transition de 200 ms de l'anneau ne se voit donc pas. Vérifié dans Chromium à 390 et 360 px (67 éléments : mêmes positions et tailles sur les 3 filtres, deux allers-retours).
 - Polices de l'app (Outfit pour les titres et chiffres, DM Sans pour le texte) : pas d'Inter ni de Google Fonts, pour garder une seule charte, une page légère en 3G et des polices disponibles hors connexion.
 
 ## 3. Déploiement
@@ -112,25 +113,34 @@ Hors découpage : `scripts/seed_demo.py` (données de démo sans API ; les joueu
 - `.env` local (noms seulement) : `DATA_PROVIDER`, `FOOTBALL_DATA_API_KEY`, `API_FOOTBALL_KEY`.
 - **Tâches planifiées** : GitHub Action `.github/workflows/sync.yml` (pas de planificateur dans l'app). GitHub peut retarder les tâches de quelques minutes et les suspend après 60 jours sans commit.
 
+## 2 octies. Accueil (10 novembre)
+
+- **Barre du bas** : Accueil · Ligues · Pronos · Classements · Profil. `/results` reste accessible (lien depuis l'accueil).
+- **Visiteur** (`home_guest.html`, sans barre du bas) : 3 prochains matchs ouverts (lien vers `/register`, compte à rebours sur le plus proche), **compétition du moment** = la plus chargée des 7 prochains jours parmi les compétitions actives (`app/services/home.py`), barème réel du jeu. Pied de page : Règles, puis `/help`, `/privacy`, `/legal`, qui affichent « Contenu à venir » (`coming_soon.html`).
+- **Joueur** (`home_player.html`) : la veille = jour du fuseau du joueur (`local_day_bounds`) ; places gagnées d'après `rank_snapshots` (classement général, `places_gained`) ; pronos à faire = 3 premiers matchs ouverts sans prono, enregistrés par « Valider mes pronos » (`predictions.js`, `data-mode="button"`, même `POST /matches/{id}/prediction`) ; « Chez les copains » = 3 derniers événements de toutes mes ligues, sans les miens ni les doublons (`friends_feed`) ; prochain badge avec « N sur M » (`badge_progress`).
+- **Compte à rebours** jusqu'à la clôture : `countdown_to_closing` / `format_countdown`, mis à jour chaque minute par `static/js/countdown.js`.
+- **Non fait faute de données** : cloche de notifications (aucun système de notifications ; à prévoir avec une date de « dernière visite »). Abréviations calculées par `team_initials` (« MU » et non « MUN ») : le `tla` de football-data.org n'est pas stocké.
+
 ## 4. Charte DESIGN.md
 
 Socle en place (`app/static/css/style.css`) : variables de couleur, polices Outfit et DM Sans (hébergées localement, pas via Google Fonts — plus léger), cartes sans ombre, badges, code couleur des scores (`score_colors.py` + `score-colors.js`), barre de navigation à 5 onglets.
 
 | Écran | État |
 |-------|------|
-| Accueil (Ma ligue) | **Conforme** : sélecteur de ligue, podium de la ligue, carte « matchs sans prono », fil « Dans la ligue », bouton d'invitation WhatsApp (bordure orange pointillée) |
-| Pronos (saisie directe) | **Conforme** : cases de score colorées, état « Ferme dans… », bouton collé en bas, ligne 1/N/2, écussons 36 px au-dessus des noms |
+| Accueil (visiteur, joueur) | **Refait** le 10 novembre (charte Profil / Ligues) ; vérifié à 390 et 360 px |
+| Pronos (saisie directe) | **Refait** : carte commune avec l'accueil (heure, tendance « 62 % voient PSG », écusson + abréviation + nom, cases 44 × 44), enregistrement automatique |
 | Match clôturé | **Conforme** : carte score final (écussons 44 px), bandeau du prono, pronos des membres de la ligue avec leurs points |
 | Classements | **Conforme** (liste, onglets) avec l'onglet « Ligue » ; les 5 onglets tiennent à 360 px |
 | Résultats | Conforme au style général (pas de maquette dédiée), avec écussons |
 | Ligues (mes ligues, détail, création, réglages) | **Refait** le 9 novembre avec la charte de la page Profil ; vérifié à 390 px |
-| Profil, connexion, inscription, règles | Composants de base (cartes, formulaires, boutons) ; pas de maquette dédiée |
+| Profil | Charte Profil ; mise en page immobile entre filtres |
+| Connexion, inscription, règles | Composants de base (cartes, formulaires, boutons) ; pas de maquette dédiée |
 
 Écussons d'équipes (`_crest.html`) : logo du fournisseur chargé en différé (`loading="lazy"`), directement depuis le site du fournisseur (pas de copie locale) ; initiales en dessous (`app/services/teams.py`), visibles s'il n'y a pas de logo ou s'il ne charge pas. Affichés sur les cartes de pronos, la liste des résultats et l'écran « Match clôturé ».
 
 ## 5. Tests
 
-`pytest` (via `.venv`, **Python 3.12.3**) : **579 tests passent, 0 échec**, 1 avertissement (dépréciation `httpx` dans le TestClient de Starlette).
+`pytest` (via `.venv`, **Python 3.12.3**) : **604 tests passent, 0 échec**, 1 avertissement (dépréciation `httpx` dans le TestClient de Starlette).
 
 ## 6. Incohérences et dettes
 

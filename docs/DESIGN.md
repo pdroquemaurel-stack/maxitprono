@@ -57,16 +57,18 @@ Règles :
 ## 5. Composants
 - **Bouton principal** : hauteur 54 px, fond `--orange`, texte noir 16 px gras, pleine largeur, collé en bas d'écran quand il valide une liste.
 - **Badge « à faire »** : fond `--orange`, texte noir, 13 px gras (ex. « 2 à faire »).
-- **Carte match (saisie)** : ligne compétition · heure + état (« Ferme dans 1 h 42 » en `--orange-text`, « Enregistré » en `--muted`) ; grille `nom domicile | 2 cases de score | nom extérieur` ; ligne des pourcentages « 1 x % · N x % · 2 x % ».
-- **Case de score** : 44×48 px, Outfit 22 px, couleur, bordure et fond selon le code gagnant/perdant/nul, recalculés à chaque saisie.
+- **Carte match (saisie)** (`_match_card.html`, partagée par la page Pronos et l'accueil) : en haut l'heure en gras puis la compétition, à droite la tendance (« 62 % voient PSG », ou « PSG favori · 55 % » si les pourcentages viennent du fournisseur) ; grille `écusson + abréviation / nom complet | 2 cases de score | nom complet / abréviation + écusson`, colonnes d'équipes de largeur égale ; sous la grille, l'état (« Ferme dans 1 h 42 » en `--orange-text`, « Enregistré » en `--muted`). Sans logo : pastille ronde aux initiales.
+- **Case de score** : 44×44 px, Outfit 22 px, couleur, bordure et fond selon le code gagnant/perdant/nul, recalculés à chaque saisie.
 - **Podium** : carte `--ink`. 1er en orange (marche + avatar, texte noir), 2e et 3e en `--ink-2`. Le joueur courant a un contour orange sur son avatar.
 - **Carte score final** : carte `--ink`, score en 48 px coloré avec les variantes « on dark » ; bandeau orange « Ton prono : x – y, score exact ! +5 » si score exact.
-- **Badges de points** : score exact = fond `--orange` texte noir ; bon vainqueur = fond `--orange-soft` texte `#7A3600` ; 0 point = fond `#F1F2F6` texte `--muted`.
+- **Badges de points** (accueil, Ligues, Profil) : score exact = fond `#0E7A43` texte blanc ; bon résultat = fond `#D6F2E1` texte `#0E5A33` ; 0 point = fond `#FDE3E1` texte `#B42318`. Les valeurs affichées sont celles du barème réglé dans le back-office (5 / 3 par défaut).
 - **Avatars** : initiales sur fond `--orange-soft`, texte `--orange-text` (en attendant les photos de profil).
-- **Barre de navigation** : 5 onglets (Ma ligue, Pronos, Classements, Résultats, Profil), icônes trait 2 px, actif en `--orange-text`, inactifs en `--muted`.
+- **Barre de navigation** : 5 onglets (Accueil `/`, Ligues `/leagues`, Pronos `/matches`, Classements `/leaderboard`, Profil `/profile`), fond blanc, bordure haute `#E7E9F0`, icônes trait 2 px ; actif : icône `#FF7900` et libellé gras `#111111`, inactifs `#4A4F5C`. Absente de l'accueil du visiteur. `/results` n'a plus d'onglet (lien « Mes résultats d'hier » de l'accueil).
 - **Écussons** : logos d'équipes fournis par API-Football (mis en cache), 36–44 px ; à défaut, initiales.
 
 ## 6. Écrans de référence
-1. **Accueil (Ma ligue)** : sélecteur de ligue, podium, carte « X matchs sans prono », fil d'activité de la ligue, bouton d'invitation WhatsApp (bordure orange pointillée).
+1. **Accueil** (la maquette `F-accueil.png` « Ma ligue » est remplacée) :
+   - *visiteur* : héro noir (titre 34 px, « Jouer gratuitement », « J'ai déjà un compte », ballon en filigrane `#23262E`), « Comment ça marche » en 3 cartes numérotées, « À pronostiquer » (3 prochains matchs ouverts), carte orange « Compétition du moment », pied de page blanc ;
+   - *joueur* : logo + avatar 36 px, « Salut [pseudo] » et la veille, 3 mini-cartes (ma ligue principale, points, réussite), bloc « Pronos à faire » à bordure orange 2 px avec les cartes de match et « Valider mes pronos », « Mes résultats d'hier », carrousel « Mes ligues » (cartes de 200 px, dernière en pointillés), « Chez les copains », prochain badge.
 2. **Pronos (saisie directe)** : liste des matchs de la journée avec cases de score, bouton « Enregistrer mes pronos ».
 3. **Match clôturé** : score final, résultat de mon prono, pronos de tous les membres de la ligue avec leurs points.
