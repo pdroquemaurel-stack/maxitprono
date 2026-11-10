@@ -111,3 +111,12 @@ def test_single_matchday():
     assert stats.single_matchday([on(12), on(4, "Ligue des champions")]) is None
     assert stats.single_matchday([on(12), on(None)]) is None
     assert stats.single_matchday([]) is None
+
+
+def test_stable_competition_rows_keep_career_order_with_period_values():
+    from app.services.profile_stats import CompetitionStat, stable_competition_rows
+    career = [CompetitionStat("Ligue 1", 9, 50), CompetitionStat("CAN", 4, 75)]
+    period = [CompetitionStat("CAN", 2, 100)]
+    assert stable_competition_rows(period, career) == [CompetitionStat("Ligue 1", 0, 0),
+                                                       CompetitionStat("CAN", 2, 100)]
+    assert stable_competition_rows([], []) == []

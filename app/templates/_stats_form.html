@@ -1,19 +1,21 @@
-{# Forme et séries. Variables : form, current_streak, best_streak, history_url (facultatif) #}
+{# Forme et séries. Variables : form, current_streak, best_streak, history_url et form_empty_key (facultatifs) #}
   <section class="p-card">
     <div class="p-card-head">
       <h2>{{ t('profile_form') }}</h2>
       {% if history_url %}<a href="{{ history_url }}">{{ t('profile_history_link') }}</a>{% endif %}
     </div>
+    {# Toujours 10 cases (vides s'il manque des pronos) : même hauteur pour tous les filtres #}
+    <ol class="p-form">
+      {% for outcome in form %}<li class="p-form-{{ outcome }}" title="{{ t('profile_outcome_' ~ outcome) }}">{{ t('profile_letter_' ~ outcome) }}</li>{% endfor %}
+      {% for _ in range(10 - form|length) %}<li class="p-form-empty" aria-hidden="true"></li>{% endfor %}
+    </ol>
     {% if form %}
-      <ol class="p-form">
-        {% for outcome in form %}<li class="p-form-{{ outcome }}" title="{{ t('profile_outcome_' ~ outcome) }}">{{ t('profile_letter_' ~ outcome) }}</li>{% endfor %}
-      </ol>
-      <p class="p-note">
+      <p class="p-note p-one-line">
         <span class="p-letter p-form-exact">{{ t('profile_letter_exact') }}</span> {{ t('profile_outcome_exact') }}
         <span class="p-letter p-form-good">{{ t('profile_letter_good') }}</span> {{ t('profile_outcome_good') }}
         <span class="p-letter p-form-miss">{{ t('profile_letter_miss') }}</span> {{ t('profile_outcome_miss') }}
       </p>
-    {% else %}<p class="p-muted">{{ t('profile_form_empty') }}</p>{% endif %}
+    {% else %}<p class="p-note p-one-line">{{ t(form_empty_key or 'profile_form_empty') }}</p>{% endif %}
     <div class="p-tiles p-tiles-2">
       <div class="p-tile p-tile-soft"><strong>{{ current_streak }}</strong><span>{{ t('profile_current_streak') }}</span></div>
       <div class="p-tile p-tile-soft"><strong>{{ best_streak }}</strong><span>{{ t('profile_best_streak') }}</span></div>

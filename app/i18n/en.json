@@ -264,8 +264,7 @@
   "prediction_saving": "Saving…",
   "prediction_offline": "Not saved: check your connection, the prediction will be sent again automatically.",
   "predictions_autosave_hint": "Type one digit per box: each prediction saves itself as soon as both scores are filled in.",
-  "profile_settings": "Settings",
-  "profile_edit": "Edit",
+  "profile_settings": "Settings and profile",
   "profile_edit_title": "Edit my profile",
   "profile_back": "Back to profile",
   "profile_account": "My account",
@@ -314,7 +313,7 @@
   "profile_by_competition": "By competition",
   "profile_competition_line": "{count} predictions · {rate}%",
   "profile_strongest": "Your strongest competition:",
-  "profile_strongest_none": "Your strongest competition will show after 5 predictions in one competition.",
+  "profile_strongest_none": "Strongest competition: after 5 picks in one",
   "profile_badges": "Badges",
   "profile_badge_locked": "locked",
   "profile_next_badge": "Next: {badge} — {rule} ({count} to go)",
@@ -479,5 +478,9 @@
   "home_create_or_join_short": "Create or join",
   "home_friends": "Among friends",
   "home_next_badge": "Next badge",
-  "home_badge_progress": "{done} of {goal}"
+  "home_badge_progress": "{done} of {goal}",
+  "profile_period_hint_season": "All your predictions on finished matches",
+  "profile_period_hint_week": "This week's matches, Monday to Sunday",
+  "profile_period_empty": "No prediction yet for this period",
+  "profile_period_hint_competition": "No competition right now"
 }

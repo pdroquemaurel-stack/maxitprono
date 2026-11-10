@@ -115,6 +115,15 @@ def by_competition(picks: list[PlayedPick]) -> list[CompetitionStat]:
     return sorted(stats, key=lambda stat: (-stat.played, stat.name))
 
 
+def stable_competition_rows(period: list[CompetitionStat],
+                            career: list[CompetitionStat]) -> list[CompetitionStat]:
+    """Mêmes lignes « Par compétition » pour tous les filtres (la page ne bouge pas) :
+    les compétitions de toute la carrière, dans le même ordre, avec les chiffres de la
+    période (0 si aucun prono sur la période)."""
+    in_period = {stat.name: stat for stat in period}
+    return [in_period.get(stat.name, CompetitionStat(stat.name, 0, 0)) for stat in career]
+
+
 def strongest_competition(stats: list[CompetitionStat],
                           min_played: int = STRONG_MIN_PLAYED) -> CompetitionStat | None:
     """Meilleur taux de réussite parmi les compétitions d'au moins `min_played` pronos."""

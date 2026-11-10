@@ -57,6 +57,7 @@ def profile(request: Request, db: Session = Depends(get_db), user: User = Depend
              and (competition_id is None or pick.competition_id == competition_id)]
     outcomes = stats.chronological_outcomes(picks)
     competition_stats = stats.by_competition(picks)
+    career_competitions = stats.by_competition(all_picks)
     if period == "week":
         context["matchday"] = stats.single_matchday(picks)
     context.update(
@@ -64,11 +65,11 @@ def profile(request: Request, db: Session = Depends(get_db), user: User = Depend
         form=stats.recent_form(outcomes),
         current_streak=stats.current_streak(outcomes),
         best_streak=stats.best_streak(outcomes),
-        competition_stats=competition_stats,
+        competition_rows=stats.stable_competition_rows(competition_stats, career_competitions),
         strongest=stats.strongest_competition(competition_stats),
+        has_played=bool(all_picks),
     )
-    if period != "competition" or competition_id:
-        context.update(rankings(request, db, user, picks, start, end, competition_id))
+    context.update(rankings(request, db, user, picks, start, end, competition_id))
     context.update(badges_context(db, user, all_picks))
     context["share_stats_url"] = public_url(request, user, context.get("league"))
     return templates.TemplateResponse(request, "profile.html", context)

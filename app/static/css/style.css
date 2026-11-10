@@ -1108,25 +1108,10 @@ a.p-logo { display: inline-flex; align-items: center; gap: 4px; min-height: 44px
   white-space: nowrap;
 }
 
-.p-edit {
-  display: inline-flex;
-  align-items: center;
-  min-height: 44px;
-  padding: 0 14px;
-  flex-shrink: 0;
-  border: 1px solid #D5D8E5;
-  border-radius: 12px;
-  background: #FFFFFF;
-  color: var(--p-ink);
-  font-size: 14px;
-  font-weight: 600;
-  text-decoration: none;
-}
-
 /* 3. Sélecteur de période */
 .p-segments {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));  /* largeur fixe : le gras de l'onglet actif n'élargit rien */
   gap: 4px;
   padding: 4px;
   border-radius: 14px;
@@ -1152,9 +1137,29 @@ a.p-logo { display: inline-flex; align-items: center; gap: 4px; min-height: 44px
   box-shadow: 0 1px 3px rgba(17, 17, 17, 0.12);
 }
 
-.p-competition-pick { margin-top: 8px; }
+/* Ligne sous le sélecteur : même hauteur pour les 3 filtres */
+.profile .p-competition-slot { display: flex; align-items: center; height: 52px; margin-top: 8px; }
 
-.p-competition-pick select { background: #FFFFFF; }
+.p-competition-pick { width: 100%; }
+
+.p-competition-pick select { width: 100%; height: 44px; margin: 0; background: #FFFFFF; }
+
+.p-period-hint {
+  width: 100%;
+  margin: 0;
+  overflow: hidden;
+  color: var(--p-muted);
+  font-size: 13px;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Chiffres de largeur égale partout sur la page (points, %, compteurs, rangs) */
+.content.profile { font-variant-numeric: tabular-nums; }
+
+/* Texte variable sur une ligne de hauteur réservée */
+.p-one-line { height: 20px; overflow: hidden; line-height: 20px; text-overflow: ellipsis; white-space: nowrap; }
 
 /* 4. Carte héro */
 .p-hero {
@@ -1173,22 +1178,31 @@ a.p-logo { display: inline-flex; align-items: center; gap: 4px; min-height: 44px
 
 .p-ring-label { fill: #C9CCD6; font-size: 12px; }
 
-.p-hero-text { min-width: 0; }
+.p-ring-arc { transition: stroke-dashoffset 200ms ease; }
+
+.p-hero-text { flex: 1; min-width: 0; }
 
 .p-hero-text p { margin: 0; }
 
 .p-hero-label { color: #C9CCD6; font-size: 14px; }
 
-.p-hero-points { color: var(--orange); font-size: 40px; font-weight: 800; line-height: 1.1; }
+.p-hero-points { height: 44px; color: var(--orange); font-size: 40px; font-weight: 800; line-height: 1.1; white-space: nowrap; }
 
-.p-hero-sub { color: #C9CCD6; font-size: 13px; overflow-wrap: anywhere; }
+.p-hero-sub {
+  height: 19px;
+  overflow: hidden;
+  color: #C9CCD6;
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 
 .p-empty { font-weight: 600; }
 
 /* 5. Tuiles KPI */
-.p-tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.p-tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
 
-.p-tiles-2 { grid-template-columns: repeat(2, 1fr); margin-top: 12px; }
+.p-tiles-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 12px; }
 
 .p-tile {
   display: flex;
@@ -1201,9 +1215,9 @@ a.p-logo { display: inline-flex; align-items: center; gap: 4px; min-height: 44px
 
 .p-tile-soft { background: var(--bg); }
 
-.p-tile strong { font-size: 26px; font-weight: 800; line-height: 1.1; }
+.p-tile strong { height: 29px; font-size: 26px; font-weight: 800; line-height: 1.1; white-space: nowrap; }
 
-.p-tile span { color: var(--p-muted); font-size: 12px; line-height: 1.25; }
+.p-tile span { overflow: hidden; color: var(--p-muted); font-size: 12px; line-height: 1.25; text-overflow: ellipsis; white-space: nowrap; }
 
 .p-exact-text { color: var(--p-exact); }
 
@@ -1217,6 +1231,8 @@ a.p-logo { display: inline-flex; align-items: center; gap: 4px; min-height: 44px
   background: var(--p-bar);
 }
 
+.p-stack span { transition: width 200ms ease; }
+
 .p-stack .p-exact { background: var(--p-exact); }
 
 .p-stack .p-good { background: var(--p-good); }
@@ -1225,7 +1241,7 @@ a.p-logo { display: inline-flex; align-items: center; gap: 4px; min-height: 44px
 
 .p-legend li { display: flex; align-items: center; gap: 8px; padding: 4px 0; font-size: 14px; }
 
-.p-legend strong { margin-left: auto; }
+.p-legend strong { min-width: 5ch; margin-left: auto; text-align: right; }  /* « 100 % » */
 
 .p-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
 
@@ -1236,13 +1252,14 @@ a.p-logo { display: inline-flex; align-items: center; gap: 4px; min-height: 44px
 .p-dot.p-miss { background: var(--p-bar); }
 
 /* 7. Mes classements */
-.p-ranks { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.p-ranks { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
 
 .p-rank {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  min-height: 88px;
+  height: 88px;
+  min-width: 0;
   padding: 10px;
   border-radius: 12px;
   background: var(--bg);
@@ -1253,17 +1270,17 @@ a.p-logo { display: inline-flex; align-items: center; gap: 4px; min-height: 44px
 
 .p-rank-league { background: #FFF3E8; }
 
-.p-rank-label { color: var(--p-muted); font-size: 12px; }
+.p-rank-label { overflow: hidden; color: var(--p-muted); font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
 
-.p-rank-value { font-size: 22px; font-weight: 800; }
+.p-rank-value { height: 30px; font-size: 22px; font-weight: 800; white-space: nowrap; }
 
 .p-rank-value small { color: var(--p-muted); font-size: 13px; font-weight: 600; }
 
-.p-rank-none { font-size: 13px; font-weight: 600; }
+.p-rank-none { height: 30px; overflow: hidden; font-size: 13px; font-weight: 600; line-height: 15px; }
 
-.p-up { color: var(--p-exact); font-size: 12px; font-weight: 700; }
+.p-up { color: var(--p-exact); font-size: 12px; font-weight: 700; white-space: nowrap; }
 
-.p-down { color: var(--p-miss); font-size: 12px; font-weight: 700; }
+.p-down { color: var(--p-miss); font-size: 12px; font-weight: 700; white-space: nowrap; }
 
 /* 8. Forme */
 .p-form {
@@ -1295,18 +1312,20 @@ a.p-logo { display: inline-flex; align-items: center; gap: 4px; min-height: 44px
 
 .p-form-miss { background: var(--p-miss-bg); color: var(--p-miss); }
 
+.p-form-empty { background: var(--p-bar); }
+
 /* 9. Par compétition */
 .p-competition { margin-top: 12px; }
 
 .p-competition-line { display: flex; justify-content: space-between; gap: 8px; font-size: 14px; }
 
-.p-competition-line span:first-child { font-weight: 600; overflow-wrap: anywhere; }
+.p-competition-line span:first-child { min-width: 0; overflow: hidden; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
 
 .p-competition-line .p-muted { flex-shrink: 0; font-size: 13px; }
 
 .p-bar { height: 8px; margin-top: 6px; overflow: hidden; border-radius: 999px; background: var(--p-bar); }
 
-.p-bar span { display: block; height: 100%; background: var(--orange); }
+.p-bar span { display: block; height: 100%; background: var(--orange); transition: width 200ms ease; }
 
 /* 10. Badges */
 .p-badges {

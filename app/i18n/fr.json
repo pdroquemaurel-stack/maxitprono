@@ -264,8 +264,7 @@
   "prediction_saving": "Enregistrement…",
   "prediction_offline": "Pas enregistré : vérifie ta connexion, le prono repartira tout seul.",
   "predictions_autosave_hint": "Tape un chiffre par case : chaque prono s'enregistre tout seul dès que ses deux scores sont remplis.",
-  "profile_settings": "Paramètres",
-  "profile_edit": "Modifier",
+  "profile_settings": "Paramètres et profil",
   "profile_edit_title": "Modifier mon profil",
   "profile_back": "Retour au profil",
   "profile_account": "Mon compte",
@@ -314,7 +313,7 @@
   "profile_by_competition": "Par compétition",
   "profile_competition_line": "{count} pronos · {rate} %",
   "profile_strongest": "Ta compétition forte :",
-  "profile_strongest_none": "Ta compétition forte apparaîtra après 5 pronos dans une même compétition.",
+  "profile_strongest_none": "Compétition forte : dès 5 pronos sur une même compét.",
   "profile_badges": "Badges",
   "profile_badge_locked": "verrouillé",
   "profile_next_badge": "Prochain : {badge} — {rule} (encore {count})",
@@ -479,5 +478,9 @@
   "home_create_or_join_short": "Créer ou rejoindre",
   "home_friends": "Chez les copains",
   "home_next_badge": "Prochain badge",
-  "home_badge_progress": "{done} sur {goal}"
+  "home_badge_progress": "{done} sur {goal}",
+  "profile_period_hint_season": "Tous tes pronos sur des matchs terminés",
+  "profile_period_hint_week": "Matchs de cette semaine, du lundi au dimanche",
+  "profile_period_empty": "Pas encore de prono sur cette période",
+  "profile_period_hint_competition": "Aucune compétition en cours"
 }

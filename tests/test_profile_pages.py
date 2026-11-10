@@ -30,7 +30,9 @@ def test_profile_without_predictions(client):
     page = client.get("/profile").text
     assert "Fais ton premier prono !" in page
     assert "0 %" in page and "Pronos joués" in page
-    assert page.count('href="/profile/edit"') == 2  # engrenage + bouton « Modifier »
+    assert page.count('href="/profile/edit"') == 1  # l'engrenage seul, plus de bouton « Modifier »
+    assert 'href="/profile/edit" aria-label="Paramètres et profil"' in page
+    assert 'class="p-edit"' not in page
     assert "Pas encore de prono sur un match terminé." in page
     assert "Prochain : Rassembleur" in page  # 1 ami suffit : le badge le plus proche
     assert '<a href="/profile" class="active" aria-current="page">' in page  # onglet Profil actif
@@ -57,7 +59,8 @@ def test_profile_with_predictions(client, db_session):
     assert "67 %" in page  # 2 réussis sur 3
     assert '<p class="p-hero-points">8</p>' in page
     assert "2,7 pt par prono" in page
-    assert page.count('<li class="p-form-') == 3  # une case par prono joué
+    assert page.count('<li class="p-form-') == 10  # toujours 10 cases…
+    assert page.count('<li class="p-form-empty"') == 7  # …dont 7 vides : 3 pronos joués
     assert "3 pronos · 67 %" in page
     assert "Série en cours" in page
 
@@ -67,7 +70,9 @@ def test_week_period_only_counts_this_week(client, db_session):
     add_pick(db_session, paul(db_session), (2, 1), (2, 1), hours_ago=24 * 10)
     assert "100 %" in client.get("/profile?period=season").text
     week = client.get("/profile?period=week").text
-    assert "Semaine du" in week and "Fais ton premier prono !" in week
+    # Période vide : état vide à la place des valeurs, sans bloc en plus ni en moins
+    assert "Pas encore de prono sur cette période" in week
+    assert "Fais ton premier prono !" not in week  # réservé au joueur qui n'a jamais joué
 
 
 def test_competition_period_defaults_to_champions_league(client, db_session):
@@ -223,3 +228,31 @@ def test_remontada_badge_from_rank_history(client, db_session):
     score_finished_matches(db_session, ScoringRules(), utc_now())
     page = client.get("/profile").text
     assert page.count('class="unlocked"') == 1  # Remontada : 7e -> 2e
+
+
+# --- Mise en page stable d'un filtre à l'autre ---
+
+def section_skeleton(page: str) -> list[str]:
+    """Suite des blocs de la page (classes des sections et cartes), sans les valeurs."""
+    import re
+    main = page[page.index('<main class="content profile">'):page.index("</main>")]
+    return re.findall(r'<(?:section|nav|div|p|form) class="(p-[a-z-]+[^"]*)"', main)
+
+
+def test_profile_sections_are_the_same_for_all_filters(client, db_session):
+    register(client)
+    add_pick(db_session, paul(db_session), (2, 1), (2, 1), hours_ago=24 * 10)  # hors de la semaine
+    skeletons = {}
+    for period in ("season", "week", "competition"):
+        page = client.get(f"/profile?period={period}").text
+        skeleton = section_skeleton(page)
+        # Seule la ligne sous le sélecteur change de contenu (choix de compétition ou rappel)
+        skeletons[period] = [c for c in skeleton if c not in ("p-competition-pick", "p-period-hint")]
+    assert skeletons["season"] == skeletons["week"] == skeletons["competition"]
+
+
+def test_competition_rows_are_kept_for_every_filter(client, db_session):
+    register(client)
+    add_pick(db_session, paul(db_session), (2, 1), (2, 1), hours_ago=24 * 10, name="Ligue 1")
+    week = client.get("/profile?period=week").text
+    assert "<span>Ligue 1</span>" in week and "0 pronos · 0 %" in week
