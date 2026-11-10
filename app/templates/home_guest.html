@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% from "_icons.html" import icon, ball_watermark %}
 {% block title %}{{ t('app_name') }} · {{ t('guest_tagline') }}{% endblock %}
-{% block body_attrs %} class="no-tabbar"{% endblock %}
+{% block guest_header %}{% endblock %}
 {% block main_class %} lg home-guest{% endblock %}
 {% block content %}
   {# 1. Héro noir #}
@@ -87,5 +87,4 @@
     <p>{{ t('footer_by') }}</p>
   </footer>
 {% endblock %}
-{% block tabbar %}{% endblock %}
 {% block scripts %}<script src="{{ static_url('js/countdown.js') }}" defer></script>{% endblock %}

@@ -4,7 +4,7 @@ import re
 from app.models.match import MatchStatus
 from app.templating import static_url
 from tests.test_league_pages import register
-from tests.test_match_pages import add_match, db_session  # noqa: F401
+from tests.test_match_pages import login, add_match, db_session  # noqa: F401
 
 
 def test_pages_are_compressed(client, db_session):
@@ -42,6 +42,7 @@ def test_icons_and_theme_color(client):
 
 
 def test_results_list_shows_crests(client, db_session):
+    login(client)  # page privée : joueur connecté
     match = add_match(db_session, -3, home="Coton Sport", away="Canon",
                       status=MatchStatus.FINISHED, score=(2, 1))
     match.home_logo_url = "https://crests.example/coton.png"

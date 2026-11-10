@@ -3,9 +3,11 @@ from fastapi.testclient import TestClient
 
 import app.routes.home as home_routes
 from app.main import app
+from tests.test_match_pages import login
 
 
 def test_unknown_page_shows_error_page_with_retry(client):
+    login(client)  # page privée : joueur connecté
     response = client.get("/nulle-part?x=1")
     assert response.status_code == 404
     assert "Page introuvable" in response.text
@@ -14,10 +16,12 @@ def test_unknown_page_shows_error_page_with_retry(client):
 
 
 def test_404_from_a_route_uses_the_page_too(client):
+    login(client)  # page privée : joueur connecté
     assert "Page introuvable" in client.get("/results/999").text
 
 
 def test_error_page_in_english(client):
+    login(client)  # page privée : joueur connecté
     response = client.get("/nulle-part", headers={"Accept-Language": "en"})
     assert "Page not found" in response.text and "Try again" in response.text
 

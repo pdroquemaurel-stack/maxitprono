@@ -131,8 +131,8 @@ def public_url(request: Request, player: User, league) -> str:
 @router.get("/players/{player_id}", name="public_stats")
 def public_stats(player_id: int, request: Request, db: Session = Depends(get_db),
                  user: User | None = Depends(current_user)):
-    """Stats de la saison visibles sans compte : rien d'autre que ce que montrent déjà
-    les classements publics (pseudo, pays) et les pronos des matchs terminés."""
+    """Stats de la saison d'un autre joueur (réservées aux connectés) : rien d'autre que ce
+    que montrent déjà les classements (pseudo, pays) et les pronos des matchs terminés."""
     player = db.get(User, player_id)
     if player is None:
         raise HTTPException(404)

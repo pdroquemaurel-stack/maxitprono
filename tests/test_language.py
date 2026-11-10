@@ -3,7 +3,7 @@ import pytest
 
 from app.i18n import current_language, pick_language, set_language, translate
 from tests.test_league_pages import create_league, register
-from tests.test_match_pages import add_match, db_session  # noqa: F401
+from tests.test_match_pages import login, add_match, db_session  # noqa: F401
 
 
 @pytest.mark.parametrize("cookie, header, expected", [
@@ -63,6 +63,7 @@ def test_register_page_in_english_with_country_names(client):
 
 
 def test_dates_in_english(client, db_session):
+    login(client)  # page privée : joueur connecté
     add_match(db_session, 30)
     client.cookies.set("lang", "en")
     page = client.get("/matches").text

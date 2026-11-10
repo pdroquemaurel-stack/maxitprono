@@ -99,6 +99,7 @@ def test_empty_state_for_filters_without_match(client, db_session):
 
 
 def test_day_with_single_match_and_counts(client, db_session):
+    login(client)  # page privée : joueur connecté
     add_match(db_session, 20)
     page = client.get("/matches").text
     assert "1 match<" in page
@@ -140,6 +141,7 @@ def test_cancelled_match_has_no_input(client, db_session):
 
 
 def test_missing_logo_falls_back_to_initials(client, db_session):
+    login(client)  # page privée : joueur connecté
     add_match(db_session, 20, home="Paris Saint-Germain", away="Marseille")
     page = client.get("/matches").text
     assert '<span class="crest-initials">PSG</span>' in page
@@ -152,14 +154,6 @@ def test_inputs_have_hidden_labels(client, db_session):
     login(client)
     page = client.get("/matches").text
     assert f'<label class="visually-hidden" for="s{match.id}h">Buts Paris Saint-Germain</label>' in page
-
-
-def test_visitor_can_browse_but_must_log_in(client, db_session):
-    add_match(db_session, 20)
-    page = client.get("/matches").text
-    assert '<a class="mc-center mc-login" href="/login">Connecte-toi pour pronostiquer</a>' in page
-    assert "<input" not in page and "data-save-all" not in page
-    assert "pr-todo" not in page
 
 
 def test_save_bar_counts_matches_without_prediction(client, db_session):
@@ -179,11 +173,13 @@ def test_prediction_on_match_started_meanwhile_is_refused(client, db_session):
 
 
 def test_tabbar_has_pronos_active(client, db_session):
+    login(client)  # page privée : joueur connecté
     page = client.get("/matches").text
     assert '<a href="/matches" class="active" aria-current="page">' in page
 
 
 def test_english_texts(client, db_session):
+    login(client)  # page privée : joueur connecté
     add_match(db_session, 20)
     client.cookies.set("lang", "en")
     page = client.get("/matches").text
@@ -191,6 +187,7 @@ def test_english_texts(client, db_session):
 
 
 def test_live_pill_shows_minute_when_known(client, db_session):
+    login(client)  # page privée : joueur connecté
     match = add_match(db_session, -1, status=MatchStatus.LIVE, score=(1, 0))
     page = client.get("/matches?status=all").text
     assert ">En direct</span>" in page  # minute inconnue

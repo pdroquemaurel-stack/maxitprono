@@ -30,6 +30,7 @@ def paul(db):
 
 
 def test_general_leaderboard_lists_players_in_order(client, db_session):
+    login(client)  # page privée : joueur connecté
     add_scored(db_session, add_player(db_session, "Ali"), 3)
     add_scored(db_session, add_player(db_session, "Bea"), 5, exact=True)
 
@@ -40,6 +41,7 @@ def test_general_leaderboard_lists_players_in_order(client, db_session):
 
 
 def test_empty_leaderboard(client):
+    login(client)  # page privée : joueur connecté
     assert "Pas encore de classement" in client.get("/leaderboard").text
 
 
@@ -79,6 +81,7 @@ def test_country_tab_defaults_to_player_country(client, db_session):
 
 
 def test_competition_tab(client, db_session):
+    login(client)  # page privée : joueur connecté
     ali, cyr = add_player(db_session, "Ali"), add_player(db_session, "Cyr")
     match = add_scored(db_session, ali, 3, name="Ligue 1")
     add_scored(db_session, cyr, 5, name="CAN")
@@ -89,6 +92,7 @@ def test_competition_tab(client, db_session):
 
 
 def test_week_tab_shows_current_week_only(client, db_session):
+    login(client)  # page privée : joueur connecté
     add_scored(db_session, add_player(db_session, "Ali"), 3, hours_ago=0)
     add_scored(db_session, add_player(db_session, "Old"), 5, hours_ago=24 * 8)
 

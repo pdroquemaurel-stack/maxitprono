@@ -5,7 +5,7 @@ from app.models import Prediction, User
 from app.models.match import MatchStatus
 from app.models.types import utc_now
 from tests.test_league_pages import create_league, logout, register
-from tests.test_match_pages import add_match, db_session  # noqa: F401
+from tests.test_match_pages import login, add_match, db_session  # noqa: F401
 
 
 def paul(db):
@@ -177,15 +177,16 @@ def test_week_shows_matchday_when_known(client, db_session):
 
 # --- Page publique (« Partager mes stats ») ---
 
-def test_public_stats_page_without_account(client, db_session):
+def test_public_stats_page_needs_an_account(client, db_session):
     register(client)
     add_pick(db_session, paul(db_session), (2, 1), (2, 1))
     logout(client)
+    response = client.get("/players/1", follow_redirects=False)
+    assert response.headers["location"] == "/login?next=/players/1"
+    register(client, "Awa")  # un autre joueur, connecté
     page = client.get("/players/1").text
     assert "<h1>Paul</h1>" in page and "100 %" in page
     assert "Répartition des pronos" in page and "de mes pronos" not in page
-    assert 'content="5 pts · 100 % de réussite' in page  # aperçu WhatsApp
-    assert 'href="/register"' in page and "Jouer à MaxitProno" in page
     assert 'href="/profile/edit"' not in page and "Prochain :" not in page
 
 
@@ -194,6 +195,7 @@ def test_public_stats_page_offers_the_league(client, db_session):
     _, code = create_league(client)
     assert f"/players/1?league={code}" in client.get("/profile").text  # lien partagé
     logout(client)
+    register(client, "Awa")  # un joueur connecté qui n'est pas encore dans la ligue
     page = client.get(f"/players/1?league={code}").text
     assert f'href="/join/{code}?ref=1"' in page and "Rejoindre la ligue « Bureau Casa »" in page
 
@@ -207,6 +209,7 @@ def test_public_stats_page_ignores_a_league_of_someone_else(client):
 
 
 def test_public_stats_unknown_player(client):
+    login(client)  # page privée : joueur connecté
     assert client.get("/players/999").status_code == 404
 
 

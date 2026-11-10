@@ -11,6 +11,7 @@ from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.auth import LoginRequired
+from app.auth.guard import require_login_for_private_pages
 from app.i18n import pick_language, set_language
 from app.routes import (accounts, admin, home, internal, leaderboard, leagues, matches, profile,
                         results)
@@ -33,7 +34,8 @@ class CachedStaticFiles(StaticFiles):
         return response
 
 
-app = FastAPI(title="MaxitProno")
+# Pas de documentation automatique (/docs, /redoc, /openapi.json) : elle listerait toutes les routes
+app = FastAPI(title="MaxitProno", docs_url=None, redoc_url=None, openapi_url=None)
 # Pages compressées : 5 à 8 fois plus légères sur un réseau 3G
 app.add_middleware(GZipMiddleware, minimum_size=500)
 
@@ -44,6 +46,10 @@ async def use_player_language(request, call_next):
     set_language(pick_language(request.cookies.get("lang"),
                                request.headers.get("accept-language")))
     return await call_next(request)
+
+
+# Pages privées réservées aux joueurs connectés (liste blanche dans app/auth/guard.py)
+app.middleware("http")(require_login_for_private_pages)
 
 
 app.mount("/static", CachedStaticFiles(directory=STATIC_DIR), name="static")

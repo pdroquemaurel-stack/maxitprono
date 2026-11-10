@@ -45,6 +45,7 @@ Pour chaque match, afficher 3 pourcentages : **victoire équipe 1 / nul / victoi
 - Première connexion : pseudo, avatar (upload), pays, acceptation du règlement du jeu.
 - POC : connexion par pseudo + code PIN. Plus tard : login Max it (identifiant crypté unique, lié au numéro).
 - Pas de chat, pas de commentaires.
+- Accès : sans connexion, seuls l'accueil visiteur, la connexion, l'inscription, le choix de la langue et les pages légales (règles, aide, confidentialité, mentions légales) sont visibles. Tout le reste est réservé aux joueurs connectés (liste blanche dans `app/auth/guard.py`). Un lien d'invitation ouvert par un visiteur mène à l'inscription, puis la ligue est rejointe automatiquement.
 
 ## 8. Écrans du MVP
 1. Accueil : prochains matchs à pronostiquer, mon rang

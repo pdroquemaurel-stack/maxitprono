@@ -1,3 +1,4 @@
+from tests.test_match_pages import login
 """Pages des ligues : création, invitation par code et par lien, départ, admin."""
 import re
 
@@ -84,8 +85,8 @@ def test_join_link_without_account_brings_back_after_sign_up(client):
     league_id, code = create_league(client)
     logout(client)
 
-    page = client.get(f"/join/{code}").text
-    assert f"/register?next=/join/{code}" in page
+    response = client.get(f"/join/{code}", follow_redirects=False)
+    assert response.headers["location"] == f"/register?next=/join/{code}"
     response = register(client, "Awa", next_url=f"/join/{code}")
     assert response.headers["location"] == f"/leagues/{league_id}?joined=1"  # rejoint d'office
     assert "Bienvenue dans la ligue" in client.get(response.headers["location"]).text
@@ -99,6 +100,7 @@ def test_join_link_when_already_member_goes_to_league(client):
 
 
 def test_unknown_join_link_is_404(client):
+    login(client)  # page privée : joueur connecté
     assert client.get("/join/ZZZZZZ").status_code == 404
 
 

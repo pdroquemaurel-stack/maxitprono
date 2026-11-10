@@ -2615,3 +2615,14 @@ a.p-logo { display: inline-flex; align-items: center; gap: 4px; min-height: 44px
 .pr-save.saving { opacity: 0.7; cursor: progress; }
 
 .pr-save.done { background: #D6F2E1; color: #0E5A33; }
+
+/* En-tête du visiteur (connexion, inscription, pages légales) : remplace la barre de navigation */
+.guest-header { display: flex; align-items: center; justify-content: space-between; min-height: 44px; margin-bottom: 8px; }
+
+.guest-header .p-logo { color: #111111; text-decoration: none; }
+
+.guest-lang { display: flex; align-items: center; gap: 6px; margin: 0; color: var(--muted); font-size: 14px; }
+
+.guest-lang a, .guest-lang strong { display: inline-flex; align-items: center; min-height: 44px; padding: 0 6px; }
+
+.guest-lang strong { color: var(--ink); }

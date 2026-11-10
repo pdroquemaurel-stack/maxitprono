@@ -1,0 +1,12 @@
+{# En-tête du visiteur (connexion, inscription, pages légales) : logo vers l'accueil et langue #}
+{% set here = request.url.path ~ ('?' ~ request.url.query if request.url.query else '') %}
+<header class="guest-header">
+  <a class="p-logo" href="/">Maxit <span class="p-logo-pill">Prono</span></a>
+  <p class="guest-lang" aria-label="{{ t('language_label') }}">
+    {% for code in ('fr', 'en') %}
+      {% if code == lang %}<strong aria-current="true">{{ code|upper }}</strong>
+      {% else %}<a href="/language/{{ code }}?next={{ here|urlencode }}" lang="{{ code }}" hreflang="{{ code }}">{{ code|upper }}</a>{% endif %}
+      {% if not loop.last %}<span aria-hidden="true">·</span>{% endif %}
+    {% endfor %}
+  </p>
+</header>

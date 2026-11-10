@@ -63,7 +63,7 @@ Règles :
 - **Carte score final** : carte `--ink`, score en 48 px coloré avec les variantes « on dark » ; bandeau orange « Ton prono : x – y, score exact ! +5 » si score exact.
 - **Badges de points** (accueil, Ligues, Profil) : score exact = fond `#0E7A43` texte blanc ; bon résultat = fond `#D6F2E1` texte `#0E5A33` ; 0 point = fond `#FDE3E1` texte `#B42318`. Les valeurs affichées sont celles du barème réglé dans le back-office (5 / 3 par défaut).
 - **Avatars** : initiales sur fond `--orange-soft`, texte `--orange-text` (en attendant les photos de profil).
-- **Barre de navigation** : 5 onglets (Accueil `/`, Ligues `/leagues`, Pronos `/matches`, Classements `/leaderboard`, Profil `/profile`), fond blanc, bordure haute `#E7E9F0`, icônes trait 2 px ; actif : icône `#FF7900` et libellé gras `#111111`, inactifs `#4A4F5C`. Absente de l'accueil du visiteur. `/results` n'a plus d'onglet (lien « Mes résultats d'hier » de l'accueil).
+- **Barre de navigation** : 5 onglets (Accueil `/`, Ligues `/leagues`, Pronos `/matches`, Classements `/leaderboard`, Profil `/profile`), fond blanc, bordure haute `#E7E9F0`, icônes trait 2 px ; actif : icône `#FF7900` et libellé gras `#111111`, inactifs `#4A4F5C`. Affichée seulement pour un joueur connecté. Un visiteur ne voit que les pages publiques (accueil visiteur, connexion, inscription, pages légales), avec à la place un en-tête simple : logo (lien vers `/`) et langue FR · EN (`_guest_header.html`). `/results` n'a plus d'onglet (lien « Mes résultats d'hier » de l'accueil).
 - **Écussons** : logos d'équipes fournis par API-Football (mis en cache), 36–44 px ; à défaut, initiales.
 
 ## 6. Écrans de référence

@@ -1,6 +1,4 @@
 """Liens d'invitation personnels (?ref=) : qui a fait venir qui (badge Rassembleur)."""
-import re
-
 from app.models import LeagueMember, User
 from app.services.leagues import valid_inviter
 from tests.test_league_pages import create_league, logout, register
@@ -32,11 +30,10 @@ def test_ref_is_kept_through_sign_up(client, db_session):
     register(client)
     _, code = create_league(client)
     logout(client)
-    page = client.get(f"/join/{code}?ref=1").text
-    next_url = re.search(r'href="/register\?next=([^"]+)"', page).group(1)
-    assert next_url == f"/join/{code}%3Fref%3D1"  # le parrain suit jusqu'au retour
+    response = client.get(f"/j/{code}?ref=1", follow_redirects=False)
+    assert response.headers["location"] == f"/register?next=/j/{code}%3Fref%3D1"  # parrain gardé
     # L'inscription (un POST) fait rejoindre la ligue directement, parrain compris
-    response = register(client, "Awa", next_url=f"/join/{code}?ref=1")
+    response = register(client, "Awa", next_url=f"/j/{code}?ref=1")
     assert response.headers["location"].endswith("?joined=1")
     assert member(db_session, "Awa").invited_by_id == 1
 

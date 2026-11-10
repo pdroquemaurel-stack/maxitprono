@@ -76,7 +76,12 @@
       headers: { Accept: "application/json" },
       body: new URLSearchParams({ home: home, away: away })
     }).then(function (response) {
-      if (response.redirected) { // session expirée : page de connexion
+      if (response.status === 401) { // session expirée : page de connexion, retour ici ensuite
+        card._dirty = false;
+        window.location.href = "/login?next=" + encodeURIComponent(location.pathname + location.search);
+        return null;
+      }
+      if (response.redirected) {
         card._dirty = false;
         window.location.href = response.url;
         return null;

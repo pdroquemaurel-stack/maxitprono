@@ -45,6 +45,7 @@ def predict(client, match, home="2", away="1"):
 
 
 def test_matches_page_lists_active_competitions_only(client, db_session):
+    login(client)  # page privée : joueur connecté
     add_match(db_session, 24, home="Lions")
     add_match(db_session, 24, home="Cachés", name="Inactive", active=False)
     page = client.get("/matches")
@@ -54,6 +55,7 @@ def test_matches_page_lists_active_competitions_only(client, db_session):
 
 
 def test_matches_page_hides_old_and_far_matches(client, db_session):
+    login(client)  # page privée : joueur connecté
     add_match(db_session, -5, home="Ancien")
     add_match(db_session, 24 * 13, home="Proche")
     add_match(db_session, 24 * 15, home="Lointain")
@@ -63,6 +65,7 @@ def test_matches_page_hides_old_and_far_matches(client, db_session):
 
 
 def test_matches_page_follows_admin_days_setting(client, db_session):
+    login(client)  # page privée : joueur connecté
     save_settings(db_session, Settings(prediction_days_ahead=3), utc_now())
     add_match(db_session, 24 * 2, home="Bientôt")
     add_match(db_session, 24 * 4, home="Après")
@@ -70,9 +73,10 @@ def test_matches_page_follows_admin_days_setting(client, db_session):
     assert "Bientôt" in page and "Après" not in page
 
 
-def test_anonymous_visitor_is_invited_to_log_in(client, db_session):
+def test_anonymous_visitor_is_sent_to_login(client, db_session):
     add_match(db_session, 24)
-    assert "Connecte-toi pour pronostiquer" in client.get("/matches").text
+    response = client.get("/matches", follow_redirects=False)
+    assert response.headers["location"] == "/login?next=/matches"
 
 
 def test_submit_prediction_then_update_it(client, db_session):
@@ -182,6 +186,7 @@ def test_home_shows_matches_to_predict(client, db_session):
 
 
 def test_times_shown_in_player_timezone(client, db_session):
+    login(client)  # page privée : joueur connecté
     match = add_match(db_session, 24)
     client.cookies.set("tz", "Asia/Tokyo")  # UTC+9, sans heure d'été
     expected = (match.kickoff_at + timedelta(hours=9)).strftime("%H:%M")

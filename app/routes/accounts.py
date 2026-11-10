@@ -127,4 +127,4 @@ def avatar(user_id: int, db: Session = Depends(get_db)):
     if user is None or user.avatar is None:
         return Response(status_code=404)
     return Response(user.avatar, media_type=user.avatar_mime,
-                    headers={"Cache-Control": "public, max-age=300"})
+                    headers={"Cache-Control": "private, max-age=300"})  # photos réservées aux connectés

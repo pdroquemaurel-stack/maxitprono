@@ -35,7 +35,9 @@ def _versioned_url(path: str, modified_at: float) -> str:
 
 def language_context(request) -> dict:
     """Langue de la requête (posée par le middleware de app/main.py) pour tous les templates."""
-    return {"lang": current_language()}
+    # logged_in : posé par le contrôle d'accès (app/auth/guard.py), affiche la barre de navigation
+    return {"lang": current_language(),
+            "logged_in": getattr(request.state, "user_id", None) is not None}
 
 
 templates = Jinja2Templates(directory=Path(__file__).parent / "templates",

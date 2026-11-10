@@ -3,7 +3,7 @@ from app.models import Prediction, User
 from app.models.match import MatchStatus
 from app.models.types import utc_now
 from app.services.probabilities import MIN_PREDICTIONS_FOR_TRENDS
-from tests.test_match_pages import add_match, db_session  # noqa: F401
+from tests.test_match_pages import login, add_match, db_session  # noqa: F401
 
 
 def add_predictions(db, match, scores):
@@ -17,6 +17,7 @@ def add_predictions(db, match, scores):
 
 
 def test_players_trend_bar_from_threshold(client, db_session):
+    login(client)  # page privée : joueur connecté
     match = add_match(db_session, 24)
     add_predictions(db_session, match, [(2, 0)] * 3 + [(1, 1)] + [(0, 1)])
     page = client.get("/matches?status=all").text
@@ -26,6 +27,7 @@ def test_players_trend_bar_from_threshold(client, db_session):
 
 
 def test_trend_uses_players_not_provider(client, db_session):
+    login(client)  # page privée : joueur connecté
     match = add_match(db_session, 24)
     match.prob_home, match.prob_draw, match.prob_away = 55, 26, 19
     db_session.commit()
@@ -35,6 +37,7 @@ def test_trend_uses_players_not_provider(client, db_session):
 
 
 def test_no_bar_below_threshold_but_place_kept(client, db_session):
+    login(client)  # page privée : joueur connecté
     match = add_match(db_session, 24)
     add_predictions(db_session, match, [(2, 0)] * (MIN_PREDICTIONS_FOR_TRENDS - 1))
     page = client.get("/matches").text
@@ -49,6 +52,7 @@ def test_no_trend_on_closed_match(client, db_session):
 
 
 def test_crest_shows_logo_with_initials_underneath(client, db_session):
+    login(client)  # page privée : joueur connecté
     match = add_match(db_session, 24, home="Paris Saint-Germain", away="Marseille")
     match.home_logo_url = "https://crests.football-data.org/524.png"
     db_session.commit()
@@ -61,6 +65,7 @@ def test_crest_shows_logo_with_initials_underneath(client, db_session):
 
 
 def test_result_page_shows_crests(client, db_session):
+    login(client)  # page privée : joueur connecté
     match = add_match(db_session, -3, home="Coton Sport", away="Canon",
                       status=MatchStatus.FINISHED, score=(2, 1))
     page = client.get(f"/results/{match.id}").text
