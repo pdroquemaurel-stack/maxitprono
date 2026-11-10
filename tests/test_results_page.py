@@ -31,12 +31,21 @@ def test_results_show_my_prediction_and_exact_badge(client, db_session):
     assert "badge points exact" in page and "+5" in page
 
 
-def test_tabbar_marks_the_current_tab(client):
-    page = client.get("/results").text
-    assert 'href="/results" class="active" aria-current="page"' in page
-    assert 'href="/login"' in page  # onglet Profil quand on n'est pas connecté
-    for label in ("Ma ligue", "Pronos", "Classements", "Résultats", "Profil"):
-        assert label in page
+def test_tabbar_has_five_tabs_in_order(client):
+    page = client.get("/matches").text
+    nav = page[page.index('<nav class="tabbar"'):page.index("</nav>", page.index('<nav class="tabbar"'))]
+    hrefs = [part.split('"')[0] for part in nav.split('href="')[1:]]
+    assert hrefs == ["/", "/leagues", "/matches", "/leaderboard", "/login"]  # Profil -> connexion
+    assert 'href="/matches" class="active" aria-current="page"' in nav
+    for label in ("Accueil", "Ligues", "Pronos", "Classements", "Profil"):
+        assert label in nav
+    assert "Résultats" not in nav
+
+
+def test_results_page_still_exists_without_tab(client):
+    page = client.get("/results")
+    assert page.status_code == 200
+    assert 'class="active"' not in page.text.split('<nav class="tabbar"')[1]
 
 
 def test_result_page_shows_exact_score_banner(client, db_session):

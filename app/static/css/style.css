@@ -218,8 +218,8 @@ body { padding-bottom: calc(var(--tabbar-height) + env(safe-area-inset-bottom));
   display: flex;
   height: calc(var(--tabbar-height) + env(safe-area-inset-bottom));
   padding-bottom: env(safe-area-inset-bottom);
-  background: var(--surface);
-  border-top: 1px solid var(--border);
+  background: #FFFFFF;
+  border-top: 1px solid #E7E9F0;
 }
 
 .tabbar a {
@@ -230,7 +230,8 @@ body { padding-bottom: calc(var(--tabbar-height) + env(safe-area-inset-bottom));
   justify-content: center;
   gap: 2px;
   min-width: 0;
-  color: var(--muted);
+  min-height: 44px;
+  color: #4A4F5C;
   font-size: 12px;
   font-weight: 600;
   text-decoration: none;
@@ -238,9 +239,12 @@ body { padding-bottom: calc(var(--tabbar-height) + env(safe-area-inset-bottom));
 
 .tabbar a span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
 
-.tabbar a.active { color: var(--orange-text); font-weight: 800; }
+.tabbar a.active { color: #111111; font-weight: 800; }
 
-.tabbar a.active svg { color: var(--orange); }
+.tabbar a.active svg { color: #FF7900; }
+
+/* Page sans barre de navigation (accueil du visiteur) */
+body.no-tabbar { padding-bottom: 0; }
 
 /* Historique */
 .history-row {

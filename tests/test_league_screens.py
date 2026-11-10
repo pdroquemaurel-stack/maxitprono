@@ -286,8 +286,8 @@ def test_login_from_invite_link_joins_the_league(client, db_session):
     assert member.invited_by_id == 1
 
 
-def test_ma_ligue_tab_is_active_on_league_screens(client):
+def test_leagues_tab_is_active_on_league_screens(client):
     league_id, _ = league_with_members(client, [])
     for url in ("/leagues", f"/leagues/{league_id}", "/leagues/new"):
         page = client.get(url).text
-        assert 'href="/" class="active" aria-current="page"' in page
+        assert 'href="/leagues" class="active" aria-current="page"' in page
