@@ -253,6 +253,18 @@ def test_owner_edits_settings_and_member_cannot(client):
     assert response.status_code == 403
 
 
+def test_old_league_with_a_long_name_can_still_save_its_settings(client, db_session):
+    league_id, _ = league_with_members(client, [])
+    old_name = "Les anciens du lycée Lamine Guèye Dakar"  # 39 caractères, d'avant la limite à 30
+    db_session.get(League, league_id).name = old_name
+    db_session.commit()
+    response = client.post(f"/leagues/{league_id}/settings",
+                           data={"name": old_name, "color": "green"}, follow_redirects=False)
+    assert response.headers["location"] == f"/leagues/{league_id}/settings?saved=1"
+    response = client.post(f"/leagues/{league_id}/settings", data={"name": old_name + "!"})
+    assert response.status_code == 400 and "entre 3 et 30 caractères" in response.text
+
+
 # --- Lien d'invitation ---
 
 def test_short_link_redirects_and_keeps_inviter(client):

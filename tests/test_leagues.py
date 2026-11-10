@@ -39,6 +39,14 @@ def test_validate_league_name(name, error):
     assert validate_league_name(name) == error
 
 
+def test_current_name_stays_valid_even_if_too_long():
+    old_name = "x" * 40
+    assert validate_league_name(old_name, current_name=old_name) is None
+    assert validate_league_name(f" {old_name} ", current_name=old_name) is None
+    assert validate_league_name("y" * 40, current_name=old_name) == "error_league_name"
+    assert validate_league_name("ab", current_name="ab") is None
+
+
 def test_create_refused_at_player_limit():
     assert create_error(MAX_LEAGUES_PER_PLAYER - 1) is None
     assert create_error(MAX_LEAGUES_PER_PLAYER) == "error_too_many_leagues"

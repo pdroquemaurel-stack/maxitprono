@@ -29,7 +29,7 @@ from app.templating import templates
 router = APIRouter()
 
 DONE_MESSAGES = {"left": "league_left", "deleted": "league_deleted"}
-TABS = ("ranking", "matches")  # le fil de discussion viendra avec le lot 2
+TABS = ("ranking", "matches")
 PREVIEW_ROWS = 7  # lignes sous le podium avant « Voir les N membres »
 CARD_FACES = 3  # avatars empilés sur la carte d'une ligue
 

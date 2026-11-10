@@ -216,7 +216,7 @@ def update_league(db: Session, league: League, user: User, name: str, color: str
     """Réglages modifiables par l'admin de la ligue : nom, couleur, compétitions."""
     if league.owner_id != user.id:
         return "error_not_league_owner"
-    error = validate_league_name(name)
+    error = validate_league_name(name, current_name=league.name)
     if error:
         return error
     league.name, league.color = clean_name(name), clean_color(color)

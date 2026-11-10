@@ -40,7 +40,11 @@ def clean_name(name: str) -> str:
     return " ".join(name.split())
 
 
-def validate_league_name(name: str) -> str | None:
+def validate_league_name(name: str, current_name: str | None = None) -> str | None:
+    """`current_name` : nom actuel de la ligue. Il reste accepté tel quel, même hors des
+    limites : les ligues créées avant le 9 novembre 2026 pouvaient avoir 40 caractères."""
+    if current_name is not None and clean_name(name) == clean_name(current_name):
+        return None
     if not NAME_MIN <= len(clean_name(name)) <= NAME_MAX:
         return "error_league_name"
     return None

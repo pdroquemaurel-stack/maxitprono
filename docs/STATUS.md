@@ -37,7 +37,7 @@ Hors découpage : `scripts/seed_demo.py` (données de démo sans API ; les joueu
 
 Écrans refaits le 9 novembre 2026 (« lot 1 »), même charte que la page Profil. Le fil de discussion, le duel de la semaine, la ligue événement « Défi des pays » et le barème « Expert » ont été proposés puis **écartés** : ils ne sont pas prévus (SPEC §7 : pas de chat ni de commentaires).
 
-- **Création** (`/leagues/new`) par un joueur, qui en devient admin et membre : nom de **3 à 30 caractères**, **couleur** de l'icône (orange, noir, vert, pêche ; `leagues.color`), **compétitions** comptées (table `league_competitions` ; aucune ligne = toutes), aperçu en direct. Le barème affiché est celui du jeu (réglé dans le back-office), il n'y a pas de barème par ligue. Puis écran de succès `/leagues/{id}/ready` : code, lien, WhatsApp, « Copier le lien ».
+- **Création** (`/leagues/new`) par un joueur, qui en devient admin et membre : nom de **3 à 30 caractères** (une ligue créée avant le 9 novembre peut garder son nom de 31 à 40 caractères tant qu'il n'est pas modifié), **couleur** de l'icône (orange, noir, vert, pêche ; `leagues.color`), **compétitions** comptées (table `league_competitions` ; aucune ligne = toutes), aperçu en direct. Le barème affiché est celui du jeu (réglé dans le back-office), il n'y a pas de barème par ligue. Puis écran de succès `/leagues/{id}/ready` : code, lien, WhatsApp, « Copier le lien ».
 - **Code d'invitation** de 6 caractères sans 0/O/1/I/L, affiché en deux groupes (`K7P-M4X`, `format_code`) et tapé librement (minuscules, espaces, tirets acceptés).
 - **Limites** : taille maximale réglée dans le back-office (100 par défaut), 10 ligues par joueur.
 - **Rejoindre** : par code sur `/leagues`, avec un message clair pour un code inconnu, une ligue pleine ou si l'on est déjà membre. Ou par lien court **`/j/{code}`**, qui redirige vers `/join/{code}` (toujours valable) : la page affiche la ligue et un bouton, l'adhésion se fait toujours par **POST** (les aperçus de lien de WhatsApp ne font jamais adhérer). Sans compte : l'**inscription ou la connexion** depuis le lien (paramètre `next`) **fait rejoindre la ligue directement** (`join_from_invite`), puis ouvre la ligue.
@@ -130,13 +130,12 @@ Socle en place (`app/static/css/style.css`) : variables de couleur, polices Outf
 
 ## 5. Tests
 
-`pytest` (via `.venv`, **Python 3.12.3**) : **577 tests passent, 0 échec**, 1 avertissement (dépréciation `httpx` dans le TestClient de Starlette).
+`pytest` (via `.venv`, **Python 3.12.3**) : **579 tests passent, 0 échec**, 1 avertissement (dépréciation `httpx` dans le TestClient de Starlette).
 
 ## 6. Incohérences et dettes
 
 1. **Couverture football-data.org** limitée aux compétitions européennes : CAN, CAF et championnats locaux demandent API-Football.
 2. Avertissement de dépréciation `httpx` / `starlette.testclient` (sans effet aujourd'hui).
 3. **Mes ligues** fait environ 5 requêtes par ligue (50 au plus avec 10 ligues) : suffisant pour le POC.
-4. Les ligues créées avant le 9 novembre peuvent avoir un nom de 31 à 40 caractères : il faudra le raccourcir pour enregistrer leurs réglages.
 
 Réglé à l'étape 1 de la PARTIE 2 : `.venv` recréé en Python 3.12, couplage à API-Football, compétition démo identifiée par un faux `api_id`, README limité à API-Football. Étape 3 : planification (SPEC §10) via `/internal/sync` + GitHub Action, CLAUDE.md sans APScheduler.
