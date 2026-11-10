@@ -1,12 +1,16 @@
-// Saisie des pronostics, sans bouton :
+// Saisie des pronostics :
 // - une case = un chiffre (0 à 9) ; après le score domicile on passe à l'extérieur,
 //   après l'extérieur on passe au match suivant ;
-// - dès que les deux cases d'un match sont remplies, le prono est envoyé au serveur
-//   (POST /matches/<id>/prediction), puis la carte affiche « Enregistré » ou l'erreur.
+// - page Pronos : dès que les deux cases d'un match sont remplies, le prono est envoyé
+//   au serveur (POST /matches/<id>/prediction), puis la carte affiche « Enregistré » ou l'erreur ;
+// - accueil (data-mode="button") : rien ne part avant le bouton « Valider mes pronos »,
+//   qui envoie tous les matchs remplis puis devient « Pronos enregistrés ».
 (function () {
   var form = document.querySelector(".predictions-form");
   if (!form) return;
   var messages = form.dataset;
+  var withButton = form.dataset.mode === "button";
+  var submit = form.querySelector("[data-save-all]");
   var homeInputs = Array.prototype.slice.call(form.querySelectorAll('[data-match-id] [data-score="home"]'));
 
   function digitOf(input) {
@@ -59,16 +63,17 @@
 
   // --- Envoi ---
 
+  // Renvoie une promesse : vrai si le prono est enregistré (null si la carte n'est pas remplie)
   function save(card) {
     var home = digitOf(card.querySelector('[data-score="home"]'));
     var away = digitOf(card.querySelector('[data-score="away"]'));
-    if (home === null || away === null) return;
+    if (home === null || away === null) return null;
     // Numéro d'envoi : on ignore la réponse d'un envoi dépassé par une saisie plus récente
     var sent = (card._sent || 0) + 1;
     card._sent = sent;
     card._failed = false;
     setStatus(card, messages.msgSaving);
-    fetch("/matches/" + card.dataset.matchId + "/prediction", {
+    return fetch("/matches/" + card.dataset.matchId + "/prediction", {
       method: "POST",
       credentials: "same-origin",
       headers: { Accept: "application/json" },
@@ -80,7 +85,7 @@
       }
       return response.json();
     }).then(function (data) {
-      if (!data || card._sent !== sent) return;
+      if (!data || card._sent !== sent) return false;
       if (data.saved) {
         setStatus(card, messages.msgSaved);
         showError(card, "");
@@ -88,15 +93,41 @@
           card.dataset.predicted = "";
           decrementTodo();
         }
-      } else {
-        setStatus(card, "");
-        showError(card, data.error);
+        return true;
       }
+      setStatus(card, "");
+      showError(card, data.error);
+      return false;
     }).catch(function () {
-      if (card._sent !== sent) return;
+      if (card._sent !== sent) return false;
       card._failed = true;
       setStatus(card, "");
       showError(card, messages.msgOffline);
+      return false;
+    });
+  }
+
+  // --- Bouton « Valider mes pronos » (accueil) ---
+
+  function setSubmitDone(done) {
+    if (!submit) return;
+    submit.classList.toggle("done", done);
+    submit.textContent = done ? submit.dataset.doneLabel : submit.dataset.label;
+  }
+
+  if (submit) {
+    submit.addEventListener("click", function () {
+      var sending = [];
+      Array.prototype.forEach.call(form.querySelectorAll("[data-match-id]"), function (card) {
+        var promise = save(card);
+        if (promise) sending.push(promise);
+      });
+      if (!sending.length) return;
+      submit.disabled = true;
+      Promise.all(sending).then(function (results) {
+        submit.disabled = false;
+        setSubmitDone(results.every(Boolean));
+      });
     });
   }
 
@@ -114,7 +145,8 @@
       input.value = input.value.replace(/[^0-9]/g, "").slice(-1);
       if (input.value === "") return;
       moveFocus(input, card);
-      save(card);
+      if (withButton) setSubmitDone(false); // nouvelle saisie : à valider de nouveau
+      else save(card);
     });
   });
 

@@ -15,7 +15,7 @@ def test_register_logs_the_player_in(client):
     assert response.status_code == 303
     assert "session" in response.cookies
     home = client.get("/")
-    assert "Le podium" in home.text and 'href="/profile"' in home.text
+    assert "Salut Paul" in home.text and 'href="/profile"' in home.text
 
 
 def test_register_error_keeps_fields_and_shows_message(client):
@@ -52,12 +52,12 @@ def test_register_with_invalid_avatar_creates_no_account(client):
 def test_login_and_logout(client):
     register(client)
     client.post("/logout")
-    assert "Le podium" not in client.get("/").text
+    assert "Salut Paul" not in client.get("/").text
 
     response = client.post("/login", data={"nickname": "paul", "pin": "1234"},
                            follow_redirects=False)
     assert response.status_code == 303
-    assert "Le podium" in client.get("/").text
+    assert "Salut Paul" in client.get("/").text
 
 
 def test_login_with_wrong_pin(client):

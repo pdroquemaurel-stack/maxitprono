@@ -11,6 +11,7 @@ from app.i18n.countries import country_name, country_options
 from app.services.avatars import initials
 from app.services.deadlines import prediction_deadline
 from app.services.leagues import format_code
+from app.services.probabilities import leading_outcome
 from app.services.score_colors import score_classes
 from app.services.teams import team_initials
 
@@ -54,3 +55,4 @@ templates.env.globals["format_rank"] = format_rank
 templates.env.globals["format_code"] = format_code
 templates.env.globals["format_countdown"] = format_countdown
 templates.env.globals["closing_at"] = prediction_deadline
+templates.env.globals["leading_outcome"] = leading_outcome

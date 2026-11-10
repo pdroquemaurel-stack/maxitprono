@@ -4,6 +4,7 @@ Rejoindre une ligue passe toujours par un POST (formulaire, connexion ou inscrip
 WhatsApp et les réseaux sociaux ouvrent les liens partagés pour en faire un aperçu,
 un GET ne doit rien changer.
 """
+from dataclasses import replace
 from urllib.parse import quote
 
 from fastapi import APIRouter, Depends, Form, HTTPException, Request
@@ -32,6 +33,8 @@ DONE_MESSAGES = {"left": "league_left", "deleted": "league_deleted"}
 TABS = ("ranking", "matches")
 PREVIEW_ROWS = 7  # lignes sous le podium avant « Voir les N membres »
 CARD_FACES = 3  # avatars empilés sur la carte d'une ligue
+LEAGUE_COOKIE = "league"  # ligue principale : la dernière ouverte (ou choisie par ?league=)
+LEAGUE_COOKIE_AGE = 365 * 24 * 3600
 
 
 def member_league(db: Session, league_id: int, user: User) -> League:
@@ -70,7 +73,8 @@ def league_card(db: Session, league: League, member_count: int, user: User, now)
             "competitions": league_store.competitions_of(db, league.id),
             "me": find_player(ranking, user.id), "move": moves.get(user.id),
             "faces": league_store.member_cards(db, league.id)[:CARD_FACES],
-            "activity": activity[0] if activity else None}
+            "activity": activity[0] if activity else None,
+            "activity_all": [replace(event, league=league.name) for event in activity]}
 
 
 def render_leagues(request: Request, db: Session, user: User, error: str | None = None,
@@ -172,7 +176,11 @@ def league_page(league_id: int, request: Request, db: Session = Depends(get_db),
         context.update(ranking_context(db, league, ranking, members, user, params.get("all")))
     else:
         context.update(matches_context(db, league, user, params.get("match")))
-    return templates.TemplateResponse(request, "league.html", context)
+    response = templates.TemplateResponse(request, "league.html", context)
+    # La dernière ligue ouverte devient la ligue principale (accueil, Profil, Résultats)
+    response.set_cookie(LEAGUE_COOKIE, str(league.id), max_age=LEAGUE_COOKIE_AGE,
+                        httponly=True, samesite="lax")
+    return response
 
 
 def next_match_context(db: Session, league: League, members, user: User, now) -> dict:

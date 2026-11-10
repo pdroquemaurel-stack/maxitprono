@@ -21,22 +21,21 @@ def test_provider_percentages_are_shown(client, db_session):
     match.prob_home, match.prob_draw, match.prob_away = 55, 26, 19
     db_session.commit()
     page = client.get("/matches").text
-    assert "1 <b>55 %</b>" in page and "N <b>26 %</b>" in page and "2 <b>19 %</b>" in page
-    assert "Tendance des joueurs" not in page
+    assert "LIO favori · 55 %" in page  # Lions, issue la plus probable
+    assert "Victoire Lions 55 %, nul 26 %, victoire Étalons 19 %" in page  # version complète
 
 
 def test_player_trends_shown_from_threshold(client, db_session):
     match = add_match(db_session, 24)
     add_predictions(db_session, match, [(2, 0)] * 3 + [(1, 1)] + [(0, 1)])
     page = client.get("/matches").text
-    assert "Tendance des joueurs" in page
-    assert "1 <b>60 %</b>" in page and "N <b>20 %</b>" in page and "2 <b>20 %</b>" in page
+    assert "60 % voient LIO" in page
 
 
 def test_no_percentages_below_threshold(client, db_session):
     match = add_match(db_session, 24)
     add_predictions(db_session, match, [(2, 0)] * (MIN_PREDICTIONS_FOR_TRENDS - 1))
-    assert 'class="probs"' not in client.get("/matches").text
+    assert 'class="match-trend"' not in client.get("/matches").text
 
 
 def test_crest_shows_logo_with_initials_underneath(client, db_session):

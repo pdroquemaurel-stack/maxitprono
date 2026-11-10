@@ -169,14 +169,14 @@ def test_home_shows_matches_to_predict(client, db_session):
     add_match(db_session, 48, home="Aigles")
     login(client)
     page = client.get("/").text
-    assert "2 matchs sans prono" in page
-    assert "Le premier ferme demain" in page or "Le premier ferme dans" in page
+    assert "2 pronos à faire" in page and "Le premier ferme dans" in page
     predict(client, first)
     page = client.get("/").text
-    assert "1 match sans prono" in page
+    assert "1 prono à faire" in page
     predict(client, add_match(db_session, 72))
     predict(client, db_session.query(Match).filter_by(home_team="Aigles").one())
-    assert "Tous tes pronos sont faits" in client.get("/").text
+    page = client.get("/").text
+    assert "Tous tes pronos sont prêts" in page and "Lions – Étalons" in page  # prochain match
 
 
 def test_times_shown_in_player_timezone(client, db_session):

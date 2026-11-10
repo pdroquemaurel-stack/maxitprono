@@ -232,8 +232,9 @@ body { padding-bottom: calc(var(--tabbar-height) + env(safe-area-inset-bottom));
   min-width: 0;
   min-height: 44px;
   color: #4A4F5C;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
+  letter-spacing: -0.01em;
   text-decoration: none;
 }
 
@@ -537,26 +538,45 @@ body.no-tabbar { padding-bottom: 0; }
 
 .match-card.has-error { border-color: var(--lose); }
 
+/* Carte match : heure + compétition à gauche, tendance à droite */
+.match-card .card-meta { align-items: baseline; }
+
+.match-when { display: flex; align-items: baseline; gap: 6px; min-width: 0; }
+
+.match-when time { color: var(--ink); font-weight: 800; font-variant-numeric: tabular-nums; }
+
+.match-when span, .match-trend { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.match-trend { flex-shrink: 0; max-width: 50%; color: var(--ink); font-weight: 600; }
+
+/* Domicile | case – case | extérieur ; colonnes d'équipes de largeur égale */
 .match-grid {
   display: grid;
-  grid-template-columns: 1fr 44px 12px 44px 1fr;
-  gap: 4px;
+  grid-template-columns: minmax(0, 1fr) 44px 12px 44px minmax(0, 1fr);
+  gap: 6px;
   align-items: center;
 }
 
-.match-grid .team {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 4px;
-  font-weight: 700;
-  font-size: 15px;
-  /* Noms longs : coupés en fin de mot ou avec un trait d'union, jamais au milieu d'une lettre */
-  overflow-wrap: break-word;
-  hyphens: auto;
+.match-grid .team { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+
+.match-grid .away { align-items: flex-end; text-align: right; }
+
+.team-top { display: flex; align-items: center; gap: 6px; }
+
+.team-abbr { font-family: var(--font-title); font-size: 16px; font-weight: 800; }
+
+.match-grid .team-name {
+  overflow: hidden;
+  max-width: 100%;
+  color: var(--muted);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.match-grid .home { align-items: flex-end; text-align: right; }
+.match-state { margin: 8px 0 0; font-size: 13px; color: var(--muted); text-align: center; }
+
+.match-state:empty { display: none; }
 
 /* Écusson : logo par-dessus les initiales, qui restent visibles s'il manque */
 .crest {
@@ -585,21 +605,6 @@ body.no-tabbar { padding-bottom: 0; }
   background: var(--surface);
 }
 
-/* Ligne des pourcentages « 1 x % · N x % · 2 x % » */
-.probs {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 4px 18px;
-  margin: 8px 0 0;
-  font-size: 13px;
-  color: var(--muted);
-}
-
-.probs b { color: var(--ink); font-weight: 700; }
-
-.probs-source { flex-basis: 100%; text-align: center; font-size: 12px; }
-
 .visually-hidden {
   position: absolute;
   width: 1px;
@@ -617,7 +622,7 @@ body.no-tabbar { padding-bottom: 0; }
   align-items: center;
   justify-content: center;
   width: 44px;
-  height: 48px;
+  height: 44px;
   min-height: 0;
   padding: 0;
   border: 1.5px solid var(--empty-border);
@@ -2159,3 +2164,163 @@ a.p-logo { display: inline-flex; align-items: center; gap: 4px; min-height: 44px
 .hg-footer a { display: inline-flex; align-items: center; min-height: 44px; color: var(--lg-ink); }
 
 .hg-footer p { margin: 8px 0 0; }
+
+/* --- Accueil du joueur --- */
+.h-me { display: inline-flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; }
+
+.lg .h-hello h1 { margin: 8px 0 4px; font-size: 26px; font-weight: 800; overflow-wrap: anywhere; }
+
+/* 3 mini-cartes de largeur égale, valeurs en chiffres tabulaires */
+.h-kpis { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+
+.h-kpi {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  min-height: 88px;
+  padding: 12px;
+  border-radius: 16px;
+  background: #FFFFFF;
+  color: var(--lg-ink);
+  text-decoration: none;
+}
+
+.h-kpi-label, .h-kpi-sub {
+  overflow: hidden;
+  color: var(--lg-muted);
+  font-size: 12px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.h-kpi-value { font: 800 22px var(--font-title); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* Bloc « Pronos à faire » : bordure orange, matchs séparés par un filet */
+.h-todo { border: 2px solid #FF7900; }
+
+.h-todo-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+
+.h-todo-head [data-countdown] { color: var(--lg-ink); font-weight: 700; font-variant-numeric: tabular-nums; }
+
+.h-day-pill {
+  flex-shrink: 0;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--lg-soft-2);
+  color: var(--lg-soft-text);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.h-todo .match-card {
+  margin: 0;
+  padding: 12px 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+}
+
+.h-todo .match-card + .match-card { margin-top: 0; border-top: 1px solid var(--lg-bar); }
+
+.h-save.done { background: #0E7A43; color: #FFFFFF; }
+
+.h-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  margin-top: 4px;
+  color: var(--lg-ink);
+  font-size: 14px;
+}
+
+.h-head-link { display: inline-flex; align-items: center; min-height: 44px; color: var(--lg-ink); font-size: 14px; }
+
+/* Mes résultats d'hier */
+.h-total { color: #0E7A43; font: 800 17px var(--font-title); font-variant-numeric: tabular-nums; }
+
+.h-result { display: flex; align-items: center; gap: 10px; min-height: 60px; padding: 8px 0; }
+
+.h-result-text { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+
+.h-result-text strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.h-final { font: 800 16px var(--font-title); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+.h-exact { margin-top: 10px; background: var(--lg-soft-2); color: var(--lg-soft-text); }
+
+.h-exact p { margin: 0; font-weight: 600; }
+
+.h-share { width: auto; margin-top: 10px; }
+
+/* Mes ligues : carrousel horizontal de cartes de 200 px */
+.h-carousel {
+  display: flex;
+  gap: 10px;
+  margin: 0 -20px;
+  padding: 0 20px 4px;
+  overflow-x: auto;
+  list-style: none;
+  scroll-snap-type: x mandatory;
+  scroll-padding: 0 20px;
+  scrollbar-width: none;
+}
+
+.h-carousel::-webkit-scrollbar { display: none; }
+
+.h-carousel > li { flex: 0 0 200px; scroll-snap-align: start; }
+
+.h-league {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  height: 100%;
+  min-height: 150px;
+  text-decoration: none;
+}
+
+.h-league-name { margin-top: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.h-league-rank { margin-top: auto; font-family: var(--font-title); font-variant-numeric: tabular-nums; }
+
+.h-league-new {
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  border: 2px dashed var(--lg-border);
+  border-radius: 16px;
+  color: var(--lg-ink);
+  text-align: center;
+}
+
+/* Chez les copains */
+.h-event { display: flex; align-items: center; gap: 10px; min-height: 56px; padding: 8px 0; }
+
+.h-event-text { flex: 1; min-width: 0; font-size: 14px; }
+
+.h-event-when { flex-shrink: 0; white-space: nowrap; }
+
+/* Progression : prochain badge */
+.h-progress { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+
+.h-progress-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  border: 2px dashed var(--lg-border);
+  border-radius: 50%;
+  color: var(--lg-muted);
+}
+
+.h-progress-text { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 0; }
+
+.h-bar { display: block; height: 8px; border-radius: 999px; background: var(--lg-bar); overflow: hidden; }
+
+.h-bar span { display: block; height: 100%; border-radius: 999px; background: #FF7900; }
+
+.h-progress > svg { flex-shrink: 0; color: var(--lg-muted); }

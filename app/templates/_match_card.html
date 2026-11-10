@@ -1,22 +1,30 @@
-{# Carte d'un match dans la liste des pronos. Variables : match + contexte match_context #}
+{# Carte d'un match, partagée par la page Pronos et l'accueil. Variables : match + contexte match_context
+   En haut : heure en gras, compétition, tendance à droite. Au centre : équipes et deux cases de score. #}
 {% set prediction = predictions.get(match.id) %}
 {% set is_open = match.id in open_ids %}
+{% set home_abbr, away_abbr = team_initials(match.home_team), team_initials(match.away_team) %}
 <article class="card match-card" id="m{{ match.id }}"{% if is_open and user %} data-match-id="{{ match.id }}"{% if prediction %} data-predicted{% endif %}{% endif %}>
   <p class="card-meta">
-    <span>{{ match.competition.name }} · <time datetime="{{ match.kickoff_at.isoformat() }}">{{ format_time(match.kickoff_at, tz) }}</time></span>
-    {% if match.status == 'live' %}<span class="badge live">{{ t('status_live') }}</span>
-    {% elif match.status == 'finished' %}<span>{{ t('status_finished') }}</span>
-    {% elif match.status == 'cancelled' %}<span>{{ t('status_cancelled') }}</span>
-    {% elif not is_open %}<span>{{ t('prediction_closed') }}</span>
-    {% elif prediction %}<span data-save-status>{{ t('prediction_saved_short') }}</span>
-    {% else %}<span class="closing" data-save-status>{{ t('closes').format(when=closing_when(match.kickoff_at, now, tz, lang)) }}</span>
+    <span class="match-when"><time datetime="{{ match.kickoff_at.isoformat() }}">{{ format_time(match.kickoff_at, tz) }}</time>
+      <span>{{ match.competition.name }}</span></span>
+    {% set probs = probabilities.get(match.id) %}
+    {% if probs %}
+      {% set outcome, pct = leading_outcome(probs) %}
+      <span class="match-trend" title="{{ t('probs_label').format(home=match.home_team, away=match.away_team, h=probs.home, d=probs.draw, a=probs.away) }}">
+        {%- if outcome == 'draw' %}{{ t('trend_draw_' ~ probs.source).format(pct=pct) }}
+        {%- else %}{{ t('trend_team_' ~ probs.source).format(pct=pct, team=home_abbr if outcome == 'home' else away_abbr) }}{% endif -%}
+      </span>
+      <span class="visually-hidden">{{ t('probs_label').format(home=match.home_team, away=match.away_team, h=probs.home, d=probs.draw, a=probs.away) }}</span>
     {% endif %}
   </p>
 
   <div class="match-grid">
-    <span class="team home">{% with url = match.home_logo_url, name = match.home_team %}{% include "_crest.html" %}{% endwith %}<span class="team-name">{{ match.home_team }}</span></span>
+    <span class="team home">
+      <span class="team-top">{% with url = match.home_logo_url, name = match.home_team %}{% include "_crest.html" %}{% endwith %}<b class="team-abbr">{{ home_abbr }}</b></span>
+      <span class="team-name">{{ match.home_team }}</span>
+    </span>
     {% if is_open and user %}
-      {# Une case = un chiffre ; l'enregistrement est automatique (static/js/predictions.js) #}
+      {# Une case = un chiffre ; enregistrement par static/js/predictions.js #}
       {% set home_value = prediction.home_score if prediction else '' %}
       {% set away_value = prediction.away_score if prediction else '' %}
       {% set home_class, away_class = score_classes(prediction.home_score, prediction.away_score) if prediction else ('', '') %}
@@ -34,19 +42,22 @@
       <span class="dash" aria-hidden="true">–</span>
       <span class="score-box {{ away_class }}">{{ prediction.away_score if prediction else '–' }}</span>
     {% endif %}
-    <span class="team away">{% with url = match.away_logo_url, name = match.away_team %}{% include "_crest.html" %}{% endwith %}<span class="team-name">{{ match.away_team }}</span></span>
+    <span class="team away">
+      <span class="team-top"><b class="team-abbr">{{ away_abbr }}</b>{% with url = match.away_logo_url, name = match.away_team %}{% include "_crest.html" %}{% endwith %}</span>
+      <span class="team-name">{{ match.away_team }}</span>
+    </span>
   </div>
 
-  {% set probs = probabilities.get(match.id) %}
-  {% if probs %}
-    <p class="probs">
-      <span class="visually-hidden">{{ t('probs_label').format(home=match.home_team, away=match.away_team, h=probs.home, d=probs.draw, a=probs.away) }}</span>
-      {% if probs.source == 'players' %}<span class="probs-source">{{ t('probs_players') }}</span>{% endif %}
-      <span aria-hidden="true">{{ t('prob_home') }} <b>{{ probs.home }} %</b></span>
-      <span aria-hidden="true">{{ t('prob_draw') }} <b>{{ probs.draw }} %</b></span>
-      <span aria-hidden="true">{{ t('prob_away') }} <b>{{ probs.away }} %</b></span>
-    </p>
-  {% endif %}
+  {# État du prono : clôture, enregistré, en cours, terminé… #}
+  <p class="match-state">
+    {% if match.status == 'live' %}<span class="badge live">{{ t('status_live') }}</span>
+    {% elif match.status == 'finished' %}<span>{{ t('status_finished') }}</span>
+    {% elif match.status == 'cancelled' %}<span>{{ t('status_cancelled') }}</span>
+    {% elif not is_open %}<span>{{ t('prediction_closed') }}</span>
+    {% elif prediction %}<span data-save-status>{{ t('prediction_saved_short') }}</span>
+    {% else %}<span class="closing" data-save-status>{{ t('closes').format(when=closing_when(match.kickoff_at, now, tz, lang)) }}</span>
+    {% endif %}
+  </p>
 
   {% if match.home_score is not none and match.status in ('live', 'finished') %}
     <p class="match-foot">{{ t('final_score_label') if match.status == 'finished' else t('live_score_label') }}

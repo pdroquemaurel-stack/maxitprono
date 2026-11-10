@@ -4,37 +4,40 @@ import re
 from tests.test_league_pages import create_league, logout, register
 
 
-def test_home_without_league_invites_to_create_one(client):
+def test_home_without_league_shows_join_card_and_create_tile(client):
     register(client)
     page = client.get("/").text
-    assert "Joue avec tes potes" in page and 'href="/leagues"' in page
-    assert "league-picker" not in page
+    assert "Ma ligue" in page and "Rejoindre" in page  # mini-carte vers /leagues
+    assert 'class="h-league h-league-new" href="/leagues"' in page
+    assert "Chez les copains" not in page  # pas de données : bloc masqué
 
 
-def test_home_shows_selected_league_with_feed_and_invite(client):
+def test_home_lists_all_my_leagues_in_carousel(client):
     register(client)
-    league_id, code = create_league(client, "Bureau Casa")
+    first_id, _ = create_league(client, "Première")
+    second_id, _ = create_league(client, "Seconde")
     page = client.get("/").text
-    assert 'class="league-picker"' in page and "Bureau Casa" in page
-    assert "Dans la ligue" in page and "a créé la ligue" in page
-    assert "Inviter des potes par WhatsApp" in page and f"/j/{code}" in page
-    assert "1 joueur" in page
+    assert f'href="/leagues/{first_id}"' in page and f'href="/leagues/{second_id}"' in page
+    assert page.count('class="h-card h-league"') == 2
+    assert "1 membre" in page
 
 
-def test_league_picker_switches_and_remembers_league(client):
+def test_opening_a_league_makes_it_the_main_league(client):
     register(client)
     first_id, _ = create_league(client, "Première")
     second_id, _ = create_league(client, "Seconde")
     # Par défaut : la plus récemment rejointe
-    assert re.search(r'league-picker-name">Seconde<', client.get("/").text)
-
-    response = client.get(f"/?league={first_id}")
-    assert re.search(r'league-picker-name">Première<', response.text)
+    assert re.search(rf'class="h-kpi" href="/leagues/{second_id}">\s*<span class="h-kpi-label">Seconde<',
+                     client.get("/").text)
+    response = client.get(f"/leagues/{first_id}")
     assert response.cookies.get("league") == str(first_id)
-    assert re.search(r'league-picker-name">Première<', client.get("/").text)  # mémorisée
+    assert re.search(r'h-kpi-label">Première<', client.get("/").text)
+    # L'ancien lien « ?league= » marche encore
+    client.get(f"/?league={second_id}")
+    assert re.search(r'h-kpi-label">Seconde<', client.get("/").text)
 
 
-def test_league_picker_ignores_league_of_others(client):
+def test_home_ignores_league_of_others(client):
     register(client)
     other_id, _ = create_league(client, "Pas à moi")
     logout(client)
@@ -43,16 +46,16 @@ def test_league_picker_ignores_league_of_others(client):
     assert "Pas à moi" not in page
 
 
-def test_home_counts_league_members_and_feed_shows_arrival(client):
+def test_friends_feed_shows_others_but_not_me(client):
     register(client)
     _, code = create_league(client, "Bureau Casa")
     logout(client)
     register(client, "Awa")
     client.post(f"/join/{code}")
     page = client.get("/").text
-    assert "2 joueurs" in page
-    assert "<strong>Toi</strong>" in page and "a rejoint la ligue" in page
-    assert "Paul</strong>" in page
+    feed = page[page.index("Chez les copains"):]
+    assert "<strong>Paul</strong>" in feed and "a créé la ligue" in feed
+    assert "<strong>Awa</strong>" not in feed  # mes propres événements ne sont pas repris
 
 
 def test_leaderboard_opens_on_league_tab_for_members(client):

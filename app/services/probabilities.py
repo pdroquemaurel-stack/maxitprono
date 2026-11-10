@@ -51,3 +51,13 @@ def match_probabilities(prob_home: int | None, prob_draw: int | None, prob_away:
     if None not in (prob_home, prob_draw, prob_away):
         return Probabilities(prob_home, prob_draw, prob_away, source="provider")
     return player_trends(scores)
+
+
+def leading_outcome(probabilities: Probabilities) -> tuple[str, int]:
+    """Issue la plus attendue : ("home" | "draw" | "away", pourcentage).
+
+    Pour la ligne « 62 % voient PSG » des cartes de match. À égalité : domicile, puis nul.
+    """
+    options = [("home", probabilities.home), ("draw", probabilities.draw),
+               ("away", probabilities.away)]
+    return max(options, key=lambda option: option[1])

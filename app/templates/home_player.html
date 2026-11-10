@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% from "_league_bits.html" import avatar, league_icon, move_badge, members_label, points_pill %}
+{% block title %}{{ t('home_title') }} · {{ t('app_name') }}{% endblock %}
+{% block main_class %} lg home-player{% endblock %}
+{% block content %}
+  {# 1. Barre du haut : logo et avatar vers le profil #}
+  <header class="p-header">
+    <span class="p-logo">Maxit <span class="p-logo-pill">Prono</span></span>
+    <a class="h-me" href="/profile" aria-label="{{ t('profile_title') }}">{{ avatar(user.id, user.nickname, user.avatar_mime, 36) }}</a>
+  </header>
+
+  {# 2. Salutation, la veille et 3 mini-cartes #}
+  <section class="h-hello">
+    <h1>{{ t('home_hello').format(name=user.nickname) }}</h1>
+    <p class="lg-muted">
+      {%- if results %}
+        {%- set pts = t('home_pts_one' if yesterday_points == 1 else 'home_pts').format(count=yesterday_points) %}
+        {%- set places = t('home_places_one' if yesterday_places|abs == 1 else 'home_places').format(count=yesterday_places|abs) %}
+        {%- if yesterday_places > 0 %}{{ t('home_yesterday_up').format(points=pts, places=places) }}
+        {%- elif yesterday_places < 0 %}{{ t('home_yesterday_down').format(points=pts, places=places) }}
+        {%- else %}{{ t('home_yesterday').format(points=pts) }}{% endif %}
+      {%- else %}{{ t('home_yesterday_none') }}{% endif -%}
+    </p>
+  </section>
+
+  <section class="h-kpis">
+    {% if main_card %}
+      <a class="h-kpi" href="/leagues/{{ main_card.league.id }}">
+        <span class="h-kpi-label">{{ main_card.league.name }}</span>
+        <strong class="h-kpi-value">{{ format_rank(main_card.me.rank) if main_card.me else '–' }}</strong>
+        <span class="h-kpi-sub">{{ move_badge(main_card.move) if main_card.me else t('profile_not_ranked') }}</span>
+      </a>
+    {% else %}
+      <a class="h-kpi" href="/leagues">
+        <span class="h-kpi-label">{{ t('home_kpi_league') }}</span>
+        <strong class="h-kpi-value">–</strong>
+        <span class="h-kpi-sub">{{ t('home_kpi_join') }}</span>
+      </a>
+    {% endif %}
+    <div class="h-kpi">
+      <span class="h-kpi-label">{{ t('profile_points') }}</span>
+      <strong class="h-kpi-value">{{ summary.points }}</strong>
+      <span class="h-kpi-sub">{{ t('home_kpi_yesterday').format(count=yesterday_points) }}</span>
+    </div>
+    <div class="h-kpi">
+      <span class="h-kpi-label">{{ t('home_kpi_success') }}</span>
+      <strong class="h-kpi-value">{{ summary.success_rate }} %</strong>
+      <span class="h-kpi-sub">{{ t('home_kpi_streak').format(count=current_streak) }}</span>
+    </div>
+  </section>
+
+  {# 3. Pronos à faire : mêmes cartes que la page Pronos, enregistrées par le bouton #}
+  <section class="h-card h-todo">
+    {% if to_predict_count %}
+      {% set first = to_predict[0] %}
+      <div class="h-todo-head">
+        <div>
+          <h2>{{ t('home_todo_title_one') if to_predict_count == 1 else t('home_todo_title').format(count=to_predict_count) }}</h2>
+          <p class="lg-muted lg-small">{{ t('home_todo_first') }}
+            <span data-countdown="{{ closing_at(first.kickoff_at).isoformat() }}"
+                  data-fmt-days="{{ t('countdown_days') }}" data-fmt-hours="{{ t('countdown_hours') }}"
+                  data-fmt-minutes="{{ t('countdown_minutes') }}">{{ format_countdown(first.kickoff_at, now) }}</span></p>
+        </div>
+        <span class="h-day-pill">{{ format_day(first.kickoff_at.astimezone(tz).date(), today) }}</span>
+      </div>
+      <form class="predictions-form" data-mode="button" onsubmit="return false"
+            data-msg-saved="{{ t('prediction_saved_short') }}" data-msg-saving="{{ t('prediction_saving') }}"
+            data-msg-offline="{{ t('prediction_offline') }}" data-msg-todo="{{ t('todo_count') }}">
+        {% for match in todo_matches %}{% include "_match_card.html" %}{% endfor %}
+        <button type="button" class="lg-btn lg-btn-orange lg-btn-big h-save" data-save-all
+                data-label="{{ t('home_save_all') }}" data-done-label="{{ t('home_saved_all') }}">{{ t('home_save_all') }}</button>
+      </form>
+    {% else %}
+      <h2>{{ t('home_all_ready') }}</h2>
+      {% if next_match %}
+        <a class="hg-match" href="/matches#m{{ next_match.id }}">
+          <span class="hg-match-text">
+            <strong>{{ next_match.home_team }} – {{ next_match.away_team }}</strong>
+            <span class="lg-muted lg-small">{{ next_match.competition.name }} ·
+              {{ format_day(next_match.kickoff_at.astimezone(tz).date(), today) }} {{ format_time(next_match.kickoff_at, tz) }}</span>
+          </span>
+          {{ icon('chevron', 20) }}
+        </a>
+      {% else %}<p class="lg-muted">{{ t('home_no_next_match') }}</p>{% endif %}
+    {% endif %}
+    <a class="h-link" href="/matches">{{ t('home_all_matches') }}</a>
+  </section>
+
+  {# 4. Mes résultats d'hier #}
+  {% if results %}
+    <section>
+      <div class="lg-card-head">
+        <h2>{{ t('home_results_title') }}</h2>
+        <strong class="h-total">+{{ yesterday_points }} {{ t('home_pts_unit') }}</strong>
+      </div>
+      <ul class="h-card h-list">
+        {% for p in results %}
+          <li class="h-result">
+            <span class="h-result-text">
+              <strong>{{ p.match.home_team }} – {{ p.match.away_team }}</strong>
+              <span class="lg-muted lg-small">{{ t('home_your_pick').format(home=p.home_score, away=p.away_score) }}</span>
+            </span>
+            <span class="h-final">{{ p.match.home_score }} – {{ p.match.away_score }}</span>
+            {{ points_pill(p) }}
+          </li>
+        {% endfor %}
+      </ul>
+      {% if exact_result %}
+        {% set exact_match = exact_result.match.home_team ~ ' – ' ~ exact_result.match.away_team %}
+        <div class="h-card h-exact">
+          <p>{{ t('home_exact_brag').format(match=exact_match) }}</p>
+          <button type="button" class="lg-btn lg-btn-dark h-share" data-home-share
+                  data-text="{{ t('home_exact_share_text').format(match=exact_match, home=exact_result.home_score, away=exact_result.away_score) }}"
+                  data-url="{{ request.base_url }}" data-copied="{{ t('profile_link_copied') }}">{{ icon('share', 20) }}<span>{{ t('home_share') }}</span></button>
+        </div>
+      {% endif %}
+      <a class="h-link" href="/results">{{ t('home_see_results') }}</a>
+    </section>
+  {% endif %}
+
+  {# 5. Mes ligues : carrousel horizontal #}
+  <section>
+    <div class="lg-card-head">
+      <h2>{{ t('leagues_title') }}</h2>
+      <a class="h-head-link" href="/leagues">{{ t('home_see_all') }}</a>
+    </div>
+    <ul class="h-carousel">
+      {% for card in cards %}
+        <li><a class="h-card h-league" href="/leagues/{{ card.league.id }}">
+          {{ league_icon(card.league, 40) }}
+          <strong class="h-league-name">{{ card.league.name }}</strong>
+          <span class="lg-muted lg-small">{{ members_label(card.member_count) }}</span>
+          <span class="h-league-rank">{% if card.me %}<strong>{{ format_rank(card.me.rank) }}</strong> {{ move_badge(card.move) }}
+            {%- else %}<span class="lg-muted lg-small">{{ t('profile_not_ranked') }}</span>{% endif %}</span>
+        </a></li>
+      {% endfor %}
+      <li><a class="h-league h-league-new" href="/leagues">{{ icon('plus', 24) }}<strong>{{ t('home_create_or_join_short') }}</strong></a></li>
+    </ul>
+  </section>
+
+  {# 6. Chez les copains : derniers événements de mes ligues #}
+  {% if feed %}
+    <section>
+      <h2>{{ t('home_friends') }}</h2>
+      <ul class="h-card h-list">
+        {% for event in feed %}
+          <li class="h-event">
+            {{ avatar(event.user_id, event.nickname, event.has_photo, 32) }}
+            <span class="h-event-text"><strong>{{ event.nickname }}</strong>
+              {{ t('activity_' ~ event.kind).format(match=event.match) }}
+              <span class="lg-muted lg-small">· {{ event.league }}</span></span>
+            <span class="lg-muted lg-small h-event-when">{{ time_ago(event.at, now, lang) }}</span>
+          </li>
+        {% endfor %}
+      </ul>
+    </section>
+  {% endif %}
+
+  {# 7. Progression : prochain badge #}
+  {% if next_badge %}
+    {% set done, goal = badge_progress %}
+    <a class="h-card h-progress" href="/profile">
+      <span class="h-progress-icon">{{ icon('lock_dashed', 24) }}</span>
+      <span class="h-progress-text">
+        <span class="lg-label">{{ t('home_next_badge') }}</span>
+        <strong>{{ t('badge_' ~ next_badge.key) }}</strong>
+        <span class="h-bar" role="img" aria-label="{{ t('home_badge_progress').format(done=done, goal=goal) }}"><span style="width: {{ (100 * done / goal)|round|int }}%"></span></span>
+        <span class="lg-muted lg-small">{{ t('home_badge_progress').format(done=done, goal=goal) }} · {{ t('badge_' ~ next_badge.key ~ '_rule') }}</span>
+      </span>
+      {{ icon('chevron', 20) }}
+    </a>
+  {% endif %}
+{% endblock %}
+{% block scripts %}
+  <script src="{{ static_url('js/score-colors.js') }}" defer></script>
+  <script src="{{ static_url('js/predictions.js') }}" defer></script>
+  <script src="{{ static_url('js/countdown.js') }}" defer></script>
+  <script src="{{ static_url('js/home.js') }}" defer></script>
+{% endblock %}

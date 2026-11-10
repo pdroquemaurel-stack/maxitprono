@@ -175,11 +175,12 @@ def recent_activity(db: Session, league: League, now: datetime) -> list[Event]:
     après l'arrivée du joueur.
     """
     since = now - ACTIVITY_WINDOW
-    joins = db.execute(select(User.id, User.nickname, LeagueMember.joined_at)
+    joins = db.execute(select(User.id, User.nickname, LeagueMember.joined_at, User.avatar_mime)
                        .join(LeagueMember, LeagueMember.user_id == User.id)
                        .where(LeagueMember.league_id == league.id,
                               LeagueMember.joined_at >= since))
-    exacts = db.execute(select(User.nickname, Match.home_team, Match.away_team, Match.kickoff_at)
+    exacts = db.execute(select(User.nickname, Match.home_team, Match.away_team, Match.kickoff_at,
+                               User.id, User.avatar_mime)
                         .join(Prediction, Prediction.user_id == User.id)
                         .join(Match, Prediction.match_id == Match.id)
                         .join(LeagueMember, LeagueMember.user_id == User.id)
@@ -188,8 +189,10 @@ def recent_activity(db: Session, league: League, now: datetime) -> list[Event]:
                                Match.kickoff_at >= LeagueMember.joined_at,
                                Match.kickoff_at >= since,
                                league_competition_filter(league.id)))
-    events = [join_event(nickname, at, user_id == league.owner_id) for user_id, nickname, at in joins]
-    events += [exact_event(*row) for row in exacts]
+    events = [join_event(nickname, at, user_id == league.owner_id, user_id, bool(mime))
+              for user_id, nickname, at, mime in joins]
+    events += [exact_event(nickname, home, away, at, user_id, bool(mime))
+               for nickname, home, away, at, user_id, mime in exacts]
     return latest_events(events, now)
 
 
