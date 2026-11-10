@@ -65,6 +65,18 @@ def format_day(day: date, today: date, lang: str | None = None) -> str:
     return translate("day_format", lang).format(weekday=weekday, day=day.day, month=month)
 
 
+def format_day_title(day: date, today: date, lang: str | None = None) -> str:
+    """Titre de jour de la page Pronos : « Aujourd'hui · mar. 10 nov. », « Sam. 14 nov. »."""
+    short = translate("day_short_format", lang).format(
+        weekday=translate(f"weekday_short_{day.weekday()}", lang), day=day.day,
+        month=translate(f"month_short_{day.month}", lang))
+    if day == today:
+        return f"{translate('today', lang)} · {short}"
+    if (day - today).days == 1:
+        return f"{translate('tomorrow', lang)} · {short}"
+    return short[:1].upper() + short[1:]
+
+
 def format_time(moment: datetime, tz: tzinfo) -> str:
     """Heure locale du joueur, ex. « 21:00 »."""
     return moment.astimezone(tz).strftime("%H:%M")

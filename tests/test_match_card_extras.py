@@ -16,26 +16,36 @@ def add_predictions(db, match, scores):
     db.commit()
 
 
-def test_provider_percentages_are_shown(client, db_session):
+def test_players_trend_bar_from_threshold(client, db_session):
+    match = add_match(db_session, 24)
+    add_predictions(db_session, match, [(2, 0)] * 3 + [(1, 1)] + [(0, 1)])
+    page = client.get("/matches?status=all").text
+    assert 'class="mc-trend-bar"' in page
+    assert "60 · 20 · 20 %" in page
+    assert "victoire Lions 60 %, nul 20 %, victoire Étalons 20 %" in page  # version lue à voix haute
+
+
+def test_trend_uses_players_not_provider(client, db_session):
     match = add_match(db_session, 24)
     match.prob_home, match.prob_draw, match.prob_away = 55, 26, 19
     db_session.commit()
-    page = client.get("/matches").text
-    assert "LIO favori · 55 %" in page  # Lions, issue la plus probable
-    assert "Victoire Lions 55 %, nul 26 %, victoire Étalons 19 %" in page  # version complète
+    add_predictions(db_session, match, [(0, 1)] * 5)
+    page = client.get("/matches?status=all").text
+    assert "0 · 0 · 100 %" in page and "55 · 26 · 19" not in page
 
 
-def test_player_trends_shown_from_threshold(client, db_session):
-    match = add_match(db_session, 24)
-    add_predictions(db_session, match, [(2, 0)] * 3 + [(1, 1)] + [(0, 1)])
-    page = client.get("/matches").text
-    assert "60 % voient LIO" in page
-
-
-def test_no_percentages_below_threshold(client, db_session):
+def test_no_bar_below_threshold_but_place_kept(client, db_session):
     match = add_match(db_session, 24)
     add_predictions(db_session, match, [(2, 0)] * (MIN_PREDICTIONS_FOR_TRENDS - 1))
-    assert 'class="match-trend"' not in client.get("/matches").text
+    page = client.get("/matches").text
+    assert 'class="mc-trend"' in page  # ligne gardée : même hauteur
+    assert 'class="mc-trend-bar"' not in page
+
+
+def test_no_trend_on_closed_match(client, db_session):
+    match = add_match(db_session, -1, status=MatchStatus.LIVE, score=(1, 0))
+    add_predictions(db_session, match, [(2, 0)] * 6)
+    assert 'class="mc-trend' not in client.get("/matches?status=all").text
 
 
 def test_crest_shows_logo_with_initials_underneath(client, db_session):

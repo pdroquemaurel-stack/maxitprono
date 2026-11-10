@@ -39,7 +39,7 @@ def login(client):
 
 
 def predict(client, match, home="2", away="1"):
-    """Envoi automatique d'un prono, comme le fait static/js/predictions.js."""
+    """Envoi d'un prono, comme le fait static/js/predictions.js au clic sur « Valider »."""
     return client.post(f"/matches/{match.id}/prediction", data={"home": home, "away": away},
                        follow_redirects=False)
 
@@ -116,13 +116,14 @@ def test_unknown_match_returns_404(client, db_session):
     assert response.json()["saved"] is False
 
 
-def test_page_has_autosave_inputs_and_no_save_button(client, db_session):
+def test_page_has_inputs_and_one_save_button(client, db_session):
     match = add_match(db_session, 24)
     login(client)
     page = client.get("/matches").text
     assert f'data-match-id="{match.id}"' in page
-    assert 'maxlength="1"' in page and "js/predictions.js" in page
-    assert "Enregistrer mes pronos" not in page and 'type="submit"' not in page
+    assert 'maxlength="1"' in page and 'inputmode="numeric"' in page and "js/predictions.js" in page
+    assert page.count("data-save-all") == 1 and ">Valider</button>" in page
+    assert 'type="submit"' not in page
 
 
 def test_error_message_in_english(client, db_session):
@@ -136,7 +137,7 @@ def test_closed_match_shows_no_input(client, db_session):
     match = add_match(db_session, 0.1)
     login(client)
     page = client.get("/matches").text
-    assert "Clôturé" in page
+    assert "Fermé" in page
     assert f'name="home_{match.id}"' not in page
 
 
@@ -153,14 +154,15 @@ def test_prediction_requires_login(client, db_session):
     assert response.headers["location"] == "/login"
 
 
-def test_saved_prediction_is_colored_and_closing_time_shown(client, db_session):
-    add_match(db_session, 24, home="Lions")
+def test_saved_prediction_is_highlighted_and_closing_time_shown(client, db_session):
+    add_match(db_session, 20, home="Lions")
     saved = add_match(db_session, 30, home="Aigles")
     login(client)
     predict(client, saved, "1", "1")
-    page = client.get("/matches").text
-    assert "score-box draw" in page
-    assert "Ferme " in page  # le match sans prono affiche sa clôture
+    page = client.get("/matches?status=all").text
+    assert page.count("score-box filled") == 2  # les deux cases du match pronostiqué
+    assert "Ferme dans" in page  # coup d'envoi dans moins de 24 h, sans prono
+    assert "Prono enregistré" in page
     assert "1 à faire" in page
 
 

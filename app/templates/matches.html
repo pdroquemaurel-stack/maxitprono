@@ -1,34 +1,84 @@
 {% extends "base.html" %}
+{% from "_icons.html" import icon %}
 {% block title %}{{ t('matches_title') }} · {{ t('app_name') }}{% endblock %}
+{% block main_class %} lg pronos{% endblock %}
 {% block content %}
-  <header class="page-head">
+  {# 1. En-tête blanc : titre et « N à faire » #}
+  <header class="pr-head">
     <h1>{{ t('matches_title') }}</h1>
-    {% if user and to_predict %}<span class="badge todo" data-todo-count="{{ to_predict }}">{{ t('todo_count').format(count=to_predict) }}</span>{% endif %}
+    {% if user and to_predict %}<span class="pr-todo" data-todo-count="{{ to_predict }}">{{ t('todo_count').format(count=to_predict) }}</span>{% endif %}
   </header>
 
-  {% if user and open_ids %}<p class="small">{{ t('predictions_autosave_hint') }}</p>{% endif %}
+  {# 2. Compétitions : « Toutes » puis une pastille par compétition présente dans les matchs.
+     Compteurs recalculés par static/js/matches.js selon le statut choisi. #}
+  <nav class="pr-comps" aria-label="{{ t('filter_competitions') }}" data-filter-comps>
+    {% set comp_items = [{'key': 'all', 'name': t('filter_all_competitions'), 'code': '', 'logo_url': ''}] + pills %}
+    {% for pill in comp_items %}
+      <a class="pr-comp{% if pill.key == comp %} active{% endif %}" href="?comp={{ pill.key }}&status={{ status }}"
+         data-comp-key="{{ pill.key }}"{% if pill.key == comp %} aria-current="true"{% endif %}>
+        <span class="pr-emblem" aria-hidden="true">
+          {%- if pill.key == 'all' %}{{ icon('ball', 16) }}
+          {%- else %}<span class="pr-emblem-code">{{ pill.code }}</span>
+            {%- if pill.logo_url %}<img src="{{ pill.logo_url }}" alt="" width="20" height="20" loading="lazy" decoding="async" onerror="this.remove()">{% endif %}
+          {%- endif -%}
+        </span>
+        <span class="pr-comp-name" data-text="{{ pill.name }}">{{ pill.name }}</span>
+        <span class="pr-count" data-count>{{ counts[pill.key] }}</span>
+      </a>
+    {% endfor %}
+  </nav>
 
-  {% if days %}
-    {# Pas d'envoi du formulaire : chaque prono part seul dès que ses deux cases sont remplies #}
-    <form class="predictions-form{% if not user %} with-action{% endif %}" onsubmit="return false"
-          data-msg-saved="{{ t('prediction_saved_short') }}" data-msg-saving="{{ t('prediction_saving') }}"
-          data-msg-offline="{{ t('prediction_offline') }}" data-msg-todo="{{ t('todo_count') }}">
-      {% for day, competitions in days %}
-        <h2 class="day-title">{{ format_day(day, today) }}</h2>
-        {% for competition, matches in competitions %}
+  {# 3. Statut : À jouer, Mes pronos, Tous #}
+  <nav class="pr-status" aria-label="{{ t('filter_status') }}" data-filter-status>
+    {% for key in ('todo', 'mine', 'all') %}
+      <a href="?comp={{ comp }}&status={{ key }}" data-status-key="{{ key }}"
+         {%- if key == status %} class="active" aria-current="true"{% endif %}>
+        <span data-text="{{ t('filter_status_' ~ key) }}">{{ t('filter_status_' ~ key) }}</span></a>
+    {% endfor %}
+  </nav>
+
+  {# 4. Matchs par jour. Tous les matchs sont dans la page : un filtre les masque sans les
+     retirer, les scores saisis restent donc en place et partent tous avec « Valider ». #}
+  <form class="predictions-form" data-mode="button" onsubmit="return false"
+        data-msg-saved="{{ t('match_state_saved') }}" data-msg-saving="{{ t('prediction_saving') }}"
+        data-msg-offline="{{ t('prediction_offline') }}" data-msg-todo="{{ t('todo_count') }}"
+        data-msg-leave="{{ t('predictions_unsaved') }}">
+    {% for day, matches in days %}
+      {% set shown = matches | selectattr('id', 'in', visible_ids) | list | length %}
+      <section class="pr-day" data-day{% if not shown %} hidden{% endif %}>
+        <h2 class="pr-day-title">{{ format_day_title(day, today) }}
+          <span class="pr-day-count" data-day-count data-fmt-one="{{ t('day_matches_one') }}"
+                data-fmt="{{ t('day_matches') }}">{{ t('day_matches_one' if shown == 1 else 'day_matches').format(count=shown) }}</span></h2>
+        <div class="pr-day-card">
           {% for match in matches %}{% include "_match_card.html" %}{% endfor %}
-        {% endfor %}
-      {% endfor %}
-
-      {% if open_ids and not user %}
-        <div class="sticky-action">
-          <a class="button" href="/login">{{ t('login_to_predict') }}</a>
         </div>
-      {% endif %}
-    </form>
-  {% else %}
-    <p class="card lead">{{ t('matches_none') }}</p>
-  {% endif %}
+      </section>
+    {% endfor %}
+
+    {# 6. Aucun match pour ces filtres #}
+    <div class="pr-empty" data-empty{% if visible_ids %} hidden{% endif %}>
+      {{ icon('calendar', 32) }}
+      <strong>{{ t('matches_empty_title') }}</strong>
+      <span>{{ t('matches_empty_hint') }}</span>
+    </div>
+
+    {# 5. Barre de validation, au-dessus de la barre de navigation #}
+    {% if user and open_ids %}
+      <div class="pr-savebar">
+        <span class="pr-savebar-text">
+          <strong data-missing data-fmt-one="{{ t('missing_predictions_one') }}" data-fmt="{{ t('missing_predictions') }}"
+                  data-fmt-none="{{ t('missing_predictions_none') }}">
+            {%- if to_predict == 0 %}{{ t('missing_predictions_none') }}
+            {%- else %}{{ t('missing_predictions_one' if to_predict == 1 else 'missing_predictions').format(count=to_predict) }}{% endif -%}
+          </strong>
+          <span>{{ t('predictions_editable_until') }}</span>
+        </span>
+        <button type="button" class="pr-save" data-save-all
+                data-label="{{ t('save_predictions') }}" data-done-label="{{ t('predictions_saved') }}">{{ t('save_predictions') }}</button>
+      </div>
+    {% endif %}
+  </form>
 {% endblock %}
-{% block scripts %}<script src="{{ static_url('js/score-colors.js') }}" defer></script>
-<script src="{{ static_url('js/predictions.js') }}" defer></script>{% endblock %}
+{% block scripts %}<script src="{{ static_url('js/countdown.js') }}" defer></script>
+<script src="{{ static_url('js/predictions.js') }}" defer></script>
+<script src="{{ static_url('js/matches.js') }}" defer></script>{% endblock %}

@@ -1,7 +1,7 @@
 """Code couleur des chiffres d'un score (charte : gagnant vert, perdant rouge, nul bleu).
 
-Fonction pure. Le même calcul existe en JavaScript (static/js/score-colors.js)
-pour recolorer les cases pendant la saisie.
+Fonction pure. Sert aux scores affichés (résultats, historique) ; les cases de saisie
+des pronos ont leur propre style (bordure orange quand elles sont remplies).
 """
 
 

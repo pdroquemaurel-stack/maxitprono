@@ -4,7 +4,7 @@ from zoneinfo import ZoneInfo
 
 from app.services.timezones import (
     DEFAULT_TIMEZONE,
-    group_by_day_and_competition,
+    group_by_day,
     local_day,
     resolve_timezone,
 )
@@ -37,18 +37,15 @@ def test_late_utc_match_is_next_day_in_douala():
     assert local_day(kickoff, ZoneInfo("Africa/Douala")) == date(2026, 11, 11)  # UTC+1
 
 
-def test_group_by_day_then_competition():
+def test_group_by_day_in_kickoff_order():
     matches = [
         FakeMatch(datetime(2026, 11, 10, 18, 0, tzinfo=UTC), L1),
         FakeMatch(datetime(2026, 11, 10, 20, 0, tzinfo=UTC), CL),
-        FakeMatch(datetime(2026, 11, 10, 21, 0, tzinfo=UTC), L1),
-        FakeMatch(datetime(2026, 11, 11, 18, 0, tzinfo=UTC), L1),
+        FakeMatch(datetime(2026, 11, 10, 23, 30, tzinfo=UTC), L1),  # le 11 à Paris
     ]
-    days = group_by_day_and_competition(matches, ZoneInfo("UTC"))
-    assert [day for day, _ in days] == [date(2026, 11, 10), date(2026, 11, 11)]
-    first_day = days[0][1]
-    assert [(c.name, len(items)) for c, items in first_day] == [("Champions League", 1),
-                                                                ("Ligue 1", 2)]
+    days = group_by_day(matches, ZoneInfo("Europe/Paris"))
+    assert [(day, len(items)) for day, items in days] == [(date(2026, 11, 10), 2),
+                                                          (date(2026, 11, 11), 1)]
 
 
 def test_falls_back_to_utc_without_timezone_database(monkeypatch):

@@ -538,45 +538,100 @@ body.no-tabbar { padding-bottom: 0; }
 
 .match-card.has-error { border-color: var(--lose); }
 
-/* Carte match : heure + compétition à gauche, tendance à droite */
-.match-card .card-meta { align-items: baseline; }
+/* Ligne de match (page Pronos et accueil) : heure + compétition à gauche, pastille d'état à droite */
+.mc-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 24px;
+  margin: 0 0 10px;
+  color: #4A4F5C;
+  font-size: 12px;
+}
 
 .match-when { display: flex; align-items: baseline; gap: 6px; min-width: 0; }
 
-.match-when time { color: var(--ink); font-weight: 800; font-variant-numeric: tabular-nums; }
+.match-when time { color: #111111; font-weight: 800; font-variant-numeric: tabular-nums; }
 
-.match-when span, .match-trend { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.match-when span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-.match-trend { flex-shrink: 0; max-width: 50%; color: var(--ink); font-weight: 600; }
+.mc-pills { display: flex; flex: none; align-items: center; gap: 6px; }
 
-/* Domicile | case – case | extérieur ; colonnes d'équipes de largeur égale */
+.mc-pill {
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: #F6F7FB;
+  color: #4A4F5C;
+  font-size: 12px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.mc-pill.closing { background: #FFF3E8; color: #7A3900; }
+.mc-pill.saved { background: #D6F2E1; color: #0E5A33; }
+.mc-pill.live { background: #FDE3E1; color: #B42318; }
+
+/* Domicile | cases (ou score réel) | extérieur ; colonnes d'équipes de largeur égale */
 .match-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 44px 12px 44px minmax(0, 1fr);
-  gap: 6px;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  gap: 8px;
   align-items: center;
 }
 
-.match-grid .team { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.match-grid .team { display: flex; align-items: center; gap: 8px; min-width: 0; }
 
-.match-grid .away { align-items: flex-end; text-align: right; }
+.match-grid .away { flex-direction: row-reverse; text-align: right; }
 
-.team-top { display: flex; align-items: center; gap: 6px; }
+.team-text { display: flex; flex-direction: column; min-width: 0; }
 
-.team-abbr { font-family: var(--font-title); font-size: 16px; font-weight: 800; }
+.team-abbr { font-family: var(--font-title); font-size: 14px; font-weight: 800; color: #111111; }
 
 .match-grid .team-name {
   overflow: hidden;
   max-width: 100%;
-  color: var(--muted);
-  font-size: 12px;
+  color: #4A4F5C;
+  font-size: 11px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.match-state { margin: 8px 0 0; font-size: 13px; color: var(--muted); text-align: center; }
+/* Centre : même largeur pour les cases, le score réel et le bouton de connexion */
+.mc-center { display: flex; align-items: center; justify-content: center; width: 116px; }
 
-.match-state:empty { display: none; }
+.mc-boxes { gap: 8px; }
+
+.mc-result { flex-direction: column; gap: 2px; min-height: 44px; }
+
+.mc-final { font: 800 20px var(--font-title); font-variant-numeric: tabular-nums; color: #111111; white-space: nowrap; }
+
+.mc-pick { color: #4A4F5C; font-size: 11px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+.mc-login {
+  min-height: 44px;
+  padding: 4px 8px;
+  border-radius: 12px;
+  background: var(--orange);
+  color: #000000;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
+  text-decoration: none;
+}
+
+/* Tendance des joueurs : barre 1 / N / 2 ; hauteur gardée même sans barre */
+.mc-trend { display: flex; align-items: center; gap: 8px; height: 16px; margin-top: 10px; }
+
+.mc-trend-bar { display: flex; flex: 1; height: 6px; border-radius: 999px; overflow: hidden; background: #E7E9F0; }
+
+.mc-trend-bar .home { background: #111111; }
+.mc-trend-bar .draw { background: #C9CCD6; }
+.mc-trend-bar .away { background: #FF7900; }
+
+.mc-trend-text { color: #4A4F5C; font-size: 11px; font-variant-numeric: tabular-nums; white-space: nowrap; }
 
 /* Écusson : logo par-dessus les initiales, qui restent visibles s'il manque */
 .crest {
@@ -614,7 +669,7 @@ body.no-tabbar { padding-bottom: 0; }
   white-space: nowrap;
 }
 
-.match-grid .dash { text-align: center; color: var(--placeholder); }
+.match-grid .dash { width: 12px; text-align: center; color: var(--placeholder); }
 
 /* Case de score : vide (gris), puis gagnant / perdant / nul */
 .score-box {
@@ -625,13 +680,14 @@ body.no-tabbar { padding-bottom: 0; }
   height: 44px;
   min-height: 0;
   padding: 0;
-  border: 1.5px solid var(--empty-border);
+  border: 1px solid #D5D8E1;
   border-radius: 12px;
-  background: var(--bg);
-  color: var(--ink);
+  background: #F6F7FB;
+  color: #111111;
   font-family: var(--font-title);
   font-weight: 800;
   font-size: 22px;
+  font-variant-numeric: tabular-nums;
   text-align: center;
 }
 
@@ -639,26 +695,12 @@ body.no-tabbar { padding-bottom: 0; }
 
 span.score-box { color: var(--placeholder); }
 
-.score-box.win { color: var(--win); border-color: var(--win); background: var(--win-bg); }
-.score-box.lose { color: var(--lose); border-color: var(--lose); background: var(--lose-bg); }
-.score-box.draw { color: var(--draw); border-color: var(--draw); background: var(--draw-bg); }
-
-.match-foot {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 8px;
-  margin: 10px 0 0;
-  font-size: 13px;
-  color: var(--muted);
-}
-
-.match-foot .score-digits { font-size: 17px; }
+/* Case remplie : bordure orange (box-sizing: border-box, la taille ne bouge pas) */
+.score-box.filled { border: 2px solid #FF7900; background: #FFF3E8; color: #111111; }
 
 .match-card .alert { margin: 10px 0 0; font-size: 13px; }
 
 /* Bouton collé en bas, au-dessus de la barre de navigation */
-.predictions-form.with-action { padding-bottom: 88px; }  /* place du bouton « Connecte-toi » */
 
 .sticky-action {
   position: fixed;
@@ -2343,3 +2385,233 @@ a.p-logo { display: inline-flex; align-items: center; gap: 4px; min-height: 44px
 .h-bar span { display: block; height: 100%; border-radius: 999px; background: #FF7900; }
 
 .h-progress > svg { flex-shrink: 0; color: var(--lg-muted); }
+
+
+/* ==========================================================================
+   Page Pronos (/matches) : en-tête, filtres compétition × statut, matchs par jour,
+   barre « Valider ». Même charte que les Ligues (variables --lg-*).
+   ========================================================================== */
+.pronos [hidden] { display: none !important; }
+
+.pr-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: -12px -20px 0;
+  padding: 12px 20px;
+  border-bottom: 1px solid #E7E9F0;
+  background: #FFFFFF;
+}
+
+.pr-head h1 { margin: 0; font-size: 26px; font-weight: 800; }
+
+.pr-todo {
+  flex: none;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: #FFF3E8;
+  color: #7A3900;
+  font-size: 13px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Gras sans saut de largeur : le libellé en gras, invisible, réserve la place */
+.pr-comp-name, .pr-status span { display: inline-flex; flex-direction: column; }
+
+.pr-comp-name::after, .pr-status span::after {
+  content: attr(data-text);
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+  font-weight: 700;
+}
+
+/* Compétitions : rangée qui défile, sans barre visible */
+.pr-comps {
+  display: flex;
+  gap: 8px;
+  margin-left: -20px;
+  margin-right: -20px;
+  padding: 2px 20px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  scroll-padding: 0 20px;
+}
+
+.pr-comps::-webkit-scrollbar { display: none; }
+
+.pr-comp {
+  position: relative;
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 8px 0 5px;
+  border: 1px solid #D5D8E1;
+  border-radius: 999px;
+  background: #FFFFFF;
+  color: #111111;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.pr-comp::before { content: ""; position: absolute; inset: -2px 0; }  /* zone tactile de 44 px */
+
+.pr-emblem {
+  position: relative;
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #E7E9F0;
+  overflow: hidden;
+}
+
+.pr-emblem-code { font: 800 10px var(--font-title); }
+
+.pr-emblem img {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  background: inherit;
+}
+
+.pr-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 26px;  /* 1 ou 2 chiffres : même largeur */
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: #E7E9F0;
+  font-size: 12px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.pr-comp.active { border-color: #111111; background: #111111; color: #FFFFFF; font-weight: 700; }
+
+.pr-comp.active .pr-emblem, .pr-comp.active .pr-count { background: #FF7900; color: #000000; }
+
+/* Statut : 3 onglets de largeur égale */
+.pr-status {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 4px;
+  padding: 4px;
+  border-radius: 14px;
+  background: #E7E9F0;
+}
+
+.pr-status a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  border-radius: 10px;
+  color: #4A4F5C;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.pr-status a.active { background: #FFFFFF; color: #111111; font-weight: 700; box-shadow: 0 1px 3px rgba(17, 17, 17, 0.12); }
+
+/* Matchs par jour */
+.pronos .predictions-form { padding-bottom: 84px; }  /* place de la barre « Valider » */
+
+.pr-day + .pr-day { margin-top: 20px; }
+
+.pr-day-title {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 0 0 8px !important;
+  font-size: 15px !important;
+  font-weight: 700;
+}
+
+.pr-day-count { flex: none; color: #4A4F5C; font: 500 13px var(--font-text); font-variant-numeric: tabular-nums; }
+
+.pr-day-card { border-radius: 16px; background: #FFFFFF; overflow: hidden; }
+
+.pr-day-card .match-card { margin: 0; padding: 12px 16px; border: 0; border-radius: 0; background: none; }
+
+/* Filet entre deux matchs visibles (les masqués ne comptent pas) */
+.pr-day-card .match-card:not([hidden]) ~ .match-card { border-top: 1px solid #E7E9F0; }
+
+.pr-day-card .match-card.has-error { box-shadow: inset 3px 0 0 #B42318; }
+
+/* Aucun match pour ces filtres */
+.pr-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 32px 16px;
+  border-radius: 16px;
+  background: #FFFFFF;
+  color: #4A4F5C;
+  font-size: 14px;
+  text-align: center;
+}
+
+.pr-empty strong { color: #111111; font-size: 16px; }
+
+/* Barre « Valider », collée au-dessus de la barre de navigation */
+.pr-savebar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: calc(var(--tabbar-height) + env(safe-area-inset-bottom));
+  z-index: 9;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px max(20px, calc((100% - 40rem) / 2 + 20px));
+  border-top: 1px solid #E7E9F0;
+  background: #FFFFFF;
+}
+
+.pr-savebar-text { display: flex; flex-direction: column; min-width: 0; }
+
+.pr-savebar-text strong {
+  overflow: hidden;
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pr-savebar-text span { color: #4A4F5C; font-size: 12px; }
+
+.pr-save {
+  flex: none;
+  width: 128px;
+  height: 48px;
+  border: 0;
+  border-radius: 14px;
+  background: #FF7900;
+  color: #000000;
+  font: 700 15px var(--font-text);
+  cursor: pointer;
+}
+
+.pr-save.saving { opacity: 0.7; cursor: progress; }
+
+.pr-save.done { background: #D6F2E1; color: #0E5A33; }

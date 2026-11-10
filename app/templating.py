@@ -6,11 +6,12 @@ from pathlib import Path
 from fastapi.templating import Jinja2Templates
 
 from app.i18n import (closing_when, current_language, format_countdown, format_date_time,
-                      format_day, format_rank, format_time, time_ago, translate)
+                      format_day, format_day_title, format_rank, format_time, time_ago, translate)
 from app.i18n.countries import country_name, country_options
 from app.services.avatars import initials
 from app.services.deadlines import prediction_deadline
 from app.services.leagues import format_code
+from app.services.match_filters import match_state
 from app.services.probabilities import leading_outcome
 from app.services.score_colors import score_classes
 from app.services.teams import team_initials
@@ -56,3 +57,5 @@ templates.env.globals["format_code"] = format_code
 templates.env.globals["format_countdown"] = format_countdown
 templates.env.globals["closing_at"] = prediction_deadline
 templates.env.globals["leading_outcome"] = leading_outcome
+templates.env.globals["format_day_title"] = format_day_title
+templates.env.globals["match_state"] = match_state

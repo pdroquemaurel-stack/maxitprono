@@ -12,10 +12,12 @@ from app.i18n import translate
 from app.models import Competition, Match, Prediction, User
 from app.models.types import utc_now
 from app.services.deadlines import is_prediction_open
+from app.services.match_filters import (ALL_COMPETITIONS, competition_code, competition_keys,
+                                        is_mine, is_todo, matches_status, parse_status)
 from app.services.predictions import save_prediction
-from app.services.probabilities import match_probabilities
+from app.services.probabilities import player_trends
 from app.services.settings_store import prediction_days_ahead
-from app.services.timezones import group_by_day_and_competition, resolve_timezone
+from app.services.timezones import group_by_day, resolve_timezone
 from app.templating import templates
 
 router = APIRouter()
@@ -44,51 +46,81 @@ def predictions_by_match(db: Session, user: User | None, match_ids: list[int]) -
     return {p.match_id: p for p in db.scalars(query)}
 
 
-def probabilities_by_match(db: Session, matches: list[Match]) -> dict:
-    """{match_id: Probabilities} ; les matchs sans pourcentages sont absents.
+def trends_by_match(db: Session, match_ids: set[int]) -> dict:
+    """{match_id: Probabilities} : tendance 1 / N / 2 des pronostics de tous les joueurs.
 
-    Une seule requête pour les pronostics des matchs sans pourcentages du fournisseur.
+    Une seule requête ; les matchs sous le seuil de pronostics sont absents.
     """
-    without_provider = [m.id for m in matches if m.prob_home is None]
     scores: dict[int, list[tuple[int, int]]] = {}
-    if without_provider:
+    if match_ids:
         rows = db.execute(select(Prediction.match_id, Prediction.home_score, Prediction.away_score)
-                          .where(Prediction.match_id.in_(without_provider)))
+                          .where(Prediction.match_id.in_(match_ids)))
         for match_id, home, away in rows:
             scores.setdefault(match_id, []).append((home, away))
-    result = {}
-    for m in matches:
-        probabilities = match_probabilities(m.prob_home, m.prob_draw, m.prob_away,
-                                            scores.get(m.id, []))
-        if probabilities:
-            result[m.id] = probabilities
-    return result
+    trends = {match_id: player_trends(items) for match_id, items in scores.items()}
+    return {match_id: trend for match_id, trend in trends.items() if trend}
 
 
 def match_context(request: Request, db: Session, user: User | None, matches: list[Match],
                   now: datetime) -> dict:
     """Données communes aux pages qui affichent des cartes de match."""
     tz = resolve_timezone(request.cookies.get("tz"))
+    open_ids = {m.id for m in matches if is_prediction_open(m.status, m.kickoff_at, now)}
     return {
         "user": user,
         "now": now,
         "tz": tz,
         "today": now.astimezone(tz).date(),
         "predictions": predictions_by_match(db, user, [m.id for m in matches]),
-        "probabilities": probabilities_by_match(db, matches),
-        "open_ids": {m.id for m in matches if is_prediction_open(m.status, m.kickoff_at, now)},
+        "trends": trends_by_match(db, open_ids),  # seulement les matchs encore ouverts
+        "open_ids": open_ids,
     }
+
+
+def competition_pills(matches: list[Match]) -> list[dict]:
+    """Une pastille par compétition présente dans les matchs, par ordre alphabétique."""
+    competitions = sorted({m.competition for m in matches}, key=lambda c: c.name)
+    codes = {c.id: competition_code(c.external_id, c.name) for c in competitions}
+    keys = competition_keys(list(codes.items()))
+    return [{"key": keys[c.id], "id": c.id, "name": c.name, "code": codes[c.id],
+             "logo_url": c.logo_url} for c in competitions]
+
+
+def filter_context(matches: list[Match], context: dict, comp: str | None,
+                   status: str | None) -> dict:
+    """Filtres de la page Pronos, appliqués dès l'affichage (la page reste juste sans JavaScript)."""
+    pills = competition_pills(matches)
+    comp_keys = {p["id"]: p["key"] for p in pills}
+    comp = comp if comp in comp_keys.values() else ALL_COMPETITIONS
+    status = parse_status(status)
+    counts = {p["key"]: 0 for p in pills} | {ALL_COMPETITIONS: 0}
+    visible_ids = set()
+    for m in matches:
+        has_prediction = m.id in context["predictions"]
+        if not matches_status(status, is_todo(m.id in context["open_ids"], has_prediction),
+                              is_mine(m.status, has_prediction)):
+            continue
+        key = comp_keys[m.competition_id]
+        counts[key] += 1
+        counts[ALL_COMPETITIONS] += 1
+        if comp in (ALL_COMPETITIONS, key):
+            visible_ids.add(m.id)
+    return {"pills": pills, "comp_keys": comp_keys, "comp": comp, "status": status,
+            "counts": counts, "visible_ids": visible_ids}
 
 
 # --- Pages ---
 
 @router.get("/matches")
 def matches_page(request: Request, db: Session = Depends(get_db),
-                 user: User | None = Depends(current_user)):
+                 user: User | None = Depends(current_user),
+                 comp: str | None = None, status: str | None = None):
+    """Page Pronos : matchs par jour, filtres ?comp=<clé>&status=todo|mine|all."""
     now = utc_now()
     matches = upcoming_matches(db, now)
     context = match_context(request, db, user, matches, now)
-    context["days"] = group_by_day_and_competition(matches, context["tz"])
+    context |= filter_context(matches, context, comp, status)
+    context["days"] = group_by_day(matches, context["tz"])
     context["to_predict"] = sum(1 for m_id in context["open_ids"] if m_id not in context["predictions"])
     return templates.TemplateResponse(request, "matches.html", context)
 
@@ -97,8 +129,8 @@ def matches_page(request: Request, db: Session = Depends(get_db),
 def save_one_prediction(match_id: int, db: Session = Depends(get_db),
                         user: User = Depends(require_user),
                         home: str = Form(""), away: str = Form("")):
-    """Enregistrement automatique d'un pronostic, envoyé par predictions.js dès que
-    les deux cases d'un match sont remplies. Réponse en JSON."""
+    """Enregistrement d'un pronostic, envoyé par predictions.js (bouton « Valider »).
+    Réponse en JSON ; un match fermé entre-temps est refusé avec son message."""
     error = save_prediction(db, user.id, match_id, home, away, utc_now())
     if error:
         status = 404 if error == "error_match_not_found" else 400

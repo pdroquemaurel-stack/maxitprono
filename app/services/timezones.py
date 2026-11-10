@@ -28,15 +28,7 @@ def local_day(moment: datetime, tz: tzinfo) -> date:
     return moment.astimezone(tz).date()
 
 
-def group_by_day_and_competition(matches: list, tz: tzinfo) -> list[tuple[date, list]]:
-    """[(jour, [(compétition, [matchs])])], dans l'ordre des coups d'envoi.
-
-    Les matchs doivent arriver triés par coup d'envoi.
-    """
-    days = []
-    for day, day_matches in groupby(matches, key=lambda m: local_day(m.kickoff_at, tz)):
-        day_matches = sorted(day_matches, key=lambda m: (m.competition.name, m.kickoff_at))
-        competitions = [(competition, list(items)) for competition, items
-                        in groupby(day_matches, key=lambda m: m.competition)]
-        days.append((day, competitions))
-    return days
+def group_by_day(matches: list, tz: tzinfo) -> list[tuple[date, list]]:
+    """[(jour, [matchs])] dans l'ordre des coups d'envoi (matchs déjà triés)."""
+    return [(day, list(items))
+            for day, items in groupby(matches, key=lambda m: local_day(m.kickoff_at, tz))]
