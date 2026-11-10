@@ -1,6 +1,7 @@
 {% extends "base.html" %}
+{% from "_logo.html" import logo with context %}
 {% from "_icons.html" import icon, ball_watermark %}
-{% block title %}{{ t('app_name') }} · {{ t('guest_tagline') }}{% endblock %}
+{% block title %}{{ app_name }} · {{ t('guest_tagline') }}{% endblock %}
 {% block guest_header %}{% endblock %}
 {% block main_class %} lg home-guest{% endblock %}
 {% block content %}
@@ -8,7 +9,7 @@
   <section class="hg-hero">
     {{ ball_watermark(220) }}
     <div class="hg-top">
-      <span class="p-logo">Maxit <span class="p-logo-pill">Prono</span></span>
+      {{ logo() }}
       <p class="hg-lang" aria-label="{{ t('language_label') }}">
         {% for code in ('fr', 'en') %}
           {% if code == lang %}<strong aria-current="true">{{ code|upper }}</strong>
@@ -17,7 +18,8 @@
         {% endfor %}
       </p>
     </div>
-    <h1 class="hg-title">{{ t('guest_title_1') }}<br><span>{{ t('guest_title_2') }}</span></h1>
+    {% set tagline_start, tagline_end = split_tagline(tagline) %}
+    <h1 class="hg-title">{{ tagline_start }}{% if tagline_end %}<br><span>{{ tagline_end }}</span>{% endif %}</h1>
     <p class="hg-sub">{{ t('guest_subtitle') }}</p>
     <a class="lg-btn lg-btn-orange lg-btn-big hg-cta" href="/register">{{ t('guest_play_free') }}</a>
     <a class="hg-login" href="/login">{{ t('guest_have_account') }}</a>

@@ -63,6 +63,7 @@ Pour chaque match, afficher 3 pourcentages : **victoire équipe 1 / nul / victoi
 - Corriger un score ou ajouter un match à la main
 - Modifier la taille max des ligues
 - Voir les KPIs de base : inscrits, joueurs actifs par semaine, pronostics par joueur, ligues créées
+- Personnaliser le nom de l'application, le logo, le slogan et les couleurs principales (avec historique)
 
 ## 10. Données et technique
 - L'API foot n'est appelée que par le back-end, via des tâches planifiées, et le résultat est stocké en base.

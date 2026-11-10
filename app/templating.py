@@ -9,6 +9,8 @@ from app.i18n import (closing_when, current_language, format_countdown, format_d
                       format_day, format_day_title, format_rank, format_time, time_ago, translate)
 from app.i18n.countries import country_name, country_options
 from app.services.avatars import initials
+from app.services.branding import contrast_ratio, split_tagline
+from app.services.branding_store import current_branding
 from app.services.deadlines import prediction_deadline
 from app.services.leagues import format_code
 from app.services.match_filters import match_state
@@ -40,8 +42,19 @@ def language_context(request) -> dict:
             "logged_in": getattr(request.state, "user_id", None) is not None}
 
 
+def branding_context(request) -> dict:
+    """Nom, logo, slogan et couleurs réglés dans l'admin (Personnalisation), pour tous les templates.
+
+    Les textes sont échappés par Jinja à l'affichage ; les couleurs sont toujours au format #RRGGBB.
+    """
+    branding = current_branding()
+    return {"app_name": branding.app_name, "logo_part1": branding.logo_part1,
+            "logo_part2": branding.logo_part2, "publisher_name": branding.publisher_name,
+            "tagline": branding.tagline(current_language()), "brand_palette": branding.palette}
+
+
 templates = Jinja2Templates(directory=Path(__file__).parent / "templates",
-                            context_processors=[language_context])
+                            context_processors=[language_context, branding_context])
 templates.env.globals["t"] = translate
 templates.env.globals["static_url"] = static_url
 templates.env.globals["country_options"] = country_options
@@ -61,3 +74,5 @@ templates.env.globals["closing_at"] = prediction_deadline
 templates.env.globals["leading_outcome"] = leading_outcome
 templates.env.globals["format_day_title"] = format_day_title
 templates.env.globals["match_state"] = match_state
+templates.env.globals["split_tagline"] = split_tagline
+templates.env.globals["contrast_ratio"] = contrast_ratio

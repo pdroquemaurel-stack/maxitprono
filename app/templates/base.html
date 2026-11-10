@@ -3,10 +3,16 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#F6F7FB">
-  <link rel="icon" href="{{ static_url('icons/icon.svg') }}" type="image/svg+xml">
+  {% include "_brand_style.html" %}
+  <meta property="og:site_name" content="{{ app_name }}">
+  {% block meta %}
+  <meta name="description" content="{{ tagline }}">
+  <meta property="og:title" content="{{ app_name }}">
+  <meta property="og:description" content="{{ tagline }}">
+  {% endblock %}
+  <link rel="icon" href="/icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="{{ static_url('icons/apple-touch-icon.png') }}">
-  <title>{% block title %}{{ t('app_name') }}{% endblock %}</title>
+  <title>{% block title %}{{ app_name }}{% endblock %}</title>
   {# Polices sans numéro de version : même adresse que dans le CSS, gardées un an par le navigateur #}
   <link rel="preload" href="/static/fonts/dm-sans.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/static/fonts/outfit.woff2" as="font" type="font/woff2" crossorigin>

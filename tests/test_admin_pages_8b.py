@@ -23,7 +23,7 @@ def db(client):
                                   "/admin/matches/1"])
 def test_new_pages_hidden_from_players(client, path):
     register(client)
-    assert client.get(path).status_code == 404
+    assert client.get(path).status_code == 403
 
 
 def test_toggle_competition(admin, db):

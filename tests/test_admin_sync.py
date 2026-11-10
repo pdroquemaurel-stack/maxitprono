@@ -61,5 +61,5 @@ def test_unknown_task_is_refused(admin, provider):
 
 def test_sync_hidden_from_players(client, provider):
     register(client)
-    assert client.post("/admin/matches/sync/fixtures").status_code == 404
+    assert client.post("/admin/matches/sync/fixtures").status_code == 403
     assert provider.calls == []

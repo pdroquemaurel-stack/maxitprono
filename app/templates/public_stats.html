@@ -1,7 +1,8 @@
 {% extends "base.html" %}
+{% from "_logo.html" import logo with context %}
 {# Page publique de « Partager mes stats » : visible sans compte #}
 {% block title %}{{ t('public_title').format(name=player.nickname) }}{% endblock %}
-{% block head %}
+{% block meta %}
   {% set s = summary %}
   {# Aperçu du lien dans WhatsApp et les réseaux sociaux #}
   <meta property="og:title" content="{{ t('public_title').format(name=player.nickname) }}">
@@ -12,7 +13,7 @@
 {% block content %}
   {% set s = summary %}
   <header class="p-header">
-    <a class="p-logo" href="/">Maxit <span class="p-logo-pill">Prono</span></a>
+    {{ logo('/') }}
   </header>
 
   {% include "_stats_identity.html" %}

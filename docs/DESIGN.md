@@ -11,7 +11,27 @@ Toute nouvelle page ou composant suit ce document. En cas de doute, la maquette 
 - Les pronos des autres membres ne s'affichent qu'après la clôture du match.
 - Mobile d'abord : largeur de référence 390 px, cibles tactiles de 44 px minimum.
 
-## 2. Couleurs (variables CSS à définir dans `app/static/css/style.css`)
+## 2. Couleurs
+
+**Couleurs de la marque : réglables dans l'admin (Personnalisation)**, jamais écrites en dur dans le CSS ni les templates.
+Elles sont injectées dans `<head>` par `app/templates/_brand_style.html` :
+
+| Variable | Défaut | Rôle |
+|---|---|---|
+| `--color-primary` | `#FF7900` | boutons principaux, onglet actif, pastilles, cases de score remplies, anneau de réussite |
+| `--color-primary-pale` | `#FFF3E8` | fond très léger (91 % de blanc) |
+| `--color-primary-soft` | `#FFE7D1` | fond doux, « pêche » (82 % de blanc) |
+| `--color-primary-ink` | `#7A3A00` | texte sur fond pâle ou doux (52 % de noir, plus si contraste < 4.5:1) |
+| `--color-primary-text` | `#B25500` | texte (liens, onglet actif) de la couleur principale sur fond blanc |
+| `--color-on-primary` | `#000000` | texte posé sur `--color-primary` : noir ou blanc, le plus contrasté |
+| `--color-dark` | `#111111` | cartes héro, en-têtes noirs, sélections actives (texte blanc dessus) |
+| `--color-dark-2` | `#242424` | carte secondaire sur fond sombre, ballon du héro |
+
+Dans la suite de ce document, « orange » = `--color-primary`, « #FFF3E8 » = `--color-primary-pale`,
+« #FFE7D1 » = `--color-primary-soft`, « #7A3900 » = `--color-primary-ink`, « fond #111111 » = `--color-dark`.
+Les couleurs de sens (vert, rouge, bleu), les gris et les textes `#111111` ne changent pas.
+
+Couleurs fixes (dans `app/static/css/style.css`) :
 ```css
 :root {
   /* Fonds et texte */
@@ -22,11 +42,6 @@ Toute nouvelle page ou composant suit ce document. En cas de doute, la maquette 
   --ink-2: #2B2F4A;        /* éléments secondaires sur carte sombre */
   --muted: #5A5F7A;        /* texte secondaire */
   --placeholder: #A9AFC4;
-
-  /* Orange : mise en avant uniquement */
-  --orange: #FF7900;       /* fonds de boutons, badges, 1er, score exact — texte posé dessus en noir #000 */
-  --orange-text: #B34F00;  /* orange lisible pour du TEXTE sur fond clair (liens, onglet actif) */
-  --orange-soft: #FFF1E6;  /* fond léger (avatars, badge « bon vainqueur ») */
 
   /* Code couleur des scores (chiffres uniquement, jamais les noms d'équipes) */
   --win: #1E8A55;   --win-bg: #EAF6EF;    /* équipe donnée gagnante */
@@ -39,8 +54,8 @@ Toute nouvelle page ou composant suit ce document. En cas de doute, la maquette 
 }
 ```
 Règles :
-- Texte sur fond orange : toujours noir `#000000`.
-- Ne jamais écrire du texte en `--orange` sur fond clair (contraste insuffisant) : utiliser `--orange-text`.
+- Texte sur fond `--color-primary` : toujours `--color-on-primary`.
+- Ne jamais écrire du texte en `--color-primary` sur fond clair (contraste insuffisant) : utiliser `--color-primary-text`.
 - Le code vert/rouge/bleu s'applique aux **chiffres** du score (pronostic du joueur, score final, pronos de la ligue). Les noms d'équipes restent en `--ink`.
 - Case de score vide : bordure `#D5D8E5`, fond `--bg`.
 
@@ -55,14 +70,14 @@ Règles :
 - Pas d'ombres portées, pas de dégradés. Bordure 1 px `--border` sur les cartes blanches.
 
 ## 5. Composants
-- **Bouton principal** : hauteur 54 px, fond `--orange`, texte noir 16 px gras, pleine largeur, collé en bas d'écran quand il valide une liste.
-- **Badge « à faire »** : fond `--orange`, texte noir, 13 px gras (ex. « 2 à faire »).
+- **Bouton principal** : hauteur 54 px, fond `--color-primary`, texte `--color-on-primary` 16 px gras, pleine largeur, collé en bas d'écran quand il valide une liste.
+- **Badge « à faire »** : fond `--color-primary`, texte `--color-on-primary`, 13 px gras (ex. « 2 à faire »).
 - **Ligne de match** (`_match_card.html`, partagée par la page Pronos et l'accueil) : en haut l'heure en gras puis la compétition (12 px, `#4A4F5C`), à droite une pastille d'état (« À jouer » `#F6F7FB` ; « Ferme dans X h Y » sous 24 h `#FFF3E8` / `#7A3900` ; « Prono enregistré » `#D6F2E1` / `#0E5A33` ; « En direct » `#FDE3E1` / `#B42318` ; « Terminé », « Reporté », « Annulé », « Fermé » en gris), plus la pastille de points sur un match terminé ; grille `minmax(0, 1fr) auto minmax(0, 1fr)` : écusson 36 px + abréviation 14 px gras / nom 11 px tronqué | centre de 116 px (2 cases, ou score réel 20 px + « Ton prono : x – y », ou bouton « Connecte-toi pour pronostiquer ») | même chose à droite, inversée ; en bas, pour un match ouvert, barre de tendance des joueurs de 6 px (domicile `#111111`, nul `#C9CCD6`, extérieur `#FF7900`) et « 48 · 24 · 28 % », place gardée sous 5 pronos. Sans logo : pastille ronde aux initiales.
 - **Case de score** : 44×44 px, Outfit 22 px, chiffres tabulaires ; vide : fond `#F6F7FB`, bordure 1 px `#D5D8E1` ; remplie : bordure orange 2 px, fond `#FFF3E8`. Le code gagnant/perdant/nul reste pour les scores affichés (résultats, historique).
 - **Podium** : carte `--ink`. 1er en orange (marche + avatar, texte noir), 2e et 3e en `--ink-2`. Le joueur courant a un contour orange sur son avatar.
 - **Carte score final** : carte `--ink`, score en 48 px coloré avec les variantes « on dark » ; bandeau orange « Ton prono : x – y, score exact ! +5 » si score exact.
 - **Badges de points** (accueil, Ligues, Profil) : score exact = fond `#0E7A43` texte blanc ; bon résultat = fond `#D6F2E1` texte `#0E5A33` ; 0 point = fond `#FDE3E1` texte `#B42318`. Les valeurs affichées sont celles du barème réglé dans le back-office (5 / 3 par défaut).
-- **Avatars** : initiales sur fond `--orange-soft`, texte `--orange-text` (en attendant les photos de profil).
+- **Avatars** : initiales sur fond `--color-primary-pale`, texte `--color-primary-text` (en attendant les photos de profil).
 - **Barre de navigation** : 5 onglets (Accueil `/`, Ligues `/leagues`, Pronos `/matches`, Classements `/leaderboard`, Profil `/profile`), fond blanc, bordure haute `#E7E9F0`, icônes trait 2 px ; actif : icône `#FF7900` et libellé gras `#111111`, inactifs `#4A4F5C`. Affichée seulement pour un joueur connecté. Un visiteur ne voit que les pages publiques (accueil visiteur, connexion, inscription, pages légales), avec à la place un en-tête simple : logo (lien vers `/`) et langue FR · EN (`_guest_header.html`). `/results` n'a plus d'onglet (lien « Mes résultats d'hier » de l'accueil).
 - **Écussons** : logos d'équipes fournis par API-Football (mis en cache), 36–44 px ; à défaut, initiales.
 

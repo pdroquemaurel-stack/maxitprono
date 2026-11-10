@@ -5,7 +5,7 @@
          aria-label="{{ t('profile_success_aria').format(rate=s.success_rate) }}">
       <circle cx="52" cy="52" r="46" fill="none" stroke="#33363F" stroke-width="10"/>
       {% if s.success_rate %}
-        <circle class="p-ring-arc" cx="52" cy="52" r="46" fill="none" stroke="#FF7900" stroke-width="10" stroke-linecap="round"
+        <circle class="p-ring-arc" cx="52" cy="52" r="46" fill="none" style="stroke: var(--color-primary)" stroke-width="10" stroke-linecap="round"
                 stroke-dasharray="{{ circumference }}"
                 stroke-dashoffset="{{ '%.2f' % (circumference * (100 - s.success_rate) / 100) }}"
                 transform="rotate(-90 52 52)"/>

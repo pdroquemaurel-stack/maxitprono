@@ -3,7 +3,7 @@ import logging
 from pathlib import Path
 from urllib.parse import quote
 
-from fastapi import FastAPI, Request
+from fastapi import Depends, FastAPI, Request
 from fastapi.exception_handlers import http_exception_handler
 from fastapi.responses import FileResponse, RedirectResponse
 from fastapi.middleware.gzip import GZipMiddleware
@@ -12,9 +12,11 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.auth import LoginRequired
 from app.auth.guard import require_login_for_private_pages
+from app.db import get_db
 from app.i18n import pick_language, set_language
 from app.routes import (accounts, admin, home, internal, leaderboard, leagues, matches, profile,
                         results)
+from app.services.branding_store import refresh_branding
 from app.templating import templates
 
 STATIC_DIR = Path(__file__).parent / "static"
@@ -34,8 +36,15 @@ class CachedStaticFiles(StaticFiles):
         return response
 
 
-# Pas de documentation automatique (/docs, /redoc, /openapi.json) : elle listerait toutes les routes
-app = FastAPI(title="MaxitProno", docs_url=None, redoc_url=None, openapi_url=None)
+def use_branding(db=Depends(get_db)):
+    """Nom et couleurs du jeu (admin → Personnalisation) : relus en base au plus une fois par minute."""
+    refresh_branding(db)
+
+
+# Pas de documentation automatique (/docs, /redoc, /openapi.json) : elle listerait toutes les routes.
+# use_branding s'exécute avant chaque route.
+app = FastAPI(title="MaxitProno", docs_url=None, redoc_url=None, openapi_url=None,
+              dependencies=[Depends(use_branding)])
 # Pages compressées : 5 à 8 fois plus légères sur un réseau 3G
 app.add_middleware(GZipMiddleware, minimum_size=500)
 
@@ -100,6 +109,14 @@ def favicon():
     # Certains navigateurs le demandent quand même : évite une page 404 à chaque visite
     return FileResponse(STATIC_DIR / "icons" / "apple-touch-icon.png", media_type="image/png",
                         headers={"Cache-Control": "public, max-age=604800"})
+
+
+@app.get("/icon.svg", include_in_schema=False)
+def icon(request: Request):
+    """Icône d'onglet aux couleurs réglées dans l'admin (Personnalisation)."""
+    response = templates.TemplateResponse(request, "icon.svg", {}, media_type="image/svg+xml")
+    response.headers["Cache-Control"] = "public, max-age=3600"
+    return response
 
 
 # --- Hors connexion (service worker) ---

@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}{{ t('admin_title') }} · {{ t('app_name') }}{% endblock %}
+{% block title %}{{ t('admin_title') }} · {{ app_name }}{% endblock %}
 {% block content %}
   <h1>{{ t('admin_title') }}</h1>
 
@@ -55,6 +55,7 @@
       ('/admin/competitions', 'admin_competitions', 'admin_competitions_hint'),
       ('/admin/matches', 'admin_matches', 'admin_matches_hint'),
       ('/admin/settings', 'admin_settings', 'admin_settings_hint'),
+      ('/admin/branding', 'admin_branding', 'admin_branding_hint'),
     ] %}
       <li>
         <a class="league-row" href="{{ href }}">

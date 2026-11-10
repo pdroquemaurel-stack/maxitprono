@@ -1,13 +1,14 @@
 {% extends "base.html" %}
+{% from "_logo.html" import logo with context %}
 {% from "_icons.html" import icon %}
-{% block title %}{{ t('profile_title') }} · {{ t('app_name') }}{% endblock %}
+{% block title %}{{ t('profile_title') }} · {{ app_name }}{% endblock %}
 {% block main_class %} profile{% endblock %}
 {% block content %}
   {% set s = summary %}
 
   {# 1. En-tête #}
   <header class="p-header">
-    <span class="p-logo">Maxit <span class="p-logo-pill">Prono</span></span>
+    {{ logo() }}
     <a class="p-icon-button" href="/profile/edit" aria-label="{{ t('profile_settings') }}">{{ icon('gear') }}</a>
   </header>
 

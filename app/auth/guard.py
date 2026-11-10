@@ -15,7 +15,7 @@ from app.models.types import utc_now
 PUBLIC_PATHS = {
     "/", "/login", "/register", "/logout",
     "/rules", "/help", "/privacy", "/legal",
-    "/health", "/favicon.ico", "/sw.js", "/offline",
+    "/health", "/favicon.ico", "/icon.svg", "/sw.js", "/offline",
 }
 # /internal/ n'utilise pas la session : il est protégé par son propre jeton (SYNC_TOKEN)
 PUBLIC_PREFIXES = ("/static/", "/language/", "/internal/")

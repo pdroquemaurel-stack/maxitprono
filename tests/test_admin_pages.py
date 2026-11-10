@@ -22,7 +22,7 @@ def admin(client):
 @pytest.mark.parametrize("path", ADMIN_PAGES)
 def test_admin_pages_hidden_from_players(client, path):
     register(client)
-    assert client.get(path).status_code == 404
+    assert client.get(path).status_code == 403
 
 
 @pytest.mark.parametrize("path", ADMIN_PAGES)
@@ -35,7 +35,7 @@ def test_settings_post_hidden_from_players(client):
     register(client)
     response = client.post("/admin/settings", data={"winner_points": "9", "exact_bonus": "9",
                                                     "league_max_members": "9"})
-    assert response.status_code == 404
+    assert response.status_code == 403
 
 
 def test_profile_shows_admin_link_to_admins_only(admin):

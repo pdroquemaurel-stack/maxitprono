@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% from "_icons.html" import icon %}
 {% from "_league_bits.html" import avatar, league_icon, move_badge, members_label, competitions_label, face_stack %}
-{% block title %}{{ t('leagues_title') }} · {{ t('app_name') }}{% endblock %}
+{% block title %}{{ t('leagues_title') }} · {{ app_name }}{% endblock %}
 {% block main_class %} lg{% endblock %}
 {% block content %}
   {# 1. Titre #}
@@ -19,7 +19,7 @@
            stroke="#111111" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="34" cy="26" r="10"/><path d="M16 66c0-11 8-18 18-18s18 7 18 18"/>
         <circle cx="86" cy="26" r="10"/><path d="M68 66c0-11 8-18 18-18s18 7 18 18"/>
-        <circle cx="60" cy="58" r="9" fill="#FF7900" stroke="#111111"/>
+        <circle cx="60" cy="58" r="9" style="fill: var(--color-primary)" stroke="#111111"/>
       </svg>
       <h2>{{ t('leagues_empty_title') }}</h2>
       <p class="lg-muted">{{ t('leagues_empty') }}</p>

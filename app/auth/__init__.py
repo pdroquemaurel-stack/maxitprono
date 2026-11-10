@@ -29,9 +29,9 @@ def require_user(user: User | None = Depends(current_user)) -> User:
 
 
 def require_admin(user: User = Depends(require_user)) -> User:
-    """Page du back-office : 404 pour les non-admins (on ne révèle pas son existence)."""
+    """Page du back-office : 403 (accès interdit) pour un joueur connecté qui n'est pas admin."""
     if not user.is_admin:
-        raise HTTPException(404)
+        raise HTTPException(403)
     return user
 
 

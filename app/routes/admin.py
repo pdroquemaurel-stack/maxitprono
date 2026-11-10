@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session, joinedload
 
 from app.auth import require_admin
 from app.db import get_db
+from app.i18n import translate
 from app.jobs.import_competitions import import_competitions
 from app.jobs.score_predictions import rescore_corrected_match
 from app.jobs.sync import Task, run_sync
@@ -20,6 +21,8 @@ from app.routes.accounts import redirect
 from app.routes.internal import get_provider_factory
 from app.services.admin_matches import STATUSES, parse_correction, parse_new_match
 from app.services import kpi_store
+from app.services.branding import FIELDS as BRANDING_FIELDS, Branding, parse_branding
+from app.services.branding_store import load_branding, recent_changes, save_branding
 from app.services.game_settings import parse_settings
 from app.services.settings_store import current_rules, get_settings, save_settings
 from app.services.timezones import resolve_timezone
@@ -69,6 +72,51 @@ def settings_submit(request: Request, db: Session = Depends(get_db),
     rescored = save_settings(db, settings, utc_now())
     return redirect(f"/admin/settings?saved=1&rescored={rescored}" if rescored
                     else "/admin/settings?saved=1")
+
+
+# --- Personnalisation (nom, logo, couleurs) ---
+
+def render_branding(request, db, user, branding: Branding, errors: dict, notice: str = "",
+                    status_code: int = 200):
+    # Couleur refusée : l'aperçu garde les couleurs par défaut (jamais la saisie brute dans un style)
+    colors_ok = not errors.keys() & {"color_primary", "color_dark"}
+    context = {"user": user, "branding": branding, "errors": errors, "notice": notice,
+               "palette": branding.palette if colors_ok else Branding().palette,
+               "history": recent_changes(db), "tz": resolve_timezone(request.cookies.get("tz"))}
+    return templates.TemplateResponse(request, "admin/branding.html", context,
+                                      status_code=status_code)
+
+
+@router.get("/branding")
+def branding_page(request: Request, db: Session = Depends(get_db),
+                  user: User = Depends(require_admin)):
+    count = request.query_params.get("count", "")
+    notices = {"saved": translate("branding_saved").format(count=int(count) if count.isdigit() else 0),
+               "reset": translate("branding_reset_done")}
+    return render_branding(request, db, user, load_branding(db), {},
+                           notice=notices.get(request.query_params.get("notice"), ""))
+
+
+@router.post("/branding")
+def branding_submit(request: Request, db: Session = Depends(get_db),
+                    user: User = Depends(require_admin),
+                    app_name: str = Form(""), logo_part1: str = Form(""), logo_part2: str = Form(""),
+                    publisher_name: str = Form(""), tagline_fr: str = Form(""),
+                    tagline_en: str = Form(""), color_primary: str = Form(""),
+                    color_dark: str = Form("")):
+    form = dict(zip(BRANDING_FIELDS, (app_name, logo_part1, logo_part2, publisher_name,
+                                      tagline_fr, tagline_en, color_primary, color_dark)))
+    branding, errors = parse_branding(form)
+    if errors:
+        return render_branding(request, db, user, branding, errors, status_code=400)
+    count = save_branding(db, branding, user.id, utc_now())
+    return redirect(f"/admin/branding?notice=saved&count={count}")
+
+
+@router.post("/branding/reset")
+def branding_reset(db: Session = Depends(get_db), user: User = Depends(require_admin)):
+    save_branding(db, Branding(), user.id, utc_now())
+    return redirect("/admin/branding?notice=reset")
 
 
 # --- Compétitions ---

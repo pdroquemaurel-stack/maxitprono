@@ -4,10 +4,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#F6F7FB">
-  <link rel="icon" href="{{ static_url('icons/icon.svg') }}" type="image/svg+xml">
+  {% include "_brand_style.html" %}
+  <link rel="icon" href="/icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="{{ static_url('icons/apple-touch-icon.png') }}">
-  <title>{{ t('offline_title') }} · {{ t('app_name') }}</title>
+  <title>{{ t('offline_title') }} · {{ app_name }}</title>
   <link rel="stylesheet" href="{{ static_url('css/style.css') }}">
 </head>
 <body class="offline-page">

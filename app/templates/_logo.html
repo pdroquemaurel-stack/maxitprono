@@ -1,0 +1,7 @@
+{# Logo texte en deux parties (admin → Personnalisation) : « Maxit » puis « Prono » dans la pastille.
+   Avec href : lien (vers l'accueil) ; sans : simple texte. #}
+{% macro logo(href=None) -%}
+  {%- if href %}<a class="p-logo" href="{{ href }}">{% else %}<span class="p-logo">{% endif -%}
+  {{ logo_part1 }} <span class="p-logo-pill">{{ logo_part2 }}</span>
+  {%- if href %}</a>{% else %}</span>{% endif %}
+{%- endmacro %}

@@ -36,7 +36,7 @@ def test_pages_use_versioned_css_and_plain_font_urls(client):
 def test_icons_and_theme_color(client):
     page = client.get("/").text
     assert 'rel="icon"' in page and 'rel="apple-touch-icon"' in page
-    assert '<meta name="theme-color" content="#F6F7FB">' in page
+    assert '<meta name="theme-color" content="#FF7900">' in page  # couleur principale
     favicon = client.get("/favicon.ico")
     assert favicon.status_code == 200 and favicon.headers["content-type"] == "image/png"
 

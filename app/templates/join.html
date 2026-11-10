@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}{{ league.name if league else t('league_join_title') }} · {{ t('app_name') }}{% endblock %}
+{% block title %}{{ league.name if league else t('league_join_title') }} · {{ app_name }}{% endblock %}
 {% block content %}
   {% include "_error.html" %}
   {% if league %}

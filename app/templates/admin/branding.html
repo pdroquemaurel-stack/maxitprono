@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% from "_logo.html" import logo with context %}
+{% block title %}{{ t('admin_branding') }} · {{ app_name }}{% endblock %}
+{% block content %}
+  {% include "admin/_back.html" %}
+  <h1>{{ t('admin_branding') }}</h1>
+  {% if notice %}<p class="notice" role="status">{{ notice }}</p>{% endif %}
+  {% if errors %}<p class="alert" role="alert">{{ t('error_branding') }}</p>{% endif %}
+
+  {# Un champ texte du formulaire, avec son erreur éventuelle #}
+  {% macro text_field(name, maxlength=30, note=None) %}
+    <label for="{{ name }}">{{ t('field_' ~ name) }}</label>
+    <input id="{{ name }}" name="{{ name }}" value="{{ branding[name] }}" required
+           minlength="2" maxlength="{{ maxlength }}" data-brand-field
+           {% if errors[name] %}aria-invalid="true" aria-describedby="{{ name }}-error"{% endif %}>
+    {% if errors[name] %}<small class="field-error" id="{{ name }}-error">{{ t(errors[name]) }}</small>{% endif %}
+    {% if note %}<small>{{ t(note) }}</small>{% endif %}
+  {% endmacro %}
+
+  {# Couleur : sélecteur + champ hexadécimal (seul le champ texte est envoyé) #}
+  {% macro color_field(name, note) %}
+    <label for="{{ name }}">{{ t('field_' ~ name) }}</label>
+    <span class="bp-color">
+      <input type="color" value="{{ palette[name.removeprefix('color_')] }}" data-color-picker="{{ name }}"
+             aria-label="{{ t('field_' ~ name) }}">
+      <input id="{{ name }}" name="{{ name }}" value="{{ branding[name] }}" required maxlength="7"
+             pattern="#[0-9A-Fa-f]{6}" autocapitalize="characters" spellcheck="false" data-brand-field
+             {% if errors[name] %}aria-invalid="true" aria-describedby="{{ name }}-error"{% endif %}>
+    </span>
+    {% if errors[name] %}<small class="field-error" id="{{ name }}-error">{{ t(errors[name]) }}</small>{% endif %}
+    <small>{{ t(note) }}</small>
+  {% endmacro %}
+
+  <form class="card form" method="post" action="/admin/branding" data-branding-form>
+    <h2>{{ t('branding_section_name') }}</h2>
+    {{ text_field('app_name') }}
+    {{ text_field('logo_part1') }}
+    {{ text_field('logo_part2') }}
+    {{ text_field('publisher_name', note='field_publisher_note') }}
+    {{ text_field('tagline_fr', 60) }}
+    {{ text_field('tagline_en', 60, 'field_tagline_note') }}
+
+    <h2>{{ t('branding_section_colors') }}</h2>
+    {{ color_field('color_primary', 'field_color_primary_note') }}
+    {{ color_field('color_dark', 'field_color_dark_note') }}
+    <p class="small" data-contrast
+       data-label="{{ t('branding_contrast') }}" data-black="{{ t('branding_contrast_black') }}"
+       data-white="{{ t('branding_contrast_white') }}">
+      {{ t('branding_contrast').format(
+           color=t('branding_contrast_black') if palette.on_primary == '#000000' else t('branding_contrast_white'),
+           ratio='%.1f' % contrast_ratio(palette.primary, palette.on_primary)) }}
+    </p>
+    <p class="alert" role="alert" data-contrast-warning hidden
+       data-invalid="{{ t('error_branding_color') }}"
+       data-primary="{{ t('error_branding_contrast_primary') }}"
+       data-dark="{{ t('error_branding_contrast_dark') }}"></p>
+
+    <h2>{{ t('branding_section_preview') }}</h2>
+    {# Aperçu : ses propres variables CSS, recalculées par branding.js pendant la saisie #}
+    <div class="bp-preview" data-brand-preview
+         style="{% for name, value in palette.css_variables().items() %}{{ name }}:{{ value }};{% endfor %}">
+      <div class="bp-logo">{{ logo() }}</div>
+      <div class="bp-row">
+        <span class="badge todo">{{ t('branding_preview_pill') }}</span>
+        <span class="score-box filled bp-score">2</span>
+      </div>
+      {% set tagline_start, tagline_end = split_tagline(branding.tagline_fr if lang == 'fr' else branding.tagline_en) %}
+      <div class="bp-hero">
+        <strong data-preview-tagline-start>{{ tagline_start }}</strong>
+        <span data-preview-tagline-end>{{ tagline_end }}</span>
+      </div>
+      <span class="lg-btn lg-btn-orange bp-button">{{ t('branding_preview_button') }}</span>
+      <div class="bp-tabbar" aria-hidden="true">
+        <span class="active"><i></i>{{ t('nav_home') }}</span>
+        <span><i></i>{{ t('nav_leagues') }}</span>
+        <span><i></i>{{ t('nav_predictions') }}</span>
+        <span><i></i>{{ t('nav_profile') }}</span>
+      </div>
+    </div>
+
+    <button type="submit" data-branding-save>{{ t('branding_save') }}</button>
+  </form>
+
+  <form class="bp-reset" method="post" action="/admin/branding/reset"
+        data-confirm="{{ t('branding_reset_confirm') }}">
+    <button type="submit" class="secondary">{{ t('branding_reset') }}</button>
+  </form>
+
+  <h2>{{ t('branding_section_history') }}</h2>
+  {% if history %}
+    <ul class="card bp-history">
+      {% for change, who in history %}
+        <li>
+          <time datetime="{{ change.changed_at.isoformat() }}">{{ format_date_time(change.changed_at, tz) }}</time>
+          {{ t('branding_history_row').format(who=who, field=t('field_' ~ change.field),
+                                               old=change.old_value, new=change.new_value) }}
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="small">{{ t('branding_history_empty') }}</p>
+  {% endif %}
+{% endblock %}
+{% block scripts %}<script src="{{ static_url('js/branding.js') }}" defer></script>{% endblock %}

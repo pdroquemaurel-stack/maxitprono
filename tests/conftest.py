@@ -7,6 +7,15 @@ from sqlalchemy.pool import StaticPool
 from app.db import get_db
 from app.main import app
 from app.models import Base
+from app.services.branding_store import clear_cache
+
+
+@pytest.fixture(autouse=True)
+def fresh_branding_cache():
+    """La personnalisation est gardée en mémoire : chaque test repart des valeurs de sa base."""
+    clear_cache()
+    yield
+    clear_cache()
 
 
 @pytest.fixture

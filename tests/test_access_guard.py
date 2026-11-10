@@ -185,7 +185,7 @@ def test_logout_goes_back_to_guest_home(client):
 
 def test_admin_stays_reserved_to_admins(client, db_session):
     register(client)
-    assert client.get("/admin").status_code == 404  # joueur ordinaire
+    assert client.get("/admin").status_code == 403  # joueur ordinaire
     db_session.query(User).filter_by(nickname_key="paul").one().is_admin = True
     db_session.commit()
     assert client.get("/admin").status_code == 200

@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% from "_icons.html" import icon %}
 {% from "_league_bits.html" import avatar, league_icon, move_badge, members_label, competitions_label, face_stack, points_pill %}
-{% block title %}{{ league.name }} · {{ t('app_name') }}{% endblock %}
+{% block title %}{{ league.name }} · {{ app_name }}{% endblock %}
 {% block main_class %} lg{% endblock %}
 {% block content %}
   {% set base_url = '/leagues/%d' % league.id %}

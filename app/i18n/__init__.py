@@ -10,6 +10,7 @@ from datetime import date, datetime, tzinfo
 from pathlib import Path
 
 from app.config import settings
+from app.services.branding_store import current_branding
 from app.services.deadlines import closing_info, countdown_to_closing
 
 I18N_DIR = Path(__file__).parent
@@ -49,9 +50,16 @@ def current_language() -> str:
 
 
 def translate(key: str, lang: str | None = None) -> str:
-    """Renvoie le texte traduit ; retombe sur le français, puis sur la clé elle-même."""
+    """Renvoie le texte traduit ; retombe sur le français, puis sur la clé elle-même.
+
+    « {app_name} » et « {publisher_name} » sont remplacés par les noms réglés dans l'admin
+    (Personnalisation). Ces noms ne contiennent jamais d'accolades : un .format() reste possible.
+    """
     lang = lang or current_language()
-    return TRANSLATIONS.get(lang, {}).get(key) or TRANSLATIONS["fr"].get(key) or key
+    text = TRANSLATIONS.get(lang, {}).get(key) or TRANSLATIONS["fr"].get(key) or key
+    branding = current_branding()
+    return (text.replace("{app_name}", branding.app_name)
+            .replace("{publisher_name}", branding.publisher_name))
 
 
 def format_day(day: date, today: date, lang: str | None = None) -> str:
