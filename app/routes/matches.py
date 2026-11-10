@@ -6,7 +6,7 @@ from fastapi.responses import JSONResponse
 from sqlalchemy import select
 from sqlalchemy.orm import Session, joinedload
 
-from app.auth import current_user, require_user
+from app.auth import require_user
 from app.db import get_db
 from app.i18n import translate
 from app.models import Competition, Match, Prediction, User
@@ -38,8 +38,8 @@ def upcoming_matches(db: Session, now: datetime) -> list[Match]:
     return list(db.scalars(query))
 
 
-def predictions_by_match(db: Session, user: User | None, match_ids: list[int]) -> dict:
-    if user is None or not match_ids:
+def predictions_by_match(db: Session, user: User, match_ids: list[int]) -> dict:
+    if not match_ids:
         return {}
     query = select(Prediction).where(Prediction.user_id == user.id,
                                      Prediction.match_id.in_(match_ids))
@@ -61,7 +61,7 @@ def trends_by_match(db: Session, match_ids: set[int]) -> dict:
     return {match_id: trend for match_id, trend in trends.items() if trend}
 
 
-def match_context(request: Request, db: Session, user: User | None, matches: list[Match],
+def match_context(request: Request, db: Session, user: User, matches: list[Match],
                   now: datetime) -> dict:
     """Données communes aux pages qui affichent des cartes de match."""
     tz = resolve_timezone(request.cookies.get("tz"))
@@ -113,7 +113,7 @@ def filter_context(matches: list[Match], context: dict, comp: str | None,
 
 @router.get("/matches")
 def matches_page(request: Request, db: Session = Depends(get_db),
-                 user: User | None = Depends(current_user),
+                 user: User = Depends(require_user),
                  comp: str | None = None, status: str | None = None):
     """Page Pronos : matchs par jour, filtres ?comp=<clé>&status=todo|mine|all."""
     now = utc_now()

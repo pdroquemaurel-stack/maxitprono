@@ -6,7 +6,7 @@
   {# 1. En-tête blanc : titre et « N à faire » #}
   <header class="pr-head">
     <h1>{{ t('matches_title') }}</h1>
-    {% if user and to_predict %}<span class="pr-todo" data-todo-count="{{ to_predict }}">{{ t('todo_count').format(count=to_predict) }}</span>{% endif %}
+    {% if to_predict %}<span class="pr-todo" data-todo-count="{{ to_predict }}">{{ t('todo_count').format(count=to_predict) }}</span>{% endif %}
   </header>
 
   {# 2. Compétitions : « Toutes » puis une pastille par compétition présente dans les matchs.
@@ -63,7 +63,7 @@
     </div>
 
     {# 5. Barre de validation, au-dessus de la barre de navigation #}
-    {% if user and open_ids %}
+    {% if open_ids %}
       <div class="pr-savebar">
         <span class="pr-savebar-text">
           <strong data-missing data-fmt-one="{{ t('missing_predictions_one') }}" data-fmt="{{ t('missing_predictions') }}"

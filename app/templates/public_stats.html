@@ -27,10 +27,8 @@
   <div class="p-actions">
     {% if join_url %}
       <a class="p-share" href="{{ join_url }}">{{ t('public_join').format(name=league.name) }}</a>
-    {% elif user %}
-      <a class="p-share" href="/matches">{{ t('profile_go_predict') }}</a>
     {% else %}
-      <a class="p-share" href="/register">{{ t('public_play') }}</a>
+      <a class="p-share" href="/matches">{{ t('profile_go_predict') }}</a>
     {% endif %}
   </div>
 {% endblock %}

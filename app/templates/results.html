@@ -24,7 +24,7 @@
           {% with home = prediction.home_score, away = prediction.away_score %}{% include "_score.html" %}{% endwith %}
           {% include "_points_badge.html" %}
         </p>
-      {% elif user %}
+      {% else %}
         <p class="result-mine muted">{{ t('results_no_prediction') }}</p>
       {% endif %}
     </a>

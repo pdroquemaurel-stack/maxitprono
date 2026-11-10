@@ -10,7 +10,7 @@ from urllib.parse import quote
 from fastapi import APIRouter, Depends, Form, HTTPException, Request
 from sqlalchemy.orm import Session
 
-from app.auth import current_user, require_user
+from app.auth import require_user
 from app.db import get_db
 from app.i18n import translate
 from app.models import League, User
@@ -302,22 +302,20 @@ def short_join(code: str, request: Request):
 
 @router.get("/join/{code}", name="join_page")
 def join_page(code: str, request: Request, db: Session = Depends(get_db),
-              user: User | None = Depends(current_user)):
+              user: User = Depends(require_user)):
     league = league_store.find_by_code(db, code)
     if league is None:
         return render_join(request, db, None, user, error="error_league_code", status_code=404)
-    if user and league_store.membership(db, league.id, user.id):
+    if league_store.membership(db, league.id, user.id):
         return redirect(f"/leagues/{league.id}")
     return render_join(request, db, league, user, ref=request.query_params.get("ref", ""))
 
 
-def render_join(request: Request, db: Session, league: League | None, user: User | None,
+def render_join(request: Request, db: Session, league: League | None, user: User,
                 error: str | None = None, status_code: int = 200, ref: str = ""):
-    ref = ref if ref.isdigit() else ""  # parrain gardé à travers l'inscription ou la connexion
-    next_url = f"/join/{league.code}" + (f"?ref={ref}" if ref else "") if league else "/"
+    ref = ref if ref.isdigit() else ""  # parrain transmis au formulaire « Rejoindre »
     context = {"user": user, "league": league, "error": error, "ref": ref,
-               "member_count": league_store.member_count(db, league.id) if league else 0,
-               "next": next_url}
+               "member_count": league_store.member_count(db, league.id) if league else 0}
     return templates.TemplateResponse(request, "join.html", context, status_code=status_code)
 
 

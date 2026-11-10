@@ -21,7 +21,7 @@
     </form>
   {% endif %}
   {% if tab == 'league' and not leagues %}
-    <a class="card todo-card" href="{{ '/leagues' if user else '/login?next=/leaderboard' }}">
+    <a class="card todo-card" href="/leagues">
       <span class="todo-text">
         <strong>{{ t('home_no_league') }}</strong>
         <span>{{ t('leaderboard_no_league') }} {{ t('home_no_league_hint') }}</span>
@@ -53,12 +53,10 @@
     </p>
   {% endif %}
 
-  {% if user %}
-    <p class="lead my-line">
-      {% if me %}{{ t('my_rank').format(rank=me.rank, total=total, points=me.points) }}
-      {% else %}{{ t('not_ranked_yet') }}{% endif %}
-    </p>
-  {% endif %}
+  <p class="lead my-line">
+    {% if me %}{{ t('my_rank').format(rank=me.rank, total=total, points=me.points) }}
+    {% else %}{{ t('not_ranked_yet') }}{% endif %}
+  </p>
 
   {% if top %}
     <ol class="card ranking">

@@ -5,7 +5,6 @@
 {% from "_league_bits.html" import points_pill %}
 {% set prediction = predictions.get(match.id) %}
 {% set is_open = match.id in open_ids %}
-{% set editable = is_open and user %}
 {% set state = match_state(match.status, match.kickoff_at, now, is_open, prediction is not none) %}
 {% set played = match.status in ('live', 'finished') and match.home_score is not none %}
 {% set home_abbr, away_abbr = team_initials(match.home_team), team_initials(match.away_team) %}
@@ -14,7 +13,7 @@
   {%- if is_open %} data-open{% endif %}
   {%- if prediction %} data-predicted{% endif %}
   {%- if match.status in ('finished', 'cancelled') %} data-ended{% endif %}
-  {%- if editable %} data-match-id="{{ match.id }}"{% endif %}
+  {%- if is_open %} data-match-id="{{ match.id }}"{% endif %}
   {%- if visible_ids is defined and match.id not in visible_ids %} hidden{% endif %}>
   <div class="mc-top">
     <span class="match-when"><time datetime="{{ match.kickoff_at.isoformat() }}">{{ format_time(match.kickoff_at, tz) }}</time>
@@ -44,7 +43,7 @@
         <strong class="mc-final">{{ match.home_score }} – {{ match.away_score }}</strong>
         <span class="mc-pick">{% if prediction %}{{ t('home_your_pick').format(home=prediction.home_score, away=prediction.away_score) }}{% else %}{{ t('no_prediction') }}{% endif %}</span>
       </span>
-    {% elif editable %}
+    {% elif is_open %}
       {# Une case = un chiffre ; enregistrement par static/js/predictions.js (bouton « Valider ») #}
       <span class="mc-center mc-boxes">
         <label class="visually-hidden" for="s{{ match.id }}h">{{ t('goals_of').format(team=match.home_team) }}</label>
@@ -57,9 +56,6 @@
                value="{{ prediction.away_score if prediction else '' }}" type="text" inputmode="numeric"
                pattern="[0-9]" maxlength="1" placeholder="–" autocomplete="off" data-score="away">
       </span>
-    {% elif is_open %}
-      {# Visiteur : la page se consulte, la saisie demande un compte #}
-      <a class="mc-center mc-login" href="/login">{{ t('login_to_predict') }}</a>
     {% else %}
       {# Fermé, annulé : mon prono en lecture seule, sinon des cases vides #}
       <span class="mc-center mc-boxes">
@@ -87,5 +83,5 @@
     </div>
   {% endif %}
 
-  {% if editable %}<p class="alert" role="alert" data-save-error hidden></p>{% endif %}
+  {% if is_open %}<p class="alert" role="alert" data-save-error hidden></p>{% endif %}
 </article>

@@ -32,7 +32,7 @@
       {% else %}
         <p class="verdict"><span>{{ t('result_missed').format(score=score) }}</span><strong>{{ prediction.points if prediction.points is not none else '' }}</strong></p>
       {% endif %}
-    {% elif user %}
+    {% else %}
       <p class="verdict">{{ t('result_no_prediction') }}</p>
     {% endif %}
   </section>

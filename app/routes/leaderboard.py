@@ -5,9 +5,9 @@ from fastapi import APIRouter, Depends, Request
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.auth import current_user
+from app.auth import require_user
 from app.db import get_db
-from app.i18n.countries import COUNTRY_CODES, PILOT_COUNTRIES
+from app.i18n.countries import COUNTRY_CODES
 from app.models import Competition, User
 from app.services import league_store
 from app.models.types import utc_now
@@ -35,9 +35,9 @@ def _parse_int(value: str | None) -> int | None:
 
 @router.get("/leaderboard")
 def leaderboard_page(request: Request, db: Session = Depends(get_db),
-                     user: User | None = Depends(current_user)):
+                     user: User = Depends(require_user)):
     params = request.query_params
-    leagues = league_store.my_leagues(db, user.id) if user else []
+    leagues = league_store.my_leagues(db, user.id)
     # Onglet par défaut : la ligue si le joueur en a une (la ligue est au centre du jeu)
     default_tab = "league" if leagues else "general"
     tab = params.get("tab") if params.get("tab") in TABS else default_tab
@@ -51,7 +51,7 @@ def leaderboard_page(request: Request, db: Session = Depends(get_db),
     elif tab == "country":
         country = params.get("country", "")
         if country not in COUNTRY_CODES:
-            country = user.country_code if user else PILOT_COUNTRIES[0]
+            country = user.country_code
         context["country"] = country
         ranking = leaderboard(db, country_code=country)
     elif tab == "competition":
@@ -70,7 +70,7 @@ def leaderboard_page(request: Request, db: Session = Depends(get_db),
     else:
         ranking = leaderboard(db)
 
-    me = find_player(ranking, user.id) if user else None
+    me = find_player(ranking, user.id)
     context.update(top=ranking[:TOP_COUNT], me=me, total=len(ranking),
                    me_outside_top=me is not None and me.rank > TOP_COUNT)
     return templates.TemplateResponse(request, "leaderboard.html", context)

@@ -7,7 +7,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app.auth import current_user, require_user
+from app.auth import require_user
 from app.db import get_db
 from app.i18n.countries import COUNTRY_CODES
 from app.models import Competition, User
@@ -130,7 +130,7 @@ def public_url(request: Request, player: User, league) -> str:
 
 @router.get("/players/{player_id}", name="public_stats")
 def public_stats(player_id: int, request: Request, db: Session = Depends(get_db),
-                 user: User | None = Depends(current_user)):
+                 user: User = Depends(require_user)):
     """Stats de la saison d'un autre joueur (réservées aux connectés) : rien d'autre que ce
     que montrent déjà les classements (pseudo, pays) et les pronos des matchs terminés."""
     player = db.get(User, player_id)

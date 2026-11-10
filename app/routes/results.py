@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy import select
 from sqlalchemy.orm import Session, joinedload
 
-from app.auth import current_user
+from app.auth import require_user
 from app.db import get_db
 from app.models import Competition, Match, User
 from app.models.match import MatchStatus
@@ -35,7 +35,7 @@ def recent_results(db: Session, now: datetime) -> list[Match]:
 
 @router.get("/results")
 def results_page(request: Request, db: Session = Depends(get_db),
-                 user: User | None = Depends(current_user)):
+                 user: User = Depends(require_user)):
     now = utc_now()
     matches = recent_results(db, now)
     tz = resolve_timezone(request.cookies.get("tz"))
@@ -51,7 +51,7 @@ def results_page(request: Request, db: Session = Depends(get_db),
 
 @router.get("/results/{match_id}")
 def result_page(match_id: int, request: Request, db: Session = Depends(get_db),
-                user: User | None = Depends(current_user)):
+                user: User = Depends(require_user)):
     """Match clôturé : score final, résultat de mon pronostic et pronos de ma ligue."""
     match = db.get(Match, match_id)
     if match is None or match.status not in DONE_STATUSES:
@@ -68,9 +68,9 @@ def result_page(match_id: int, request: Request, db: Session = Depends(get_db),
     return templates.TemplateResponse(request, "result.html", context)
 
 
-def league_picks(request: Request, db: Session, user: User | None, match: Match) -> tuple:
+def league_picks(request: Request, db: Session, user: User, match: Match) -> tuple:
     """Ligue choisie sur l'accueil et pronos de ses membres, seulement après la clôture."""
-    if user is None or is_prediction_open(match.status, match.kickoff_at, utc_now()):
+    if is_prediction_open(match.status, match.kickoff_at, utc_now()):
         return None, []
     leagues = league_store.my_leagues(db, user.id)
     league_id = pick_league([league.id for league, _ in leagues], request.cookies.get("league"))
