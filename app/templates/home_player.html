@@ -52,7 +52,7 @@
     </div>
   </section>
 
-  {# 3. À jouer maintenant : le prochain match ouvert, même carte que la page Pronos #}
+  {# 3. À jouer maintenant : les prochains matchs ouverts (3 au plus), même carte que la page Pronos #}
   <section class="h-todo-section">
     <div class="lg-card-head">
       <h2>{{ t('home_play_now') }}</h2>
@@ -71,7 +71,7 @@
       <form class="predictions-form" data-mode="button" onsubmit="return false"
             data-msg-saved="{{ t('prediction_saved_short') }}" data-msg-saving="{{ t('prediction_saving') }}"
             data-msg-offline="{{ t('prediction_offline') }}" data-msg-todo="{{ t('todo_count') }}">
-        {% for match in todo_matches[:1] %}{% include "_match_card.html" %}{% endfor %}
+        {% for match in todo_matches %}{% include "_match_card.html" %}{% endfor %}
         <button type="button" class="h-save" data-save-all
                 data-label="{{ t('home_save_all') }}" data-done-label="{{ t('home_saved_all') }}">{{ t('home_save_all') }}</button>
       </form>

@@ -2341,9 +2341,11 @@ a.p-logo { display: inline-flex; align-items: center; gap: 4px; min-height: 44px
 
 .h-todo-sub { margin: 0 0 8px; }
 
-.h-todo-sub [data-countdown] { color: var(--color-primary-on-dark); font-weight: 700; }
+.h-todo-sub [data-countdown] { color: var(--color-primary-on-dark); font-weight: 700; white-space: nowrap; }
 
 .h-todo .match-card { border: 2px solid var(--color-primary); background: var(--color-surface); padding: 14px 12px; }
+
+.h-todo .match-card + .match-card { margin-top: 10px; }
 
 .h-save { margin-top: 10px; }
 

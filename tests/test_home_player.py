@@ -66,7 +66,7 @@ def test_new_player_without_prediction(client):
         assert absent not in page
 
 
-def test_todo_block_shows_next_open_match_with_save_button(client, db_session):
+def test_todo_block_shows_three_open_matches_with_save_button(client, db_session):
     for hours in (2, 5, 8, 11):
         add_match(db_session, hours, home="Lions", away="Paris Saint-Germain")
     login(client)
@@ -75,7 +75,7 @@ def test_todo_block_shows_next_open_match_with_save_button(client, db_session):
     assert "Aujourd" in page or "Demain" in page
     todo = page[page.index('class="h-todo"'):page.index('href="/matches">Voir tous les matchs')]
     assert "À jouer maintenant" in page
-    assert todo.count('class="card match-card"') == 1  # le prochain match ouvert
+    assert todo.count('class="card match-card"') == 3
     assert 'data-mode="button"' in todo and "data-save-all" in todo and "Valider mes pronos" in todo
     assert 'data-done-label="Pronos enregistrés"' in todo
     # Même gabarit que la page Pronos : abréviation, nom complet, cases de score, pas de + / –

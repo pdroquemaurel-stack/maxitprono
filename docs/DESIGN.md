@@ -126,7 +126,7 @@ Un seul jeu de variables : n'en recréez pas de locales à une page.
    - Barre de validation : carte claire (`--text`, texte `--color-dark`) au-dessus de la navigation,
      « N pronos à faire », « Modifiable jusqu'à 10 min avant », bouton orange « Valider ».
 2. **Accueil joueur** : « Salut pseudo » 26 px, la veille (gains en `--good`), 3 tuiles (place, points en orange,
-   réussite) ; « À jouer maintenant » (prochain match ouvert, carte à bordure orange, Valider, « Voir tous les matchs ») ;
+   réussite) ; « À jouer maintenant » (les 3 prochains matchs ouverts, cartes à bordure orange, Valider, « Voir tous les matchs ») ;
    résultats d'hier ; carrousel Mes ligues ; Chez les copains ; prochain badge.
 3. **Ligues** : Créer (carte orange, + sur carré sombre) et Rejoindre (champ + bouton clair) côte à côte ;
    une carte par ligue (icône 48 px, nom, méta, place 30 px + évolution, séparateur, avatars, dernière activité).
