@@ -78,7 +78,7 @@ def test_todo_block_shows_three_open_matches_with_save_button(client, db_session
     assert 'data-mode="button"' in todo and "data-save-all" in todo and "Valider mes pronos" in todo
     assert 'data-done-label="Pronos enregistrés"' in todo
     # Même gabarit que la page Pronos : abréviation, nom complet, cases de score, pas de + / –
-    assert '<b class="team-abbr">LIO</b>' in todo and '<b class="team-abbr">PSG</b>' in todo
+    assert '<span class="team-name">Lions</span>' in todo
     assert '<span class="team-name">Paris Saint-Germain</span>' in todo
     assert 'data-score="home"' in todo and "<button type=\"button\" class=\"step" not in todo
 

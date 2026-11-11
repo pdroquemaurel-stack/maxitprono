@@ -3,11 +3,30 @@
 {% block title %}{{ t('matches_title') }} · {{ app_name }}{% endblock %}
 {% block main_class %} lg pronos{% endblock %}
 {% block content %}
-  {# 1. En-tête blanc : titre et « N à faire » #}
+  {% from "_league_bits.html" import avatar %}
+  {# 1. En-tête : titre, « N à faire » (mis à jour par predictions.js) et avatar #}
   <header class="pr-head">
     <h1>{{ t('matches_title') }}</h1>
-    {% if to_predict %}<span class="pr-todo" data-todo-count="{{ to_predict }}">{{ t('todo_count').format(count=to_predict) }}</span>{% endif %}
+    <span class="pr-head-side">
+      {% if to_predict %}<span class="pr-todo" data-todo-count="{{ to_predict }}">{{ t('todo_count').format(count=to_predict) }}</span>{% endif %}
+      <a class="pr-me" href="/profile" aria-label="{{ t('profile_title') }}">{{ avatar(user.id, user.nickname, user.avatar_mime, 36) }}</a>
+    </span>
   </header>
+
+  {# Bande des jours : les 5 premiers jours qui ont des matchs. Un clic fait défiler jusqu'au jour
+     (ancre, pas de nouvelle page) ; point orange = des matchs encore à pronostiquer ce jour-là. #}
+  {% if days %}
+  <nav class="pr-days" aria-label="{{ t('days_label') }}" data-day-strip>
+    {% for day, matches in days[:5] %}
+      {% set todo_day = matches | selectattr('id', 'in', open_ids) | rejectattr('id', 'in', predictions) | list %}
+      <a class="pr-day-link{% if loop.first %} active{% endif %}" href="#d{{ day.isoformat() }}" data-day-link>
+        <span class="pr-dow">{{ t('weekday_short_' ~ day.weekday()) | replace('.', '') | upper }}</span>
+        <span class="pr-dnum">{{ day.day }}</span>
+        <span class="pr-dot{% if not todo_day %} off{% endif %}" aria-hidden="true"></span>
+      </a>
+    {% endfor %}
+  </nav>
+  {% endif %}
 
   {# 2. Compétitions : « Toutes » puis une pastille par compétition présente dans les matchs.
      Compteurs recalculés par static/js/matches.js selon le statut choisi. #}
@@ -45,11 +64,29 @@
         data-msg-leave="{{ t('predictions_unsaved') }}">
     {% for day, matches in days %}
       {% set shown = matches | selectattr('id', 'in', visible_ids) | list | length %}
-      <section class="pr-day" data-day{% if not shown %} hidden{% endif %}>
-        <h2 class="pr-day-title">{{ format_day_title(day, today) }}
-          <span class="pr-day-count" data-day-count data-fmt-one="{{ t('day_matches_one') }}"
-                data-fmt="{{ t('day_matches') }}">{{ t('day_matches_one' if shown == 1 else 'day_matches').format(count=shown) }}</span></h2>
-        <div class="pr-day-card">
+      {% set open_day = matches | selectattr('id', 'in', open_ids) | list %}
+      {% set todo_day = open_day | rejectattr('id', 'in', predictions) | list %}
+      {% set done = open_day | length - todo_day | length %}
+      <section class="pr-day" id="d{{ day.isoformat() }}" data-day{% if not shown %} hidden{% endif %}>
+        {# Carte d'avancement du jour : pronos faits sur les matchs ouverts, prochaine clôture #}
+        <div class="card pr-progress-card">
+          <div class="pr-progress-line">
+            <h2 class="pr-day-title">{{ format_day_title(day, today) }}
+              {%- if open_day %} · <span data-day-done data-total="{{ open_day | length }}" data-fmt="{{ t('day_progress') }}">{{ t('day_progress').format(done=done, total=open_day | length) }}</span>{% endif %}
+              <span class="pr-day-count{% if open_day %} visually-hidden{% endif %}" data-day-count data-fmt-one="{{ t('day_matches_one') }}"
+                    data-fmt="{{ t('day_matches') }}">{{ t('day_matches_one' if shown == 1 else 'day_matches').format(count=shown) }}</span></h2>
+            {% if todo_day %}
+              {% set next_match = todo_day | first %}
+              <span class="pr-closes">{{ t('closes_in_pill') }} <span data-countdown="{{ closing_at(next_match.kickoff_at).isoformat() }}"
+                data-fmt-days="{{ t('countdown_days') }}" data-fmt-hours="{{ t('countdown_hours') }}"
+                data-fmt-minutes="{{ t('countdown_minutes') }}">{{ format_countdown(next_match.kickoff_at, now) }}</span></span>
+            {% endif %}
+          </div>
+          {% if open_day %}
+            <span class="pr-progress" aria-hidden="true"><span data-day-bar style="width: {{ (100 * done / open_day | length) | round | int }}%"></span></span>
+          {% endif %}
+        </div>
+        <div class="pr-day-list">
           {% for match in matches %}{% include "_match_card.html" %}{% endfor %}
         </div>
       </section>
@@ -81,4 +118,5 @@
 {% endblock %}
 {% block scripts %}<script src="{{ static_url('js/countdown.js') }}" defer></script>
 <script src="{{ static_url('js/predictions.js') }}" defer></script>
-<script src="{{ static_url('js/matches.js') }}" defer></script>{% endblock %}
+<script src="{{ static_url('js/matches.js') }}" defer></script>
+<script src="{{ static_url('js/days.js') }}" defer></script>{% endblock %}

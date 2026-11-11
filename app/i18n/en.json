@@ -488,10 +488,10 @@
   "day_matches": "{count} matches",
   "matches_empty_title": "No matches here",
   "matches_empty_hint": "Try another competition or status.",
-  "missing_predictions_one": "1 match without a pick",
-  "missing_predictions": "{count} matches without a pick",
+  "missing_predictions_one": "1 pick to make",
+  "missing_predictions": "{count} picks to make",
   "missing_predictions_none": "All your picks are filled in",
-  "predictions_editable_until": "Editable until 10 min before kick-off",
+  "predictions_editable_until": "Editable until 10 min before",
   "save_predictions": "Save",
   "predictions_saved": "Saved",
   "day_short_format": "{weekday} {day} {month}",
@@ -552,5 +552,10 @@
   "error_branding_characters": "The characters < > { } are not allowed.",
   "error_branding_color": "Colour in #RRGGBB format (e.g. #FF7900).",
   "error_branding_contrast_primary": "Neither black nor white is readable enough on this colour (contrast < 4.5:1).",
-  "error_branding_contrast_dark": "Colour too light: white text on it would be unreadable (contrast < 4.5:1)."
+  "error_branding_contrast_dark": "Colour too light: white text on it would be unreadable (contrast < 4.5:1).",
+  "day_progress": "{done} of {total} picked",
+  "days_label": "Days",
+  "matchday_short": "MD{number}",
+  "card_your_pick": "Your pick {home} : {away}",
+  "trend_draw_short": "Draw"
 }

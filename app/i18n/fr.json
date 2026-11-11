@@ -488,10 +488,10 @@
   "day_matches": "{count} matchs",
   "matches_empty_title": "Aucun match ici",
   "matches_empty_hint": "Change de compétition ou de statut.",
-  "missing_predictions_one": "1 match sans prono",
-  "missing_predictions": "{count} matchs sans prono",
+  "missing_predictions_one": "1 prono à faire",
+  "missing_predictions": "{count} pronos à faire",
   "missing_predictions_none": "Tous tes pronos sont remplis",
-  "predictions_editable_until": "Modifiable jusqu'à 10 min avant le coup d'envoi",
+  "predictions_editable_until": "Modifiable jusqu'à 10 min avant",
   "save_predictions": "Valider",
   "predictions_saved": "Enregistré",
   "day_short_format": "{weekday} {day} {month}",
@@ -552,5 +552,10 @@
   "error_branding_characters": "Les caractères < > { } ne sont pas autorisés.",
   "error_branding_color": "Couleur au format #RRGGBB (ex. #FF7900).",
   "error_branding_contrast_primary": "Ni le noir ni le blanc ne sont assez lisibles sur cette couleur (contraste < 4.5:1).",
-  "error_branding_contrast_dark": "Couleur trop claire : le texte blanc posé dessus serait illisible (contraste < 4.5:1)."
+  "error_branding_contrast_dark": "Couleur trop claire : le texte blanc posé dessus serait illisible (contraste < 4.5:1).",
+  "day_progress": "{done} sur {total} joués",
+  "days_label": "Jours",
+  "matchday_short": "J{number}",
+  "card_your_pick": "Ton prono {home} : {away}",
+  "trend_draw_short": "Nul"
 }

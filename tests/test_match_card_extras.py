@@ -22,7 +22,7 @@ def test_players_trend_bar_from_threshold(client, db_session):
     add_predictions(db_session, match, [(2, 0)] * 3 + [(1, 1)] + [(0, 1)])
     page = client.get("/matches?status=all").text
     assert 'class="mc-trend-bar"' in page
-    assert "60 · 20 · 20 %" in page
+    assert "LIO 60 % · Nul 20 % · ÉTA 20 %" in page
     assert "victoire Lions 60 %, nul 20 %, victoire Étalons 20 %" in page  # version lue à voix haute
 
 
@@ -33,7 +33,7 @@ def test_trend_uses_players_not_provider(client, db_session):
     db_session.commit()
     add_predictions(db_session, match, [(0, 1)] * 5)
     page = client.get("/matches?status=all").text
-    assert "0 · 0 · 100 %" in page and "55 · 26 · 19" not in page
+    assert "LIO 0 % · Nul 0 % · ÉTA 100 %" in page and "55 %" not in page
 
 
 def test_no_bar_below_threshold_but_place_kept(client, db_session):

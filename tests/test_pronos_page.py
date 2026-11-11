@@ -110,7 +110,7 @@ def test_live_match_shows_real_score_and_my_pick(client, db_session):
     _, _, _, pl_live = setup_matches(client, db_session)
     page = client.get("/matches?status=all").text
     card = page.split(f'id="m{pl_live.id}"')[1].split("</article>")[0]
-    assert "En direct" in card and "1 – 0" in card and "Ton prono : 2 – 1" in card
+    assert "En direct" in card and "1 – 0" in card and "Ton prono 2 : 1" in card
     assert "<input" not in card
 
 
@@ -159,8 +159,8 @@ def test_inputs_have_hidden_labels(client, db_session):
 def test_save_bar_counts_matches_without_prediction(client, db_session):
     setup_matches(client, db_session)
     page = client.get("/matches").text
-    assert "2 matchs sans prono" in page and "2 à faire" in page
-    assert "Modifiable jusqu&#39;à 10 min avant le coup d&#39;envoi" in page
+    assert "2 pronos à faire" in page and "2 à faire" in page
+    assert "Modifiable jusqu&#39;à 10 min avant" in page
 
 
 def test_prediction_on_match_started_meanwhile_is_refused(client, db_session):

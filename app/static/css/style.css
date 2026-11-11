@@ -586,30 +586,43 @@ body.no-tabbar { padding-bottom: 0; }
 
 .match-card.has-error { border-color: var(--bad); }
 
-/* Ligne de match (page Pronos et accueil) : heure + compétition à gauche, pastille d'état à droite */
+/* Carte de match (page Pronos et accueil) : compétition à gauche, pastille d'état à droite */
 .mc-top {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  min-height: 24px;
-  margin: 0 0 10px;
+  min-height: 26px;
+  margin: 0 0 12px;
   color: var(--muted);
   font-size: 12px;
 }
 
-.match-when { display: flex; align-items: baseline; gap: 6px; min-width: 0; }
+.mc-comp { display: flex; align-items: center; gap: 6px; min-width: 0; }
 
-.match-when time { color: var(--text); font-weight: 800; font-variant-numeric: tabular-nums; }
+.mc-comp-name { min-width: 0; overflow-wrap: anywhere; line-height: 1.25; }
 
-.match-when span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mc-emblem {
+  position: relative;
+  display: inline-flex;
+  flex: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--color-raised);
+  overflow: hidden;
+}
+
+.mc-emblem img { position: absolute; inset: 3px; width: 14px; height: 14px; object-fit: contain; }
 
 .mc-pills { display: flex; flex: none; align-items: center; gap: 6px; }
 
+/* Pastilles d'état */
 .mc-pill {
-  padding: 3px 10px;
+  display: inline-block;  /* pas inline-flex : il garderait pas l'espace de « Ferme dans 1 h » */
+  padding: 4px 10px;
   border-radius: 999px;
-  background: var(--color-dark);
+  background: var(--color-raised);
   color: var(--muted);
   font-size: 12px;
   font-weight: 700;
@@ -617,56 +630,56 @@ body.no-tabbar { padding-bottom: 0; }
   white-space: nowrap;
 }
 
-.mc-pill.closing { background: var(--color-primary-tint); color: var(--color-primary-on-dark); }
+.mc-pill.todo, .mc-pill.closing { background: var(--color-primary-tint); color: var(--color-primary-on-dark); }
 .mc-pill.saved { background: var(--good-tint); color: var(--good); }
 .mc-pill.live { background: var(--bad-tint); color: var(--bad); }
 
-/* Domicile | cases (ou score réel) | extérieur ; colonnes d'équipes de largeur égale */
+/* Domicile | cases + heure (ou score réel) | extérieur ; colonnes d'équipes de largeur égale */
 .match-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-  gap: 8px;
-  align-items: center;
+  grid-template-columns: minmax(0, 1fr) 132px minmax(0, 1fr);
+  gap: 6px;
+  align-items: start;
 }
 
-.match-grid .team { display: flex; align-items: center; gap: 8px; min-width: 0; }
+/* Logo au-dessus du nom complet, centré, sur 2 lignes au plus (jamais tronqué sur une ligne) */
+.match-grid .team { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 0; text-align: center; }
 
-.match-grid .away { flex-direction: row-reverse; text-align: right; }
+.match-grid .crest { width: 48px; height: 48px; font-size: 13px; }
 
-.team-text { display: flex; flex-direction: column; min-width: 0; }
-
-.team-abbr { font-size: 14px; font-weight: 800; color: var(--text); }
-
+/* Jamais tronqué : le nom passe à la ligne (coupure avec tiret si un mot est trop long) */
 .match-grid .team-name {
-  overflow: hidden;
   max-width: 100%;
-  color: var(--muted);
-  font-size: 11px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.25;
+  overflow-wrap: break-word;
+  hyphens: auto;
 }
 
-/* Centre : même largeur pour les cases, le score réel et le bouton de connexion */
-.mc-center { display: flex; align-items: center; justify-content: center; width: 116px; }
+.mc-center { display: flex; flex-direction: column; align-items: center; gap: 4px; width: 132px; }
 
-.mc-boxes { gap: 8px; }
+.mc-boxes { display: flex; align-items: center; justify-content: center; gap: 6px; }
 
-.mc-result { flex-direction: column; gap: 2px; min-height: 44px; }
+.mc-time { color: var(--muted); font-size: 12px; font-weight: 600; }
 
-.mc-final { font: 700 20px var(--font-num); font-variant-numeric: tabular-nums; color: var(--text); white-space: nowrap; }
+.mc-result { justify-content: center; min-height: 52px; }
 
-.mc-pick { color: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.mc-final { font: 700 32px/1 var(--font-num); color: var(--text); white-space: nowrap; }
 
-/* Tendance des joueurs : barre 1 / N / 2 ; hauteur gardée même sans barre */
-.mc-trend { display: flex; align-items: center; gap: 8px; height: 16px; margin-top: 10px; }
+.mc-pick { color: var(--muted); font-size: 12px; white-space: nowrap; }
 
-.mc-trend-bar { display: flex; flex: 1; height: 6px; border-radius: 999px; overflow: hidden; background: var(--color-line); }
+/* Tendance des joueurs : barre domicile / nul / extérieur ; hauteur gardée même sans barre */
+.mc-trend { display: flex; flex-direction: column; gap: 6px; min-height: 16px; margin-top: 12px; }
 
-.mc-trend-bar .home { background: var(--color-dark); }
+.mc-trend-bar { display: flex; gap: 2px; height: 6px; border-radius: 999px; overflow: hidden; background: var(--color-line); }
+
+.mc-trend-bar .home { background: var(--text); }
 .mc-trend-bar .draw { background: var(--color-line-strong); }
 .mc-trend-bar .away { background: var(--color-primary); }
 
-.mc-trend-text { color: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.mc-trend-text { color: var(--muted); font-size: 12px; text-align: center; }
 
 /* Écusson : logo par-dessus les initiales, qui restent visibles s'il manque */
 .crest {
@@ -705,34 +718,36 @@ body.no-tabbar { padding-bottom: 0; }
   white-space: nowrap;
 }
 
-.match-grid .dash { width: 12px; text-align: center; color: var(--faint); }
+.match-grid .dash, .mc-boxes .dash { width: 8px; text-align: center; color: var(--muted); font: 700 22px var(--font-num); }
 
-/* Case de score : vide (gris), puis gagnant / perdant / nul */
+/* Case de score : vide à remplir (fond foncé de la couleur principale), puis remplie */
 .score-box {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 44px;
+  width: 48px;
+  height: 52px;
   min-height: 0;
+  margin: 0;
   padding: 0;
-  border: 1px solid var(--color-line-strong);
+  border: 2px solid var(--color-primary);
   border-radius: 12px;
-  background: var(--color-dark);
+  background: var(--color-primary-deep);
   color: var(--text);
-  font-family: var(--font-num);
-  font-weight: 800;
-  font-size: 22px;
+  font: 700 30px var(--font-num);
   font-variant-numeric: tabular-nums;
   text-align: center;
 }
 
 .score-box::placeholder { color: var(--faint); }
 
-span.score-box { color: var(--faint); }
+.score-box:focus { outline: 2px solid var(--text); outline-offset: 1px; border-color: var(--color-primary); }
 
-/* Case remplie : bordure orange (box-sizing: border-box, la taille ne bouge pas) */
-.score-box.filled { border: 2px solid var(--color-primary); background: var(--color-primary-tint); color: var(--text); }
+/* Lecture seule (match fermé sans prono) : case neutre */
+span.score-box { border: 1px solid var(--color-line-strong); background: var(--color-surface); color: var(--muted); }
+
+/* Case remplie (box-sizing: border-box, la taille ne bouge pas) */
+.score-box.filled, span.score-box.filled { border: 1px solid var(--color-line-strong); background: var(--color-raised); color: var(--text); }
 
 .match-card .alert { margin: 10px 0 0; font-size: 13px; }
 
@@ -1148,8 +1163,8 @@ a.p-logo { display: inline-flex; align-items: center; gap: 4px; min-height: 44px
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: var(--color-dark);
-  color: var(--color-primary);
+  background: var(--color-raised);
+  color: var(--text-2);
   font-size: 22px;
   font-weight: 800;
 }
@@ -1373,7 +1388,7 @@ a.p-logo { display: inline-flex; align-items: center; gap: 4px; min-height: 44px
 
 .p-letter:first-child { margin-left: 0; }
 
-.p-form-exact { background: var(--good); color: var(--text); }
+.p-form-exact { background: var(--good); color: var(--color-dark); }
 
 .p-form-good { background: var(--good-tint); color: var(--good); }
 
@@ -1569,8 +1584,8 @@ a.p-logo { display: inline-flex; align-items: center; gap: 4px; min-height: 44px
 }
 
 .lg-initials {
-  background: var(--color-dark);
-  color: var(--color-primary);
+  background: var(--color-raised);
+  color: var(--text-2);
   font-size: calc(var(--size) * 0.36);
   font-weight: 800;
 }
@@ -1591,7 +1606,7 @@ a.p-logo { display: inline-flex; align-items: center; gap: 4px; min-height: 44px
 
 .lg-color-orange { background: var(--color-primary); color: var(--color-on-primary); }
 .lg-color-black { background: var(--color-dark); color: var(--text); } /* couleur de ligue fixe */
-.lg-color-green { background: var(--good); color: var(--text); }
+.lg-color-green { background: var(--good); color: var(--color-dark); }
 .lg-color-peach { background: var(--color-primary-tint); color: var(--color-primary-on-dark); }
 
 .lg-faces { display: inline-flex; align-items: center; flex-shrink: 0; }
@@ -1941,9 +1956,9 @@ a.p-logo { display: inline-flex; align-items: center; gap: 4px; min-height: 44px
 
 .lg-picks-score .score-digits { font-size: 17px; }
 
-.lg-pts { min-width: 36px; padding: 3px 8px; border-radius: 999px; font-size: 13px; font-weight: 800; text-align: center; }
+.lg-pts { min-width: 36px; padding: 2px 8px; border-radius: 999px; font: 700 15px var(--font-num); text-align: center; }
 
-.lg-pts.exact { background: var(--good); color: var(--text); }
+.lg-pts.exact { background: var(--good); color: var(--color-dark); }
 .lg-pts.good { background: var(--good-tint); color: var(--good); }
 .lg-pts.miss { background: var(--bad-tint); color: var(--bad); }
 
@@ -2093,7 +2108,7 @@ a.p-logo { display: inline-flex; align-items: center; gap: 4px; min-height: 44px
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
-.h-pts-exact { background: var(--good); color: var(--text); }
+.h-pts-exact { background: var(--good); color: var(--color-dark); }
 .h-pts-good { background: var(--good-tint); color: var(--good); }
 .h-pts-miss { background: var(--bad-tint); color: var(--bad); }
 
@@ -2297,7 +2312,7 @@ a.p-logo { display: inline-flex; align-items: center; gap: 4px; min-height: 44px
 
 .h-todo .match-card + .match-card { margin-top: 0; border-top: 1px solid var(--color-line); }
 
-.h-save.done { background: var(--good); color: var(--text); }
+.h-save.done { background: var(--good); color: var(--color-dark); }
 
 .h-link {
   display: flex;
@@ -2400,34 +2415,75 @@ a.p-logo { display: inline-flex; align-items: center; gap: 4px; min-height: 44px
 
 
 /* ==========================================================================
-   Page Pronos (/matches) : en-tête, filtres compétition × statut, matchs par jour,
-   barre « Valider ». Même charte que les Ligues (variables --lg-*).
+   Page Pronos (/matches) : en-tête, bande des jours, filtres compétition × statut,
+   avancement du jour, une carte par match, barre « Valider ».
    ========================================================================== */
 .pronos [hidden] { display: none !important; }
 
-.pr-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin: -12px -20px 0;
-  padding: 12px 20px;
-  border-bottom: 1px solid var(--color-line);
-  background: var(--color-surface);
-}
+.content.pronos { padding: 12px 16px 20px; }
 
-.pr-head h1 { margin: 0; font-size: 26px; font-weight: 800; }
+.pr-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 48px; }
 
+.pr-head h1 { margin: 0; font-size: 24px; }
+
+.pr-head-side { display: flex; align-items: center; gap: 10px; }
+
+/* « N à faire » : point orange devant */
 .pr-todo {
-  flex: none;
-  padding: 6px 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--color-line);
   border-radius: 999px;
-  background: var(--color-primary-tint);
-  color: var(--color-primary-on-dark);
+  background: var(--color-surface);
+  color: var(--text);
   font-size: 13px;
   font-weight: 700;
-  font-variant-numeric: tabular-nums;
 }
+
+.pr-todo::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--color-primary); }
+
+.pr-me { text-decoration: none; display: inline-flex; min-width: 44px; min-height: 44px; align-items: center; justify-content: center; }
+
+/* Bande des jours : 5 colonnes égales, collée en haut quand on défile */
+.pr-days {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  margin: 4px -16px 12px;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--color-line);
+  background: var(--color-dark);
+}
+
+.pr-day-link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  min-height: 56px;
+  padding: 6px 0 4px;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.pr-dow { font-size: 11px; font-weight: 700; letter-spacing: 0.04em; }
+
+.pr-dnum { font-size: 17px; font-weight: 800; line-height: 1.1; }
+
+.pr-dot { width: 5px; height: 5px; margin-top: 3px; border-radius: 50%; background: var(--color-primary); }
+
+.pr-dot.off { visibility: hidden; }
+
+.pr-day-link.active { border-bottom-color: var(--color-primary); color: var(--text); }
+
+.pr-day { scroll-margin-top: 72px; }  /* l'ancre tombe sous la bande des jours */
 
 /* Gras sans saut de largeur : le libellé en gras, invisible, réserve la place */
 .pr-comp-name, .pr-status span { display: inline-flex; flex-direction: column; }
@@ -2437,19 +2493,18 @@ a.p-logo { display: inline-flex; align-items: center; gap: 4px; min-height: 44px
   height: 0;
   overflow: hidden;
   visibility: hidden;
-  font-weight: 700;
+  font-weight: 800;
 }
 
-/* Compétitions : rangée qui défile, sans barre visible */
+/* Compétitions : pastilles de filtre dans une rangée qui défile, sans barre visible */
 .pr-comps {
   display: flex;
   gap: 8px;
-  margin-left: -20px;
-  margin-right: -20px;
-  padding: 2px 20px;
+  margin: 0 -16px;
+  padding: 4px 16px;
   overflow-x: auto;
   scrollbar-width: none;
-  scroll-padding: 0 20px;
+  scroll-padding: 0 16px;
 }
 
 .pr-comps::-webkit-scrollbar { display: none; }
@@ -2460,19 +2515,19 @@ a.p-logo { display: inline-flex; align-items: center; gap: 4px; min-height: 44px
   flex: none;
   align-items: center;
   gap: 8px;
-  height: 40px;
-  padding: 0 8px 0 5px;
-  border: 1px solid var(--color-line-strong);
+  height: 36px;
+  padding: 0 6px 0 4px;
+  border: 1px solid var(--color-line);
   border-radius: 999px;
   background: var(--color-surface);
-  color: var(--text);
-  font-size: 14px;
-  font-weight: 500;
+  color: var(--text-2);
+  font-size: 13px;
+  font-weight: 600;
   text-decoration: none;
   white-space: nowrap;
 }
 
-.pr-comp::before { content: ""; position: absolute; inset: -2px 0; }  /* zone tactile de 44 px */
+.pr-comp::before { content: ""; position: absolute; inset: -4px 0; }  /* zone tactile de 44 px */
 
 .pr-emblem {
   position: relative;
@@ -2483,7 +2538,8 @@ a.p-logo { display: inline-flex; align-items: center; gap: 4px; min-height: 44px
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background: var(--color-line);
+  background: var(--color-raised);
+  color: var(--text-2);
   overflow: hidden;
 }
 
@@ -2503,70 +2559,74 @@ a.p-logo { display: inline-flex; align-items: center; gap: 4px; min-height: 44px
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 26px;  /* 1 ou 2 chiffres : même largeur */
+  min-width: 24px;  /* 1 ou 2 chiffres : même largeur */
   height: 20px;
   padding: 0 6px;
   border-radius: 999px;
-  background: var(--color-line);
+  background: var(--color-raised);
+  color: var(--muted);
   font-size: 12px;
   font-weight: 700;
-  font-variant-numeric: tabular-nums;
 }
 
-.pr-comp.active { border-color: var(--color-dark); background: var(--color-dark); color: var(--text); font-weight: 700; }
+.pr-comp.active { border-color: var(--text); background: var(--text); color: var(--color-dark); font-weight: 800; }
 
-.pr-comp.active .pr-emblem, .pr-comp.active .pr-count { background: var(--color-primary); color: var(--color-on-primary); }
+.pr-comp.active .pr-emblem { background: var(--color-dark); color: var(--text); }
 
-/* Statut : 3 onglets de largeur égale */
+.pr-comp.active .pr-count { background: var(--color-primary); color: var(--color-on-primary); }
+
+/* Statut : sélecteur segmenté, 3 onglets de largeur égale */
 .pr-status {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 4px;
+  margin-top: 10px;
   padding: 4px;
+  border: 1px solid var(--color-line);
   border-radius: 14px;
-  background: var(--color-line);
+  background: var(--color-surface);
 }
 
 .pr-status a {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 44px;
+  min-height: 40px;
   border-radius: 10px;
   color: var(--muted);
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   text-decoration: none;
   white-space: nowrap;
 }
 
-.pr-status a.active { background: var(--color-surface); color: var(--text); font-weight: 700; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5); }
+.pr-status a.active { background: var(--text); color: var(--color-dark); font-weight: 800; }
 
 /* Matchs par jour */
-.pronos .predictions-form { padding-bottom: 84px; }  /* place de la barre « Valider » */
+.pronos .predictions-form { margin-top: 16px; padding-bottom: 96px; }  /* place de la barre « Valider » */
 
 .pr-day + .pr-day { margin-top: 20px; }
 
-.pr-day-title {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 8px;
-  margin: 0 0 8px !important;
-  font-size: 15px !important;
-  font-weight: 700;
-}
+/* Carte d'avancement du jour */
+.pr-progress-card { padding: 12px 14px; }
 
-.pr-day-count { flex: none; color: var(--muted); font: 500 13px var(--font-text); font-variant-numeric: tabular-nums; }
+.pr-progress-line { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
 
-.pr-day-card { border-radius: 16px; background: var(--color-surface); overflow: hidden; }
+.pr-day-title { margin: 0 !important; font-size: 14px !important; font-weight: 700; }
 
-.pr-day-card .match-card { margin: 0; padding: 12px 16px; border: 0; border-radius: 0; background: none; }
+.pr-day-count { color: var(--muted); font-weight: 500; }
 
-/* Filet entre deux matchs visibles (les masqués ne comptent pas) */
-.pr-day-card .match-card:not([hidden]) ~ .match-card { border-top: 1px solid var(--color-line); }
+[data-day-done] { white-space: nowrap; }
 
-.pr-day-card .match-card.has-error { box-shadow: inset 3px 0 0 var(--bad); }
+.pr-closes { flex: none; color: var(--color-primary-on-dark); font-size: 12px; font-weight: 700; white-space: nowrap; }
+
+.pr-progress { display: block; height: 4px; margin-top: 10px; border-radius: 999px; background: var(--color-line); overflow: hidden; }
+
+.pr-progress span { display: block; height: 100%; border-radius: inherit; background: var(--color-primary); transition: width 200ms ease; }
+
+.pr-day-list .match-card { margin-top: 10px; padding: 14px 12px; }
+
+.pr-day-list .match-card.has-error { border-color: var(--bad); }
 
 /* Aucun match pour ces filtres */
 .pr-empty {
@@ -2575,6 +2635,7 @@ a.p-logo { display: inline-flex; align-items: center; gap: 4px; min-height: 44px
   align-items: center;
   gap: 6px;
   padding: 32px 16px;
+  border: 1px solid var(--color-line);
   border-radius: 16px;
   background: var(--color-surface);
   color: var(--muted);
@@ -2584,49 +2645,45 @@ a.p-logo { display: inline-flex; align-items: center; gap: 4px; min-height: 44px
 
 .pr-empty strong { color: var(--text); font-size: 16px; }
 
-/* Barre « Valider », collée au-dessus de la barre de navigation */
+/* Barre « Valider » : carte claire au-dessus de la barre de navigation */
 .pr-savebar {
   position: fixed;
-  left: 0;
-  right: 0;
-  bottom: calc(var(--tabbar-height) + env(safe-area-inset-bottom));
+  left: max(12px, calc((100% - 40rem) / 2 + 12px));
+  right: max(12px, calc((100% - 40rem) / 2 + 12px));
+  bottom: calc(var(--tabbar-height) + env(safe-area-inset-bottom) + 8px);
   z-index: 9;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 10px max(20px, calc((100% - 40rem) / 2 + 20px));
-  border-top: 1px solid var(--color-line);
-  background: var(--color-surface);
+  padding: 10px 10px 10px 16px;
+  border-radius: 16px;
+  background: var(--text);
+  color: var(--color-dark);
 }
 
 .pr-savebar-text { display: flex; flex-direction: column; min-width: 0; }
 
-.pr-savebar-text strong {
-  overflow: hidden;
-  font-size: 15px;
-  font-variant-numeric: tabular-nums;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
+.pr-savebar-text strong { font-size: 15px; font-weight: 800; line-height: 1.25; }
 
-.pr-savebar-text span { color: var(--muted); font-size: 12px; }
+.pr-savebar-text span { font-size: 12px; opacity: 0.7; }
 
 .pr-save {
   flex: none;
-  width: 128px;
+  width: 112px;
   height: 48px;
+  margin: 0;
   border: 0;
-  border-radius: 14px;
+  border-radius: 12px;
   background: var(--color-primary);
   color: var(--color-on-primary);
-  font: 700 15px var(--font-text);
+  font: 800 15px var(--font-text);
   cursor: pointer;
 }
 
 .pr-save.saving { opacity: 0.7; cursor: progress; }
 
-.pr-save.done { background: var(--good-tint); color: var(--good); }
+.pr-save.done { background: var(--good); color: var(--color-dark); }
 
 /* En-tête du visiteur (connexion, inscription, pages légales) : remplace la barre de navigation */
 .guest-header { display: flex; align-items: center; justify-content: space-between; min-height: 44px; margin-bottom: 8px; }

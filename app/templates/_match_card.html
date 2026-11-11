@@ -1,13 +1,13 @@
-{# Ligne de match, partagée par la page Pronos et l'accueil. Variables : match + contexte match_context
+{# Carte de match, partagée par la page Pronos et l'accueil. Variables : match + contexte match_context
    (et, sur la page Pronos seulement, comp_keys et visible_ids pour les filtres).
-   En haut : heure, compétition, pastille d'état. Au centre : équipes et cases de score (ou score réel).
+   En haut : compétition · journée, pastille d'état. Au centre, en 3 colonnes : équipe à domicile
+   (logo au-dessus du nom), cases de score et heure (ou score réel), équipe à l'extérieur.
    En bas, pour un match ouvert : tendance des joueurs. #}
 {% from "_league_bits.html" import points_pill %}
 {% set prediction = predictions.get(match.id) %}
 {% set is_open = match.id in open_ids %}
 {% set state = match_state(match.status, match.kickoff_at, now, is_open, prediction is not none) %}
 {% set played = match.status in ('live', 'finished') and match.home_score is not none %}
-{% set home_abbr, away_abbr = team_initials(match.home_team), team_initials(match.away_team) %}
 <article class="card match-card" id="m{{ match.id }}"
   {%- if comp_keys is defined %} data-comp="{{ comp_keys[match.competition_id] }}"{% endif %}
   {%- if is_open %} data-open{% endif %}
@@ -16,8 +16,13 @@
   {%- if is_open %} data-match-id="{{ match.id }}"{% endif %}
   {%- if visible_ids is defined and match.id not in visible_ids %} hidden{% endif %}>
   <div class="mc-top">
-    <span class="match-when"><time datetime="{{ match.kickoff_at.isoformat() }}">{{ format_time(match.kickoff_at, tz) }}</time>
-      <span>{{ match.competition.name }}</span></span>
+    <span class="mc-comp">
+      <span class="mc-emblem" aria-hidden="true">
+        {%- if match.competition.logo_url %}<img src="{{ match.competition.logo_url }}" alt="" width="14" height="14" loading="lazy" decoding="async" onerror="this.remove()">{% endif -%}
+      </span>
+      <span class="mc-comp-name">{{ match.competition.name }}
+        {%- if match.matchday %} · {{ t('matchday_short').format(number=match.matchday) }}{% endif %}</span>
+    </span>
     <span class="mc-pills">
       {%- if state == 'finished' and prediction %}{{ points_pill(prediction) }}{% endif -%}
       <span class="mc-pill {{ state }}" data-state-pill>
@@ -34,40 +39,46 @@
   <div class="match-grid">
     <span class="team home">
       {% with url = match.home_logo_url, name = match.home_team %}{% include "_crest.html" %}{% endwith %}
-      <span class="team-text"><b class="team-abbr">{{ home_abbr }}</b><span class="team-name">{{ match.home_team }}</span></span>
+      <span class="team-name">{{ match.home_team }}</span>
     </span>
 
     {% if played %}
       {# Match en cours ou terminé : score réel à la place des cases, même largeur #}
       <span class="mc-center mc-result">
         <strong class="mc-final">{{ match.home_score }} – {{ match.away_score }}</strong>
-        <span class="mc-pick">{% if prediction %}{{ t('home_your_pick').format(home=prediction.home_score, away=prediction.away_score) }}{% else %}{{ t('no_prediction') }}{% endif %}</span>
+        <span class="mc-pick">{% if prediction %}{{ t('card_your_pick').format(home=prediction.home_score, away=prediction.away_score) }}{% else %}{{ t('no_prediction') }}{% endif %}</span>
       </span>
     {% elif is_open %}
       {# Une case = un chiffre ; enregistrement par static/js/predictions.js (bouton « Valider ») #}
-      <span class="mc-center mc-boxes">
-        <label class="visually-hidden" for="s{{ match.id }}h">{{ t('goals_of').format(team=match.home_team) }}</label>
-        <input class="score-box{% if prediction %} filled{% endif %}" id="s{{ match.id }}h" name="home_{{ match.id }}"
-               value="{{ prediction.home_score if prediction else '' }}" type="text" inputmode="numeric"
-               pattern="[0-9]" maxlength="1" placeholder="–" autocomplete="off" data-score="home">
-        <span class="dash" aria-hidden="true">–</span>
-        <label class="visually-hidden" for="s{{ match.id }}a">{{ t('goals_of').format(team=match.away_team) }}</label>
-        <input class="score-box{% if prediction %} filled{% endif %}" id="s{{ match.id }}a" name="away_{{ match.id }}"
-               value="{{ prediction.away_score if prediction else '' }}" type="text" inputmode="numeric"
-               pattern="[0-9]" maxlength="1" placeholder="–" autocomplete="off" data-score="away">
+      <span class="mc-center">
+        <span class="mc-boxes">
+          <label class="visually-hidden" for="s{{ match.id }}h">{{ t('goals_of').format(team=match.home_team) }}</label>
+          <input class="score-box{% if prediction %} filled{% endif %}" id="s{{ match.id }}h" name="home_{{ match.id }}"
+                 value="{{ prediction.home_score if prediction else '' }}" type="text" inputmode="numeric"
+                 pattern="[0-9]" maxlength="1" placeholder="–" autocomplete="off" data-score="home">
+          <span class="dash" aria-hidden="true">:</span>
+          <label class="visually-hidden" for="s{{ match.id }}a">{{ t('goals_of').format(team=match.away_team) }}</label>
+          <input class="score-box{% if prediction %} filled{% endif %}" id="s{{ match.id }}a" name="away_{{ match.id }}"
+                 value="{{ prediction.away_score if prediction else '' }}" type="text" inputmode="numeric"
+                 pattern="[0-9]" maxlength="1" placeholder="–" autocomplete="off" data-score="away">
+        </span>
+        <time class="mc-time" datetime="{{ match.kickoff_at.isoformat() }}">{{ format_time(match.kickoff_at, tz) }}</time>
       </span>
     {% else %}
-      {# Fermé, annulé : mon prono en lecture seule, sinon des cases vides #}
-      <span class="mc-center mc-boxes">
-        <span class="score-box{% if prediction %} filled{% endif %}">{{ prediction.home_score if prediction else '–' }}</span>
-        <span class="dash" aria-hidden="true">–</span>
-        <span class="score-box{% if prediction %} filled{% endif %}">{{ prediction.away_score if prediction else '–' }}</span>
+      {# Fermé, annulé, reporté : mon prono en lecture seule, sinon des cases vides #}
+      <span class="mc-center">
+        <span class="mc-boxes">
+          <span class="score-box{% if prediction %} filled{% endif %}">{{ prediction.home_score if prediction else '–' }}</span>
+          <span class="dash" aria-hidden="true">:</span>
+          <span class="score-box{% if prediction %} filled{% endif %}">{{ prediction.away_score if prediction else '–' }}</span>
+        </span>
+        <time class="mc-time" datetime="{{ match.kickoff_at.isoformat() }}">{{ format_time(match.kickoff_at, tz) }}</time>
       </span>
     {% endif %}
 
     <span class="team away">
       {% with url = match.away_logo_url, name = match.away_team %}{% include "_crest.html" %}{% endwith %}
-      <span class="team-text"><b class="team-abbr">{{ away_abbr }}</b><span class="team-name">{{ match.away_team }}</span></span>
+      <span class="team-name">{{ match.away_team }}</span>
     </span>
   </div>
 
@@ -77,7 +88,7 @@
     <div class="mc-trend">
       {% if trend %}
         <span class="mc-trend-bar" aria-hidden="true"><span class="home" style="width: {{ trend.home }}%"></span><span class="draw" style="width: {{ trend.draw }}%"></span><span class="away" style="width: {{ trend.away }}%"></span></span>
-        <span class="mc-trend-text" aria-hidden="true">{{ trend.home }} · {{ trend.draw }} · {{ trend.away }} %</span>
+        <span class="mc-trend-text" aria-hidden="true">{{ team_initials(match.home_team) }} {{ trend.home }} % · {{ t('trend_draw_short') }} {{ trend.draw }} % · {{ team_initials(match.away_team) }} {{ trend.away }} %</span>
         <span class="visually-hidden">{{ t('trend_label').format(home=match.home_team, away=match.away_team, h=trend.home, d=trend.draw, a=trend.away) }}</span>
       {% endif %}
     </div>
