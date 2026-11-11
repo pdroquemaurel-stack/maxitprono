@@ -559,5 +559,16 @@
   "card_your_pick": "Your pick {home} : {away}",
   "trend_draw_short": "Draw",
   "home_play_now": "Play now",
-  "league_invite_short": "Invite"
+  "league_invite_short": "Invite",
+  "leaderboard_rules": "Rules",
+  "leaderboard_my_position": "Your position",
+  "leaderboard_of_total": "of {total}",
+  "leaderboard_col_player": "Player",
+  "leaderboard_col_exacts": "Exact",
+  "leaderboard_col_points": "Pts",
+  "leaderboard_hint_league": "Players in your league, over the whole season.",
+  "leaderboard_hint_general": "All players, all competitions.",
+  "leaderboard_hint_country": "Players from the same country.",
+  "leaderboard_hint_competition": "Points earned in a single competition.",
+  "leaderboard_hint_week": "Points earned from Monday to Sunday."
 }

@@ -51,7 +51,7 @@ def test_logged_in_player_sees_own_rank(client, db_session):
     assert "Pas encore classé" in client.get("/leaderboard").text
 
     add_scored(db_session, paul(db_session), 3)
-    assert "Ton rang : 2 sur 2 · 3 pts" in client.get("/leaderboard").text
+    assert 'aria-label="Ton rang : 2 sur 2 · 3 pts"' in client.get("/leaderboard").text
 
 
 def test_player_outside_top_is_shown_at_the_bottom(client, db_session, monkeypatch):
@@ -65,7 +65,7 @@ def test_player_outside_top_is_shown_at_the_bottom(client, db_session, monkeypat
     assert 'class="rank-row me"' in text and "<strong>Toi</strong>" in text
     assert 'class="gap"' in text
     assert '<span class="rank first">1</span>' in text  # Ali, en tête
-    assert "0 score exact" in text
+    assert 'title="0 score exact"' in text
 
 
 def test_country_tab_defaults_to_player_country(client, db_session):

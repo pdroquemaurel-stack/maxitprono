@@ -354,55 +354,84 @@ body.no-tabbar { padding-bottom: 0; }
 
 .week-nav a { font-size: 24px; text-decoration: none; padding: 0 12px; }
 
-/* Liste du classement */
-.ranking { margin: 0; padding: 4px 12px; list-style: none; }
+/* --- Page Classements --- */
+.lb-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 
-.rank-row {
+.lb-head h1 { margin: 8px 0 12px; }
+
+.lb-rules { display: inline-flex; align-items: center; min-height: 44px; font-size: 14px; text-decoration: none; }
+
+.lb-chips { display: flex; gap: 8px; margin: 0 -16px; padding: 4px 16px; overflow-x: auto; scrollbar-width: none; }
+
+.lb-chips::-webkit-scrollbar { display: none; }
+
+.lb-chips .chip { position: relative; }
+
+.lb-chips .chip::before { content: ""; position: absolute; inset: -4px 0; }  /* zone tactile de 44 px */
+
+.lb-hint { margin: 8px 0 12px; color: var(--muted); font-size: 13px; }
+
+/* Carte « Ta position » */
+.lb-me {
   display: flex;
   align-items: center;
   gap: 12px;
-  min-height: 60px;
-  padding: 8px 4px;
-  border-top: 1px solid var(--color-line);
-}
-
-.rank-row:first-child { border-top: none; }
-
-.rank-row.me {
-  margin: 4px -8px;
-  padding: 8px 12px;
+  margin-bottom: 12px;
+  padding: 14px 16px;
   border: 2px solid var(--color-primary);
-  border-radius: 14px;
+  border-radius: 16px;
+  background: var(--color-raised);
 }
 
-.rank-row.me + .rank-row { border-top: none; }
+.lb-me .lg-avatar.me { box-shadow: 0 0 0 2px var(--color-raised), 0 0 0 4px var(--color-primary); }
 
-.rank-row .rank {
-  flex-shrink: 0;
-  width: 28px;
-  height: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 10px;
-  color: var(--muted);
-  font-family: var(--font-num);
-  font-weight: 700;
-}
+.lb-me-text { display: flex; flex-direction: column; flex: 1; min-width: 0; }
 
-.rank-row .rank.first { background: var(--color-primary); color: var(--color-on-primary); }
+.lb-me-label { color: var(--muted); font-size: 12px; font-weight: 600; }
 
-.rank-row .player { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.lb-me-rank { color: var(--text-2); font-size: 14px; font-weight: 600; }
 
-.rank-row .player strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lb-me-rank strong { color: var(--text); font: 700 36px/1 var(--font-num); }
 
-.rank-row .player small { color: var(--muted); font-size: 12px; }
+.lb-me-points { flex: none; color: var(--muted); font-size: 13px; font-weight: 600; text-align: right; }
 
-.rank-row .points { font-family: var(--font-num); font-weight: 800; font-size: 18px; white-space: nowrap; }
+.lb-me-points strong { display: block; color: var(--color-primary-on-dark); font: 700 30px/1 var(--font-num); }
 
-.rank-row .points small { font-family: var(--font-text); font-weight: 600; font-size: 12px; color: var(--muted); }
+/* Tableau : # · joueur · exacts · points, colonnes de largeur fixe */
+.lb-table { padding: 4px 0; overflow: hidden; }
 
-.ranking .gap { text-align: center; color: var(--muted); padding: 4px 0; }
+.lb-table-head, .rank-row { display: grid; grid-template-columns: 30px minmax(0, 1fr) 44px 52px; align-items: center; gap: 6px; padding: 0 12px; }
+
+.lb-table-head { min-height: 32px; color: var(--faint); font-size: 11px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
+
+.lb-table-head span:nth-child(n+3) { text-align: right; }
+
+.ranking { margin: 0; padding: 0; list-style: none; }
+
+.rank-row { min-height: 56px; border-top: 1px solid var(--color-line); }
+
+/* Ma ligne : fond teinté, liseré orange à gauche */
+.rank-row.me { background: var(--color-primary-tint); box-shadow: inset 3px 0 0 var(--color-primary); }
+
+.rank-row .rank { color: var(--muted); font: 700 20px var(--font-num); text-align: center; }
+
+.rank-row .rank.first { color: var(--color-primary-on-dark); }
+.rank-row .rank.second { color: var(--text); }
+.rank-row .rank.third { color: #C9875A; }  /* bronze, fixe */
+
+.rank-row .player { display: flex; align-items: center; gap: 10px; min-width: 0; }
+
+.rank-row .player .initials { width: 32px; height: 32px; font-size: 12px; }
+
+.rank-row .player strong { min-width: 0; font-size: 14px; line-height: 1.25; overflow-wrap: anywhere; }
+
+.rank-row .exacts { color: var(--text-2); font: 700 18px var(--font-num); text-align: right; }
+
+.rank-row .points { font: 700 22px var(--font-num); text-align: right; white-space: nowrap; }
+
+.ranking .gap { text-align: center; color: var(--muted); padding: 4px 0; border-top: 1px solid var(--color-line); }
+
+.lb-rule { margin: 12px 0 0; color: var(--muted); font-size: 12px; text-align: center; }
 
 .my-line { margin: 0 0 12px; }
 

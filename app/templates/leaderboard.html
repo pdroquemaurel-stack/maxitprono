@@ -1,12 +1,17 @@
 {% extends "base.html" %}
 {% block title %}{{ t('leaderboard_title') }} · {{ app_name }}{% endblock %}
 {% block content %}
-  <h1>{{ t('leaderboard_title') }}</h1>
-  <nav class="tabs">
+  <header class="lb-head">
+    <h1>{{ t('leaderboard_title') }}</h1>
+    <a class="lb-rules" href="/rules">{{ t('leaderboard_rules') }}</a>
+  </header>
+  {# Types de classement : pastilles de filtre #}
+  <nav class="lb-chips" aria-label="{{ t('leaderboard_title') }}">
     {% for name in tabs %}
-      <a href="/leaderboard?tab={{ name }}"{% if name == tab %} class="active"{% endif %}>{{ t('leaderboard_tab_' ~ name) }}</a>
+      <a class="chip{% if name == tab %} active{% endif %}" href="/leaderboard?tab={{ name }}"{% if name == tab %} aria-current="page"{% endif %}>{{ t('leaderboard_tab_' ~ name) }}</a>
     {% endfor %}
   </nav>
+  <p class="lb-hint">{{ t('leaderboard_hint_' ~ tab) }}</p>
 
   {% if tab == 'league' and leagues|length > 1 %}
     <form class="filter" method="get" action="/leaderboard">
@@ -53,22 +58,37 @@
     </p>
   {% endif %}
 
-  <p class="lead my-line">
-    {% if me %}{{ t('my_rank').format(rank=me.rank, total=total, points=me.points) }}
-    {% else %}{{ t('not_ranked_yet') }}{% endif %}
-  </p>
+  {# Ta position : rang en gros chiffres, points à droite #}
+  {% if me %}
+    {% from "_league_bits.html" import avatar %}
+    <section class="lb-me" aria-label="{{ t('my_rank').format(rank=me.rank, total=total, points=me.points) }}">
+      {{ avatar(user.id, user.nickname, user.avatar_mime, 44, true) }}
+      <span class="lb-me-text">
+        <span class="lb-me-label">{{ t('leaderboard_my_position') }}</span>
+        <span class="lb-me-rank"><strong>{{ format_rank(me.rank) }}</strong> {{ t('leaderboard_of_total').format(total=total) }}</span>
+      </span>
+      <span class="lb-me-points"><strong>{{ me.points }}</strong> {{ t('leaderboard_points') }}</span>
+    </section>
+  {% else %}
+    <p class="lead my-line">{{ t('not_ranked_yet') }}</p>
+  {% endif %}
 
   {% if top %}
-    <ol class="card ranking">
-      {% for player in top %}{% include "_leaderboard_row.html" %}{% endfor %}
-      {% if me_outside_top %}
-        <li class="gap" aria-hidden="true">…</li>
-        {% with player = me %}{% include "_leaderboard_row.html" %}{% endwith %}
-      {% endif %}
-    </ol>
+    <div class="card lb-table">
+      <div class="lb-table-head" aria-hidden="true">
+        <span>#</span><span>{{ t('leaderboard_col_player') }}</span><span>{{ t('leaderboard_col_exacts') }}</span><span>{{ t('leaderboard_col_points') }}</span>
+      </div>
+      <ol class="ranking">
+        {% for player in top %}{% include "_leaderboard_row.html" %}{% endfor %}
+        {% if me_outside_top %}
+          <li class="gap" aria-hidden="true">…</li>
+          {% with player = me %}{% include "_leaderboard_row.html" %}{% endwith %}
+        {% endif %}
+      </ol>
+    </div>
   {% else %}
     <p class="card lead">{{ t('leaderboard_empty') }}</p>
   {% endif %}
-  {% if tab == 'league' and leagues %}<p class="small">{{ t('leaderboard_league_rule') }}</p>{% endif %}
-  <p class="small"><a href="/rules">{{ t('leaderboard_tiebreak_link') }}</a></p>
+  {% if tab == 'league' and leagues %}<p class="lb-rule">{{ t('leaderboard_league_rule') }}</p>{% endif %}
+  <p class="lb-rule"><a href="/rules">{{ t('leaderboard_tiebreak_link') }}</a></p>
 {% endblock %}

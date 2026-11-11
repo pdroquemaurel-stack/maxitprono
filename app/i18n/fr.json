@@ -559,5 +559,16 @@
   "card_your_pick": "Ton prono {home} : {away}",
   "trend_draw_short": "Nul",
   "home_play_now": "À jouer maintenant",
-  "league_invite_short": "Inviter"
+  "league_invite_short": "Inviter",
+  "leaderboard_rules": "Règles",
+  "leaderboard_my_position": "Ta position",
+  "leaderboard_of_total": "sur {total}",
+  "leaderboard_col_player": "Joueur",
+  "leaderboard_col_exacts": "Exacts",
+  "leaderboard_col_points": "Pts",
+  "leaderboard_hint_league": "Les joueurs de ta ligue, sur toute la saison.",
+  "leaderboard_hint_general": "Tous les joueurs, toutes compétitions confondues.",
+  "leaderboard_hint_country": "Les joueurs d'un même pays.",
+  "leaderboard_hint_competition": "Les points gagnés sur une seule compétition.",
+  "leaderboard_hint_week": "Les points gagnés du lundi au dimanche."
 }

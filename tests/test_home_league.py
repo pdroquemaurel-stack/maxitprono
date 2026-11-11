@@ -62,7 +62,7 @@ def test_leaderboard_opens_on_league_tab_for_members(client):
     register(client)
     create_league(client, "Bureau Casa")
     page = client.get("/leaderboard").text
-    assert re.search(r'tab=league" class="active"', page)
+    assert re.search(r'class="chip active" href="/leaderboard\?tab=league"', page)
     assert "depuis l&#39;arrivée" in page or "depuis l'arrivée" in page
 
 
@@ -70,4 +70,4 @@ def test_leaderboard_league_tab_without_league(client):
     register(client)
     page = client.get("/leaderboard?tab=league").text
     assert "Tu n&#39;es dans aucune ligue" in page or "Tu n'es dans aucune ligue" in page
-    assert re.search(r'tab=general" class="active"', client.get("/leaderboard").text)
+    assert re.search(r'class="chip active" href="/leaderboard\?tab=general"', client.get("/leaderboard").text)
