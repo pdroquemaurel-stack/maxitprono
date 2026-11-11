@@ -1718,7 +1718,7 @@ a.p-logo { display: inline-flex; align-items: center; gap: 4px; min-height: 44px
   border: 1px solid var(--color-line-strong);
   border-radius: 12px;
   background: var(--color-dark);
-  font: 600 14px var(--font-text);
+  font: 600 16px var(--font-text);  /* 16 px : pas de zoom automatique sur iPhone */
   text-transform: uppercase;
 }
 
