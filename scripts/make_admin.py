@@ -28,10 +28,11 @@ def main() -> None:
     args = parser.parse_args()
     with SessionLocal() as db:
         user = set_admin(db, args.nickname, not args.off)
-    if user is None:
-        print(f"Joueur inconnu : {args.nickname}")
-    else:
-        print(f"{user.nickname} : {'admin' if user.is_admin else 'plus admin'}")
+        # Message construit avant la fermeture de la session : après, le joueur n'est plus lisible
+        if user is None:
+            print(f"Joueur inconnu : {args.nickname}")
+        else:
+            print(f"{user.nickname} : {'admin' if user.is_admin else 'plus admin'}")
 
 
 if __name__ == "__main__":

@@ -2,6 +2,7 @@
 from datetime import UTC, datetime
 
 import pytest
+from sqlalchemy.orm import sessionmaker
 
 from app.jobs.score_predictions import rescore_all
 from app.models import Competition, Match, Prediction, User
@@ -11,6 +12,7 @@ from app.services.game_settings import Settings, parse_settings
 from app.services.scoring import ScoringRules
 from app.services.settings_store import (current_rules, get_settings, league_max_members,
                                          prediction_days_ahead, save_settings)
+from scripts import make_admin
 from scripts.make_admin import set_admin
 
 NOW = datetime(2026, 11, 5, 12, 0, tzinfo=UTC)
@@ -101,3 +103,15 @@ def test_make_admin(db):
     assert set_admin(db, "paul", False).is_admin is False
     assert set_admin(db, "inconnu", True) is None
     assert paul.is_admin is False
+
+
+def test_make_admin_command_prints_result(db, monkeypatch, capsys):
+    # La commande affiche le résultat sans planter (le joueur est lu avant la fin de la session)
+    add_user(db)
+    sessions = sessionmaker(bind=db.get_bind())
+    monkeypatch.setattr(make_admin, "SessionLocal", sessions)
+    monkeypatch.setattr("sys.argv", ["make_admin", "paul"])
+    make_admin.main()
+    monkeypatch.setattr("sys.argv", ["make_admin", "inconnu", "--off"])
+    make_admin.main()
+    assert capsys.readouterr().out.splitlines()[-2:] == ["Paul : admin", "Joueur inconnu : inconnu"]
