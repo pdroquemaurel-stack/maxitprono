@@ -1,8 +1,11 @@
 """Calendrier de la page Pronos (fonctions pures)."""
-from datetime import UTC, date, datetime
+from datetime import UTC, date, datetime, timedelta
+from types import SimpleNamespace
 from zoneinfo import ZoneInfo
 
-from app.services.match_days import calendar_days, calendar_end, match_day, pick_day
+from app.models.match import MatchStatus
+from app.services.match_days import (calendar_days, calendar_end, day_prediction_status,
+                                     match_day, pick_day)
 
 TODAY = date(2026, 11, 11)
 DOUALA = ZoneInfo("Africa/Douala")  # UTC+1
@@ -37,3 +40,37 @@ def test_match_started_yesterday_counts_today():
 def test_calendar_end_is_midnight_after_last_day_local_time():
     end = calendar_end(calendar_days(TODAY, 2), DOUALA)
     assert end == datetime(2026, 11, 12, 23, 0, tzinfo=UTC)  # 13/11 00:00 à Douala
+
+
+# --- État d'un jour (rond sous le numéro) ---
+
+NOW = datetime(2026, 11, 11, 12, 0, tzinfo=UTC)
+
+
+def match(id, hours, status=MatchStatus.SCHEDULED):
+    return SimpleNamespace(id=id, kickoff_at=NOW + timedelta(hours=hours), status=status)
+
+
+def test_day_without_match():
+    assert day_prediction_status([], set(), NOW) == "none"
+
+
+def test_day_with_open_match_without_prediction():
+    assert day_prediction_status([match(1, 5), match(2, 8)], {1}, NOW) == "todo"
+
+
+def test_day_with_all_predictions():
+    assert day_prediction_status([match(1, 5), match(2, -2, MatchStatus.FINISHED)], {1, 2}, NOW) == "done"
+
+
+def test_day_closed_with_missing_predictions():
+    finished = match(1, -3, MatchStatus.FINISHED)
+    live = match(2, -1, MatchStatus.LIVE)
+    closing = match(3, 0.1)  # coup d'envoi dans 6 min : déjà fermé (10 min avant)
+    assert day_prediction_status([finished, live, closing], {2}, NOW) == "missed"
+
+
+def test_cancelled_and_postponed_matches_do_not_count():
+    cancelled, postponed = match(1, 5, MatchStatus.CANCELLED), match(2, 5, MatchStatus.POSTPONED)
+    assert day_prediction_status([cancelled, postponed], set(), NOW) == "none"
+    assert day_prediction_status([cancelled, match(3, 5)], {3}, NOW) == "done"

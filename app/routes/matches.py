@@ -12,7 +12,8 @@ from app.i18n import translate
 from app.models import Competition, Match, Prediction, User
 from app.models.types import utc_now
 from app.services.deadlines import is_prediction_open
-from app.services.match_days import calendar_days, calendar_end, match_day, pick_day
+from app.services.match_days import (calendar_days, calendar_end, day_prediction_status, match_day,
+                                     pick_day)
 from app.services.match_filters import (ALL_COMPETITIONS, competition_code, competition_keys,
                                         is_mine, is_todo, matches_status, parse_status)
 from app.services.predictions import save_prediction
@@ -141,6 +142,10 @@ def matches_page(request: Request, db: Session = Depends(get_db),
     # Tous les jours du calendrier, même sans match ; seul le jour choisi est affiché
     context["days"] = [(d, [m for m in matches if day_keys[m.id] == d.isoformat()]) for d in days]
     context["selected_day"] = selected
+    # Rond sous chaque jour du calendrier : tous les matchs du jour, sans les filtres
+    # (pronos déjà chargés en une requête par match_context)
+    context["day_status"] = {d: day_prediction_status(ms, context["predictions"], now)
+                             for d, ms in context["days"]}
     context["to_predict"] = sum(1 for m_id in context["open_ids"] if m_id not in context["predictions"])
     return templates.TemplateResponse(request, "matches.html", context)
 

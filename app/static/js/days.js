@@ -1,5 +1,5 @@
 // Page Pronos, affichage seulement : la carte d'avancement du jour (« 2 sur 3 joués » et sa barre)
-// et le point orange du calendrier sont mis à jour après un enregistrement.
+// est mise à jour après un enregistrement. Le rond du calendrier, lui, suit au rechargement.
 (function () {
   document.addEventListener("prediction-saved", function (event) {
     var day = event.target.closest("[data-day]");
@@ -10,7 +10,5 @@
     label.textContent = label.dataset.fmt.replace("{done}", done).replace("{total}", total);
     var bar = day.querySelector("[data-day-bar]");
     if (bar) bar.style.width = Math.round(100 * done / total) + "%";
-    var link = document.querySelector('[data-filter-days] [data-day-key="' + day.dataset.dayKey + '"]');
-    if (link && done === total) link.querySelector(".pr-dot").classList.add("off");
   });
 })();

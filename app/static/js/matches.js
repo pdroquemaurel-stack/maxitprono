@@ -34,7 +34,8 @@
   }
 
   function plural(element, count) {
-    var fmt = count === 1 ? element.dataset.fmtOne : element.dataset.fmt;
+    var fmt = count === 0 && element.dataset.fmtZero ? element.dataset.fmtZero
+      : count === 1 ? element.dataset.fmtOne : element.dataset.fmt;
     return fmt.replace("{count}", count);
   }
 

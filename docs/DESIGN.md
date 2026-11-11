@@ -114,10 +114,15 @@ Un seul jeu de variables : n'en recréez pas de locales à une page.
    - En-tête : titre, pastille « N à faire » (point orange), avatar.
    - Calendrier : les N jours ouverts aux pronostics (réglage admin « Jours de matchs ouverts aux pronostics »)
      à partir d'aujourd'hui, même sans match ; 5 jours visibles (jour abrégé 11 px + numéro 17 px), la rangée défile ;
-     collé en haut. Jour choisi souligné de 2 px orange ; point orange = matchs encore à pronostiquer.
+     collé en haut. Jour choisi souligné de 2 px orange, sans toucher le rond. Sous le numéro, un rond de 7 px
+     (place toujours réservée) donne l'état des pronos du jour, toutes compétitions, sans tenir compte des filtres
+     (`day_prediction_status`) : vide orange = un match ouvert sans prono ; plein orange = tout est pronostiqué ;
+     vide gris = clos sans tout avoir joué ; rien = aucun match (annulés et reportés ne comptent pas).
+     Chaque jour a un `aria-label` (« Vendredi 20 novembre : 2 pronos à faire »).
      **Seuls les matchs du jour choisi sont affichés** (`?day=`, aujourd'hui par défaut) ; un jour sans match montre
      « Aucun match ce jour-là ». La barre « Valider » compte et enregistre les pronos de tous les jours.
-   - Pastilles des compétitions, puis sélecteur À jouer / Mes pronos / Tous.
+   - Pastilles des compétitions, puis sélecteur Tous / À jouer / Mes pronos (« À jouer » par défaut).
+   - 12 px entre l'en-tête du jour et la première carte, ou le message « Aucun match ce jour-là ».
    - Jour choisi : carte d'avancement « Mer. 11 nov. · 2 sur 3 joués », « Ferme dans X h Y », barre 4 px.
    - **Carte match** (`_match_card.html`, partagée avec l'accueil) : grille `minmax(0,1fr) 132px minmax(0,1fr)` ;
      en haut emblème + « Compétition · J12 » et pastille d'état ; au centre logo 48 px au-dessus du nom complet,

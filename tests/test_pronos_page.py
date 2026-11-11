@@ -170,12 +170,55 @@ def test_day_without_match(client, db_session):
     assert "Aucun match ce jour-là" in page and 'data-empty hidden' not in page
 
 
-def test_dot_on_days_with_matches_to_play(client, db_session):
+def day_dots(page: str) -> dict[str, str]:
+    """{jour: état du rond} dans le calendrier."""
+    return dict(re.findall(r'href="\?day=([\d-]+)[^"]*".*?class="pr-dot (\w+)"', page, re.S))
+
+
+def test_day_dots_states(client, db_session):
+    done = add_match(db_session, 2)  # aujourd'hui, pronostiqué
     add_match(db_session, 26)  # demain, sans prono
+    add_match(db_session, 50, status=MatchStatus.CANCELLED)  # après-demain : annulé seulement
+    login(client)
+    predict(client, done, "1", "0")
+    dots = day_dots(client.get("/matches").text)
+    assert dots["2030-06-10"] == "done" and dots["2030-06-11"] == "todo"
+    assert dots["2030-06-12"] == "none" and dots["2030-06-13"] == "none"
+
+
+def test_day_dot_missed_when_closed_without_prediction(client, db_session):
+    add_match(db_session, -1, status=MatchStatus.LIVE, score=(0, 0))  # aujourd'hui, déjà commencé
+    login(client)
+    assert day_dots(client.get("/matches").text)["2030-06-10"] == "missed"
+
+
+def test_day_dots_ignore_filters(client, db_session):
+    setup_matches(client, db_session)
+    add_match(db_session, 26, name="Premier League")
+    pages = [client.get(f"/matches{query}").text
+             for query in ("", "?comp=l1&status=mine", "?comp=pl&status=all", "?day=2030-06-11")]
+    assert all(day_dots(page) == day_dots(pages[0]) for page in pages)
+
+
+def test_day_aria_label(client, db_session):
+    add_match(db_session, 2)
+    add_match(db_session, 3)
     login(client)
     page = client.get("/matches").text
-    links = re.findall(r'href="\?day=([\d-]+)[^"]*".*?class="pr-dot( off)?"', page, re.S)
-    assert dict(links)["2030-06-11"] == "" and dict(links)["2030-06-10"] == " off"
+    assert 'aria-label="Lundi 10 juin : 2 pronos à faire"' in page
+    assert 'aria-label="Mardi 11 juin : aucun match"' in page
+
+
+def test_status_tabs_order_and_default(client, db_session):
+    login(client)
+    page = client.get("/matches").text
+    assert re.findall(r'data-status-key="(\w+)"', page) == ["all", "todo", "mine"]
+    assert re.search(r'data-status-key="todo" class="active"', page)
+
+
+def test_zero_match_is_singular(client, db_session):
+    login(client)
+    assert ">0 match<" in client.get("/matches?day=2030-06-12").text
 
 
 def test_save_bar_counts_all_days(client, db_session):

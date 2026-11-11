@@ -2,9 +2,15 @@
 
 N = réglage admin « Jours de matchs ouverts aux pronostics ». Fonctions pures.
 """
+from collections.abc import Container
 from datetime import date, datetime, time, timedelta, tzinfo
 
+from app.models.match import MatchStatus
+from app.services.deadlines import is_prediction_open
 from app.services.timezones import local_day
+
+# Matchs qui ne comptent pas dans l'état d'un jour : on ne peut pas (ou plus) les jouer
+NOT_PLAYED = (MatchStatus.CANCELLED, MatchStatus.POSTPONED)
 
 
 def calendar_days(today: date, count: int) -> list[date]:
@@ -30,3 +36,22 @@ def match_day(kickoff_at: datetime, tz: tzinfo, today: date) -> date:
 def calendar_end(days: list[date], tz: tzinfo) -> datetime:
     """Fin du dernier jour du calendrier (minuit suivant, heure locale du joueur)."""
     return datetime.combine(days[-1] + timedelta(days=1), time(0), tzinfo=tz)
+
+
+def day_prediction_status(matches: list, predicted_ids: Container[int], now: datetime) -> str:
+    """État des pronos du joueur sur un jour du calendrier, toutes compétitions confondues :
+
+    - "none"   : aucun match (hors annulés et reportés) ;
+    - "todo"   : au moins un match encore ouvert sans prono ;
+    - "done"   : tous les matchs ont un prono ;
+    - "missed" : des matchs sans prono, mais plus aucun n'est ouvert (rien à faire).
+    """
+    played = [m for m in matches if m.status not in NOT_PLAYED]
+    if not played:
+        return "none"
+    missing = [m for m in played if m.id not in predicted_ids]
+    if not missing:
+        return "done"
+    if any(is_prediction_open(m.status, m.kickoff_at, now) for m in missing):
+        return "todo"
+    return "missed"

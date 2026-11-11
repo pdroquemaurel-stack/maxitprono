@@ -573,5 +573,10 @@
   "leaderboard_hint_week": "Points earned from Monday to Sunday.",
   "trend_none": "No picks yet",
   "matches_empty_day_title": "No matches that day",
-  "matches_empty_day_hint": "Pick another day in the calendar."
+  "matches_empty_day_hint": "Pick another day in the calendar.",
+  "day_matches_zero": "0 matches",
+  "day_state_label": "{day}: {state}",
+  "day_state_done": "all picks made",
+  "day_state_none": "no matches",
+  "day_state_missed": "picks closed, nothing left to do"
 }

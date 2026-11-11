@@ -573,5 +573,10 @@
   "leaderboard_hint_week": "Les points gagnés du lundi au dimanche.",
   "trend_none": "Aucun prono pour l'instant",
   "matches_empty_day_title": "Aucun match ce jour-là",
-  "matches_empty_day_hint": "Choisis un autre jour dans le calendrier."
+  "matches_empty_day_hint": "Choisis un autre jour dans le calendrier.",
+  "day_matches_zero": "0 match",
+  "day_state_label": "{day} : {state}",
+  "day_state_done": "tous les pronos faits",
+  "day_state_none": "aucun match",
+  "day_state_missed": "pronos clos, il n'y a plus rien à faire"
 }
