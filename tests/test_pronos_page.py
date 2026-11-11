@@ -1,9 +1,24 @@
-"""Page Pronos : filtres compétition × statut, jours, états des matchs, visiteur."""
+"""Page Pronos : calendrier des jours, filtres compétition × statut, états des matchs, visiteur."""
 import re
+from dataclasses import replace
+from datetime import UTC, datetime
+
+import pytest
 
 from app.models import Prediction
 from app.models.match import MatchStatus
+from app.services.settings_store import get_settings, save_settings
 from tests.test_match_pages import add_match, db_session, login, predict  # noqa: F401
+
+# Heure figée : le 10 juin 2030 à 7 h à Douala (fuseau par défaut, UTC+1). Les matchs à
+# quelques heures d'ici tombent donc « aujourd'hui », le jour affiché par défaut.
+NOW = datetime(2030, 6, 10, 6, 0, tzinfo=UTC)
+
+
+@pytest.fixture(autouse=True)
+def frozen_now(monkeypatch):
+    monkeypatch.setattr("app.routes.matches.utc_now", lambda: NOW)
+    monkeypatch.setattr("tests.test_match_pages.utc_now", lambda: NOW)
 
 
 def visible_cards(page: str) -> list[str]:
@@ -18,10 +33,11 @@ def pill_count(page: str, key: str) -> int:
 
 
 def setup_matches(client, db):
-    """Ligue 1 : un match à jouer et un pronostiqué ; Premier League : un à jouer et un en direct."""
-    l1_todo = add_match(db, 20, home="Lions", name="Ligue 1")
-    l1_done = add_match(db, 30, home="Aigles", name="Ligue 1")
-    pl_todo = add_match(db, 50, home="Arsenal", name="Premier League")
+    """Aujourd'hui. Ligue 1 : un match à jouer et un pronostiqué ;
+    Premier League : un à jouer et un en direct."""
+    l1_todo = add_match(db, 2, home="Lions", name="Ligue 1")
+    l1_done = add_match(db, 4, home="Aigles", name="Ligue 1")
+    pl_todo = add_match(db, 6, home="Arsenal", name="Premier League")
     pl_live = add_match(db, -1, home="Chelsea", name="Premier League", status=MatchStatus.LIVE,
                         score=(1, 0))
     login(client)
@@ -36,7 +52,7 @@ def test_default_is_all_competitions_and_to_play(client, db_session):
     l1_todo, _, pl_todo, _ = setup_matches(client, db_session)
     page = client.get("/matches").text
     assert visible_cards(page) == [f"m{l1_todo.id}", f"m{pl_todo.id}"]
-    assert re.search(r'class="pr-comp active" href="\?comp=all', page)
+    assert re.search(r'class="pr-comp active" href="\?day=2030-06-10&comp=all', page)
     assert re.search(r'data-status-key="todo" class="active"', page)
 
 
@@ -100,10 +116,80 @@ def test_empty_state_for_filters_without_match(client, db_session):
 
 def test_day_with_single_match_and_counts(client, db_session):
     login(client)  # page privée : joueur connecté
-    add_match(db_session, 20)
+    add_match(db_session, 2)
     page = client.get("/matches").text
     assert "1 match<" in page
-    assert re.search(r'class="pr-day-title">(Aujourd&#39;hui|Demain) · ', page)
+    assert re.search(r'class="pr-day-title">Aujourd&#39;hui · ', page)
+
+
+# --- Calendrier des jours ---
+
+def day_links(page: str) -> list[str]:
+    return re.findall(r'class="pr-day-link[^"]*" href="\?day=([\d-]+)', page)
+
+
+def test_calendar_shows_admin_day_count_from_today(client, db_session):
+    login(client)
+    page = client.get("/matches").text
+    days = day_links(page)
+    assert len(days) == get_settings(db_session).prediction_days_ahead
+    assert days[0] == "2030-06-10"
+    assert re.search(r'class="pr-day-link active" href="\?day=2030-06-10', page)
+
+
+def test_calendar_follows_admin_setting(client, db_session):
+    save_settings(db_session, replace(get_settings(db_session), prediction_days_ahead=3), NOW)
+    login(client)
+    assert day_links(client.get("/matches").text) == ["2030-06-10", "2030-06-11", "2030-06-12"]
+
+
+def test_only_selected_day_is_shown(client, db_session):
+    today = add_match(db_session, 2, home="Lions")
+    tomorrow = add_match(db_session, 26, home="Aigles")
+    login(client)
+    assert visible_cards(client.get("/matches").text) == [f"m{today.id}"]
+    page = client.get("/matches?day=2030-06-11").text
+    assert visible_cards(page) == [f"m{tomorrow.id}"]
+    assert f'name="home_{today.id}"' in page  # masqué mais présent : sa saisie part avec « Valider »
+    assert re.search(r'class="pr-day-link active" href="\?day=2030-06-11', page)
+    assert pill_count(page, "all") == 1  # compteurs du jour choisi
+
+
+def test_unknown_day_falls_back_to_today(client, db_session):
+    match = add_match(db_session, 2)
+    login(client)
+    for day in ("2031-01-01", "pas-une-date"):
+        assert visible_cards(client.get(f"/matches?day={day}").text) == [f"m{match.id}"]
+
+
+def test_day_without_match(client, db_session):
+    add_match(db_session, 2)
+    login(client)
+    page = client.get("/matches?day=2030-06-12").text
+    assert visible_cards(page) == []
+    assert "Aucun match ce jour-là" in page and 'data-empty hidden' not in page
+
+
+def test_dot_on_days_with_matches_to_play(client, db_session):
+    add_match(db_session, 26)  # demain, sans prono
+    login(client)
+    page = client.get("/matches").text
+    links = re.findall(r'href="\?day=([\d-]+)[^"]*".*?class="pr-dot( off)?"', page, re.S)
+    assert dict(links)["2030-06-11"] == "" and dict(links)["2030-06-10"] == " off"
+
+
+def test_save_bar_counts_all_days(client, db_session):
+    add_match(db_session, 2)
+    add_match(db_session, 26)
+    login(client)
+    assert "2 pronos à faire" in client.get("/matches").text
+
+
+def test_matches_after_last_calendar_day_are_left_out(client, db_session):
+    save_settings(db_session, replace(get_settings(db_session), prediction_days_ahead=2), NOW)
+    late = add_match(db_session, 42, home="Aigles")  # 12/06 à 1 h à Douala : 3e jour
+    login(client)
+    assert f'id="m{late.id}"' not in client.get("/matches?status=all").text
 
 
 def test_live_match_shows_real_score_and_my_pick(client, db_session):

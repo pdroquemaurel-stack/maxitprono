@@ -12,12 +12,13 @@ from app.i18n import translate
 from app.models import Competition, Match, Prediction, User
 from app.models.types import utc_now
 from app.services.deadlines import is_prediction_open
+from app.services.match_days import calendar_days, calendar_end, match_day, pick_day
 from app.services.match_filters import (ALL_COMPETITIONS, competition_code, competition_keys,
                                         is_mine, is_todo, matches_status, parse_status)
 from app.services.predictions import save_prediction
 from app.services.probabilities import player_trends
 from app.services.settings_store import prediction_days_ahead
-from app.services.timezones import group_by_day, resolve_timezone
+from app.services.timezones import local_day, resolve_timezone
 from app.templating import templates
 
 router = APIRouter()
@@ -28,12 +29,16 @@ HISTORY_LIMIT = 50
 
 # --- Lectures en base ---
 
-def upcoming_matches(db: Session, now: datetime) -> list[Match]:
-    """Matchs des compétitions actives, des 3 dernières heures aux N prochains jours (réglage admin)."""
+def upcoming_matches(db: Session, now: datetime, until: datetime | None = None) -> list[Match]:
+    """Matchs des compétitions actives, des 3 dernières heures aux N prochains jours (réglage admin).
+
+    `until` : fin de la période (la page Pronos s'arrête à la fin du dernier jour de son calendrier).
+    """
+    until = until or now + timedelta(days=prediction_days_ahead(db))
     query = (select(Match).join(Match.competition).options(joinedload(Match.competition))
              .where(Competition.is_active.is_(True),
                     Match.kickoff_at >= now - RECENT_WINDOW,
-                    Match.kickoff_at <= now + timedelta(days=prediction_days_ahead(db)))
+                    Match.kickoff_at < until)
              .order_by(Match.kickoff_at))
     return list(db.scalars(query))
 
@@ -87,8 +92,13 @@ def competition_pills(matches: list[Match]) -> list[dict]:
 
 
 def filter_context(matches: list[Match], context: dict, comp: str | None,
-                   status: str | None) -> dict:
-    """Filtres de la page Pronos, appliqués dès l'affichage (la page reste juste sans JavaScript)."""
+                   status: str | None, day_keys: dict[int, str] | None = None,
+                   day: str | None = None) -> dict:
+    """Filtres de la page Pronos, appliqués dès l'affichage (la page reste juste sans JavaScript).
+
+    Avec `day` : seuls les matchs de ce jour du calendrier (`day_keys` : {match_id: "2026-11-12"})
+    sont visibles et comptés dans les pastilles.
+    """
     pills = competition_pills(matches)
     comp_keys = {p["id"]: p["key"] for p in pills}
     comp = comp if comp in comp_keys.values() else ALL_COMPETITIONS
@@ -96,6 +106,8 @@ def filter_context(matches: list[Match], context: dict, comp: str | None,
     counts = {p["key"]: 0 for p in pills} | {ALL_COMPETITIONS: 0}
     visible_ids = set()
     for m in matches:
+        if day is not None and day_keys[m.id] != day:
+            continue
         has_prediction = m.id in context["predictions"]
         if not matches_status(status, is_todo(m.id in context["open_ids"], has_prediction),
                               is_mine(m.status, has_prediction)):
@@ -114,13 +126,21 @@ def filter_context(matches: list[Match], context: dict, comp: str | None,
 @router.get("/matches")
 def matches_page(request: Request, db: Session = Depends(get_db),
                  user: User = Depends(require_user),
-                 comp: str | None = None, status: str | None = None):
-    """Page Pronos : matchs par jour, filtres ?comp=<clé>&status=todo|mine|all."""
+                 comp: str | None = None, status: str | None = None, day: str | None = None):
+    """Page Pronos : calendrier des N jours ouverts, matchs du jour choisi,
+    filtres ?day=2026-11-12&comp=<clé>&status=todo|mine|all."""
     now = utc_now()
-    matches = upcoming_matches(db, now)
+    tz = resolve_timezone(request.cookies.get("tz"))
+    today = local_day(now, tz)
+    days = calendar_days(today, prediction_days_ahead(db))
+    selected = pick_day(day, days)
+    matches = upcoming_matches(db, now, until=calendar_end(days, tz))
     context = match_context(request, db, user, matches, now)
-    context |= filter_context(matches, context, comp, status)
-    context["days"] = group_by_day(matches, context["tz"])
+    day_keys = {m.id: match_day(m.kickoff_at, tz, today).isoformat() for m in matches}
+    context |= filter_context(matches, context, comp, status, day_keys, selected.isoformat())
+    # Tous les jours du calendrier, même sans match ; seul le jour choisi est affiché
+    context["days"] = [(d, [m for m in matches if day_keys[m.id] == d.isoformat()]) for d in days]
+    context["selected_day"] = selected
     context["to_predict"] = sum(1 for m_id in context["open_ids"] if m_id not in context["predictions"])
     return templates.TemplateResponse(request, "matches.html", context)
 

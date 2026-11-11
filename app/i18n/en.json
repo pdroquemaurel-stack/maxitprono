@@ -571,5 +571,7 @@
   "leaderboard_hint_country": "Players from the same country.",
   "leaderboard_hint_competition": "Points earned in a single competition.",
   "leaderboard_hint_week": "Points earned from Monday to Sunday.",
-  "trend_none": "No picks yet"
+  "trend_none": "No picks yet",
+  "matches_empty_day_title": "No matches that day",
+  "matches_empty_day_hint": "Pick another day in the calendar."
 }

@@ -2497,30 +2497,35 @@ a.p-logo { display: inline-flex; align-items: center; gap: 4px; min-height: 44px
 
 .pr-me { text-decoration: none; display: inline-flex; min-width: 44px; min-height: 44px; align-items: center; justify-content: center; }
 
-/* Bande des jours : 5 colonnes égales, collée en haut quand on défile */
+/* Calendrier : les N jours ouverts, 5 visibles à la fois, qui défile ; collé en haut */
 .pr-days {
   position: sticky;
   top: 0;
   z-index: 5;
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  display: flex;
   margin: 4px -16px 12px;
   padding: 0 16px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  scroll-snap-type: x proximity;
   border-bottom: 1px solid var(--color-line);
   background: var(--color-dark);
 }
 
+.pr-days::-webkit-scrollbar { display: none; }
+
 .pr-day-link {
   display: flex;
+  flex: 0 0 20%;
   flex-direction: column;
   align-items: center;
   gap: 1px;
   min-height: 56px;
   padding: 6px 0 4px;
   border-bottom: 2px solid transparent;
-  margin-bottom: -1px;
   color: var(--muted);
   text-decoration: none;
+  scroll-snap-align: start;
 }
 
 .pr-dow { font-size: 11px; font-weight: 700; letter-spacing: 0.04em; }
@@ -2533,7 +2538,7 @@ a.p-logo { display: inline-flex; align-items: center; gap: 4px; min-height: 44px
 
 .pr-day-link.active { border-bottom-color: var(--color-primary); color: var(--text); }
 
-.pr-day { scroll-margin-top: 72px; }  /* l'ancre tombe sous la bande des jours */
+.pr-empty-text { display: flex; flex-direction: column; align-items: center; gap: 6px; }
 
 /* Gras sans saut de largeur : le libellé en gras, invisible, réserve la place */
 .pr-comp-name, .pr-status span { display: inline-flex; flex-direction: column; }

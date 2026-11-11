@@ -571,5 +571,7 @@
   "leaderboard_hint_country": "Les joueurs d'un même pays.",
   "leaderboard_hint_competition": "Les points gagnés sur une seule compétition.",
   "leaderboard_hint_week": "Les points gagnés du lundi au dimanche.",
-  "trend_none": "Aucun prono pour l'instant"
+  "trend_none": "Aucun prono pour l'instant",
+  "matches_empty_day_title": "Aucun match ce jour-là",
+  "matches_empty_day_hint": "Choisis un autre jour dans le calendrier."
 }

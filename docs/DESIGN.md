@@ -112,10 +112,13 @@ Un seul jeu de variables : n'en recréez pas de locales à une page.
 ## 6. Écrans de référence
 1. **Pronos** (`/matches`, écran de référence)
    - En-tête : titre, pastille « N à faire » (point orange), avatar.
-   - Bande des 5 premiers jours qui ont des matchs (jour abrégé 11 px + numéro 17 px), collée en haut ; jour courant
-     souligné de 2 px orange ; point orange = matchs encore à pronostiquer. Un clic fait défiler jusqu'au jour (ancre).
+   - Calendrier : les N jours ouverts aux pronostics (réglage admin « Jours de matchs ouverts aux pronostics »)
+     à partir d'aujourd'hui, même sans match ; 5 jours visibles (jour abrégé 11 px + numéro 17 px), la rangée défile ;
+     collé en haut. Jour choisi souligné de 2 px orange ; point orange = matchs encore à pronostiquer.
+     **Seuls les matchs du jour choisi sont affichés** (`?day=`, aujourd'hui par défaut) ; un jour sans match montre
+     « Aucun match ce jour-là ». La barre « Valider » compte et enregistre les pronos de tous les jours.
    - Pastilles des compétitions, puis sélecteur À jouer / Mes pronos / Tous.
-   - Par jour : carte d'avancement « Mer. 11 nov. · 2 sur 3 joués », « Ferme dans X h Y », barre 4 px.
+   - Jour choisi : carte d'avancement « Mer. 11 nov. · 2 sur 3 joués », « Ferme dans X h Y », barre 4 px.
    - **Carte match** (`_match_card.html`, partagée avec l'accueil) : grille `minmax(0,1fr) 132px minmax(0,1fr)` ;
      en haut emblème + « Compétition · J12 » et pastille d'état ; au centre logo 48 px au-dessus du nom complet,
      deux cases 48×52 séparées par « : », heure dessous ; case à remplir fond `--color-primary-deep` + bordure 2 px
