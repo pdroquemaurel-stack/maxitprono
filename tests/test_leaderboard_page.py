@@ -111,7 +111,7 @@ def test_home_shows_my_points(client, db_session):
     login(client)
     add_scored(db_session, paul(db_session), 5, hours_ago=24 * 3)
     page = client.get("/").text
-    assert '<strong class="h-kpi-value">5</strong>' in page
+    assert '<strong class="h-kpi-value h-kpi-primary">5</strong>' in page
 
 
 def test_history_shows_points(client, db_session):

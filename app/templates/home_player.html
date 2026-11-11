@@ -14,13 +14,14 @@
   {# 2. Salutation, la veille et 3 mini-cartes #}
   <section class="h-hello">
     <h1>{{ t('home_hello').format(name=user.nickname) }}</h1>
-    <p class="lg-muted">
+    <p class="lg-muted h-yesterday">
       {%- if results %}
-        {%- set pts = t('home_pts_one' if yesterday_points == 1 else 'home_pts').format(count=yesterday_points) %}
+        {%- set pts_text = t('home_pts_one' if yesterday_points == 1 else 'home_pts').format(count=yesterday_points) %}
+        {%- set pts %}<strong class="h-gain">{{ pts_text }}</strong>{% endset %}
         {%- set places = t('home_places_one' if yesterday_places|abs == 1 else 'home_places').format(count=yesterday_places|abs) %}
-        {%- if yesterday_places > 0 %}{{ t('home_yesterday_up').format(points=pts, places=places) }}
-        {%- elif yesterday_places < 0 %}{{ t('home_yesterday_down').format(points=pts, places=places) }}
-        {%- else %}{{ t('home_yesterday').format(points=pts) }}{% endif %}
+        {%- if yesterday_places > 0 %}{{ (t('home_yesterday_up') | e).format(points=pts, places=places) }}
+        {%- elif yesterday_places < 0 %}{{ (t('home_yesterday_down') | e).format(points=pts, places=places) }}
+        {%- else %}{{ (t('home_yesterday') | e).format(points=pts) }}{% endif %}
       {%- else %}{{ t('home_yesterday_none') }}{% endif -%}
     </p>
   </section>
@@ -41,7 +42,7 @@
     {% endif %}
     <div class="h-kpi">
       <span class="h-kpi-label">{{ t('profile_points') }}</span>
-      <strong class="h-kpi-value">{{ summary.points }}</strong>
+      <strong class="h-kpi-value h-kpi-primary">{{ summary.points }}</strong>
       <span class="h-kpi-sub">{{ t('home_kpi_yesterday').format(count=yesterday_points) }}</span>
     </div>
     <div class="h-kpi">
@@ -51,40 +52,45 @@
     </div>
   </section>
 
-  {# 3. Pronos à faire : mêmes cartes que la page Pronos, enregistrées par le bouton #}
-  <section class="h-card h-todo">
+  {# 3. À jouer maintenant : le prochain match ouvert, même carte que la page Pronos #}
+  <section class="h-todo-section">
+    <div class="lg-card-head">
+      <h2>{{ t('home_play_now') }}</h2>
+      {% if to_predict_count %}<span class="pr-todo" data-todo-count="{{ to_predict_count }}">{{ t('todo_count').format(count=to_predict_count) }}</span>{% endif %}
+    </div>
+    <div class="h-todo">
     {% if to_predict_count %}
       {% set first = to_predict[0] %}
-      <div class="h-todo-head">
-        <div>
-          <h2>{{ t('home_todo_title_one') if to_predict_count == 1 else t('home_todo_title').format(count=to_predict_count) }}</h2>
-          <p class="lg-muted lg-small">{{ t('home_todo_first') }}
-            <span data-countdown="{{ closing_at(first.kickoff_at).isoformat() }}"
-                  data-fmt-days="{{ t('countdown_days') }}" data-fmt-hours="{{ t('countdown_hours') }}"
-                  data-fmt-minutes="{{ t('countdown_minutes') }}">{{ format_countdown(first.kickoff_at, now) }}</span></p>
-        </div>
-        <span class="h-day-pill">{{ format_day(first.kickoff_at.astimezone(tz).date(), today) }}</span>
-      </div>
+      <p class="lg-muted lg-small h-todo-sub">
+        {{- format_day(first.kickoff_at.astimezone(tz).date(), today) }} ·
+        {{ t('home_todo_title_one') if to_predict_count == 1 else t('home_todo_title').format(count=to_predict_count) }} ·
+        {{ t('home_todo_first') }}
+        <span data-countdown="{{ closing_at(first.kickoff_at).isoformat() }}"
+              data-fmt-days="{{ t('countdown_days') }}" data-fmt-hours="{{ t('countdown_hours') }}"
+              data-fmt-minutes="{{ t('countdown_minutes') }}">{{ format_countdown(first.kickoff_at, now) }}</span></p>
       <form class="predictions-form" data-mode="button" onsubmit="return false"
             data-msg-saved="{{ t('prediction_saved_short') }}" data-msg-saving="{{ t('prediction_saving') }}"
             data-msg-offline="{{ t('prediction_offline') }}" data-msg-todo="{{ t('todo_count') }}">
-        {% for match in todo_matches %}{% include "_match_card.html" %}{% endfor %}
-        <button type="button" class="lg-btn lg-btn-orange lg-btn-big h-save" data-save-all
+        {% for match in todo_matches[:1] %}{% include "_match_card.html" %}{% endfor %}
+        <button type="button" class="h-save" data-save-all
                 data-label="{{ t('home_save_all') }}" data-done-label="{{ t('home_saved_all') }}">{{ t('home_save_all') }}</button>
       </form>
     {% else %}
-      <h2>{{ t('home_all_ready') }}</h2>
-      {% if next_match %}
-        <a class="hg-match" href="/matches#m{{ next_match.id }}">
-          <span class="hg-match-text">
-            <strong>{{ next_match.home_team }} – {{ next_match.away_team }}</strong>
-            <span class="lg-muted lg-small">{{ next_match.competition.name }} ·
-              {{ format_day(next_match.kickoff_at.astimezone(tz).date(), today) }} {{ format_time(next_match.kickoff_at, tz) }}</span>
-          </span>
-          {{ icon('chevron', 20) }}
-        </a>
-      {% else %}<p class="lg-muted">{{ t('home_no_next_match') }}</p>{% endif %}
+      <div class="card">
+        <h2>{{ t('home_all_ready') }}</h2>
+        {% if next_match %}
+          <a class="hg-match" href="/matches#m{{ next_match.id }}">
+            <span class="hg-match-text">
+              <strong>{{ next_match.home_team }} – {{ next_match.away_team }}</strong>
+              <span class="lg-muted lg-small">{{ next_match.competition.name }} ·
+                {{ format_day(next_match.kickoff_at.astimezone(tz).date(), today) }} {{ format_time(next_match.kickoff_at, tz) }}</span>
+            </span>
+            {{ icon('chevron', 20) }}
+          </a>
+        {% else %}<p class="lg-muted">{{ t('home_no_next_match') }}</p>{% endif %}
+      </div>
     {% endif %}
+    </div>
     <a class="h-link" href="/matches">{{ t('home_all_matches') }}</a>
   </section>
 

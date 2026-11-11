@@ -557,5 +557,6 @@
   "days_label": "Days",
   "matchday_short": "MD{number}",
   "card_your_pick": "Your pick {home} : {away}",
-  "trend_draw_short": "Draw"
+  "trend_draw_short": "Draw",
+  "home_play_now": "Play now"
 }

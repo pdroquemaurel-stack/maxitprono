@@ -66,15 +66,16 @@ def test_new_player_without_prediction(client):
         assert absent not in page
 
 
-def test_todo_block_shows_three_open_matches_with_save_button(client, db_session):
+def test_todo_block_shows_next_open_match_with_save_button(client, db_session):
     for hours in (2, 5, 8, 11):
         add_match(db_session, hours, home="Lions", away="Paris Saint-Germain")
     login(client)
     page = client.get("/").text
     assert "4 pronos à faire" in page and "Le premier ferme dans" in page
     assert "Aujourd" in page or "Demain" in page
-    todo = page[page.index('class="h-card h-todo"'):page.index('href="/matches">Voir tous les matchs')]
-    assert todo.count('class="card match-card"') == 3
+    todo = page[page.index('class="h-todo"'):page.index('href="/matches">Voir tous les matchs')]
+    assert "À jouer maintenant" in page
+    assert todo.count('class="card match-card"') == 1  # le prochain match ouvert
     assert 'data-mode="button"' in todo and "data-save-all" in todo and "Valider mes pronos" in todo
     assert 'data-done-label="Pronos enregistrés"' in todo
     # Même gabarit que la page Pronos : abréviation, nom complet, cases de score, pas de + / –
@@ -117,7 +118,7 @@ def test_yesterday_results_points_places_and_share(client, db_session):
                         RankSnapshot(day=yesterday, user_id=me.id, rank=3, points=5)])
     db_session.commit()
     page = client.get("/").text
-    assert "Hier, tu as gagné 5 pts et 2 places." in page
+    assert 'Hier, tu as gagné <strong class="h-gain">5 pts</strong> et 2 places.' in page
     assert "+5 hier" in page
     assert "Mes résultats d" in page and "+5 pts" in page
     assert "Ton prono : 2 – 1" in page and "Ton prono : 1 – 0" in page

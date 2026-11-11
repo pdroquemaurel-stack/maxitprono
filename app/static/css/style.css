@@ -1535,9 +1535,9 @@ a.p-logo { display: inline-flex; align-items: center; gap: 4px; min-height: 44px
 
 .lg-btn-orange { background: var(--color-primary); color: var(--color-on-primary); }
 
-.lg-btn-dark { background: var(--color-dark); color: var(--text); }
+.lg-btn-dark { background: var(--text); color: var(--color-dark); }  /* bouton clair sur le thème sombre */
 
-.lg-btn-light { background: var(--color-surface); color: var(--text); border: 1px solid var(--color-line-strong); }
+.lg-btn-light { background: transparent; color: var(--text); border: 1px solid var(--color-line-strong); }
 
 .lg-btn-danger { background: var(--bad); color: var(--text); }
 
@@ -2254,11 +2254,15 @@ a.p-logo { display: inline-flex; align-items: center; gap: 4px; min-height: 44px
 .hg-footer p { margin: 8px 0 0; }
 
 /* --- Accueil du joueur --- */
-.h-me { display: inline-flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; }
+.h-me { display: inline-flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; text-decoration: none; }
 
 .lg .h-hello h1 { margin: 8px 0 4px; font-size: 26px; font-weight: 800; overflow-wrap: anywhere; }
 
-/* 3 mini-cartes de largeur égale, valeurs en chiffres tabulaires */
+.h-yesterday { color: var(--text-2); }
+
+.h-gain { color: var(--good); font-weight: 800; }
+
+/* 3 tuiles de largeur égale ; libellés sur 2 lignes au besoin, jamais tronqués */
 .h-kpis { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
 
 .h-kpi {
@@ -2266,51 +2270,32 @@ a.p-logo { display: inline-flex; align-items: center; gap: 4px; min-height: 44px
   flex-direction: column;
   gap: 2px;
   min-width: 0;
-  min-height: 88px;
+  min-height: 96px;
   padding: 12px;
+  border: 1px solid var(--color-line);
   border-radius: 16px;
   background: var(--color-surface);
   color: var(--text);
+  font-weight: 400;
   text-decoration: none;
 }
 
-.h-kpi-label, .h-kpi-sub {
-  overflow: hidden;
-  color: var(--muted);
-  font-size: 12px;
-  font-weight: 600;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
+.h-kpi-label, .h-kpi-sub { color: var(--muted); font-size: 12px; font-weight: 600; line-height: 1.25; overflow-wrap: anywhere; }
 
-.h-kpi-value { font: 700 22px var(--font-num); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.h-kpi-value { margin-top: auto; font: 700 30px/1.1 var(--font-num); white-space: nowrap; }
 
-/* Bloc « Pronos à faire » : bordure orange, matchs séparés par un filet */
-.h-todo { border: 2px solid var(--color-primary); }
+.h-kpi-primary { color: var(--color-primary-on-dark); }
 
-.h-todo-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+/* À jouer maintenant : carte match à bordure orange, bouton « Valider » */
+.h-todo-section .lg-card-head { margin-bottom: 4px; }
 
-.h-todo-head [data-countdown] { color: var(--text); font-weight: 700; font-variant-numeric: tabular-nums; }
+.h-todo-sub { margin: 0 0 8px; }
 
-.h-day-pill {
-  flex-shrink: 0;
-  padding: 3px 10px;
-  border-radius: 999px;
-  background: var(--color-primary-tint);
-  color: var(--color-primary-on-dark);
-  font-size: 12px;
-  font-weight: 700;
-}
+.h-todo-sub [data-countdown] { color: var(--color-primary-on-dark); font-weight: 700; }
 
-.h-todo .match-card {
-  margin: 0;
-  padding: 12px 0;
-  border: 0;
-  border-radius: 0;
-  background: none;
-}
+.h-todo .match-card { border: 2px solid var(--color-primary); background: var(--color-surface); padding: 14px 12px; }
 
-.h-todo .match-card + .match-card { margin-top: 0; border-top: 1px solid var(--color-line); }
+.h-save { margin-top: 10px; }
 
 .h-save.done { background: var(--good); color: var(--color-dark); }
 
@@ -2320,28 +2305,31 @@ a.p-logo { display: inline-flex; align-items: center; gap: 4px; min-height: 44px
   justify-content: center;
   min-height: 44px;
   margin-top: 4px;
-  color: var(--text);
+  color: var(--color-primary-on-dark);
   font-size: 14px;
+  text-decoration: none;
 }
 
-.h-head-link { display: inline-flex; align-items: center; min-height: 44px; color: var(--text); font-size: 14px; }
+.h-head-link { display: inline-flex; align-items: center; min-height: 44px; color: var(--color-primary-on-dark); font-size: 14px; text-decoration: none; }
 
-/* Mes résultats d'hier */
-.h-total { color: var(--good); font: 700 17px var(--font-num); font-variant-numeric: tabular-nums; }
+/* Résultats d'hier : match, « Ton prono », score, pastille de points */
+.h-total { color: var(--good); font: 700 20px var(--font-num); }
+
+.h-list { border: 1px solid var(--color-line); }
 
 .h-result { display: flex; align-items: center; gap: 10px; min-height: 60px; padding: 8px 0; }
 
 .h-result-text { display: flex; flex-direction: column; flex: 1; min-width: 0; }
 
-.h-result-text strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.h-result-text strong { font-size: 14px; line-height: 1.3; overflow-wrap: anywhere; }
 
-.h-final { font: 700 16px var(--font-num); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.h-final { font: 700 22px var(--font-num); white-space: nowrap; }
 
-.h-exact { margin-top: 10px; background: var(--color-primary-tint); color: var(--color-primary-on-dark); }
+.h-exact { margin-top: 10px; border: 1px solid var(--good); background: var(--good-tint); color: var(--text); }
 
 .h-exact p { margin: 0; font-weight: 600; }
 
-.h-share { width: auto; margin-top: 10px; }
+.h-share { width: auto; margin-top: 10px; background: transparent; color: var(--text); border: 1px solid var(--color-line-strong); }
 
 /* Mes ligues : carrousel horizontal de cartes de 200 px */
 .h-carousel {
@@ -2361,6 +2349,7 @@ a.p-logo { display: inline-flex; align-items: center; gap: 4px; min-height: 44px
 .h-carousel > li { flex: 0 0 200px; scroll-snap-align: start; }
 
 .h-league {
+  border: 1px solid var(--color-line);
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -2369,9 +2358,11 @@ a.p-logo { display: inline-flex; align-items: center; gap: 4px; min-height: 44px
   text-decoration: none;
 }
 
-.h-league-name { margin-top: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.h-league-name { margin-top: 6px; line-height: 1.25; overflow-wrap: anywhere; }
 
-.h-league-rank { margin-top: auto; font-family: var(--font-num); font-variant-numeric: tabular-nums; }
+.h-league-rank { margin-top: auto; }
+
+.h-league-rank strong { font: 700 30px/1 var(--font-num); }
 
 .h-league-new {
   align-items: center;
