@@ -1,9 +1,9 @@
 {# Carte héro : anneau de réussite et points. Variables : s (Summary), hero_sub #}
   {% set circumference = 289.03 %}
   <section class="p-hero">
-    <svg class="p-ring" viewBox="0 0 104 104" width="104" height="104" role="img"
+    <svg class="p-ring" viewBox="0 0 104 104" width="108" height="108" role="img"
          aria-label="{{ t('profile_success_aria').format(rate=s.success_rate) }}">
-      <circle cx="52" cy="52" r="46" fill="none" stroke="#33363F" stroke-width="10"/>
+      <circle cx="52" cy="52" r="46" fill="none" style="stroke: var(--color-line)" stroke-width="10"/>
       {% if s.success_rate %}
         <circle class="p-ring-arc" cx="52" cy="52" r="46" fill="none" style="stroke: var(--color-primary)" stroke-width="10" stroke-linecap="round"
                 stroke-dasharray="{{ circumference }}"

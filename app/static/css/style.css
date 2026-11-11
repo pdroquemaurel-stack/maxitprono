@@ -1131,6 +1131,7 @@ html { scroll-padding-bottom: calc(var(--tabbar-height) + 96px); }
 
 .p-card {
   background: var(--color-surface);
+  border: 1px solid var(--color-line);
   border-radius: 16px;
   padding: 16px;
 }
@@ -1214,9 +1215,7 @@ a.p-logo { display: inline-flex; align-items: center; gap: 4px; min-height: 44px
   color: var(--color-primary-on-dark);
   font-size: 12px;
   font-weight: 700;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
 }
 
 /* 3. Sélecteur de période */
@@ -1225,8 +1224,9 @@ a.p-logo { display: inline-flex; align-items: center; gap: 4px; min-height: 44px
   grid-template-columns: repeat(3, minmax(0, 1fr));  /* largeur fixe : le gras de l'onglet actif n'élargit rien */
   gap: 4px;
   padding: 4px;
+  border: 1px solid var(--color-line);
   border-radius: 14px;
-  background: var(--color-line);
+  background: var(--color-surface);
 }
 
 .p-segments a {
@@ -1241,19 +1241,14 @@ a.p-logo { display: inline-flex; align-items: center; gap: 4px; min-height: 44px
   text-decoration: none;
 }
 
-.p-segments a.active {
-  background: var(--color-surface);
-  color: var(--text);
-  font-weight: 700;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
-}
+.p-segments a.active { background: var(--text); color: var(--color-dark); font-weight: 800; }
 
 /* Ligne sous le sélecteur : même hauteur pour les 3 filtres */
 .profile .p-competition-slot { display: flex; align-items: center; height: 52px; margin-top: 8px; }
 
 .p-competition-pick { width: 100%; }
 
-.p-competition-pick select { width: 100%; height: 44px; margin: 0; background: var(--color-surface); }
+.p-competition-pick select { width: 100%; height: 44px; margin: 0; }
 
 .p-period-hint {
   width: 100%;
@@ -1278,16 +1273,17 @@ a.p-logo { display: inline-flex; align-items: center; gap: 4px; min-height: 44px
   align-items: center;
   gap: 20px;
   padding: 20px;
-  border-radius: 20px;
-  background: var(--color-dark);
+  border: 1px solid var(--color-line);
+  border-radius: 16px;
+  background: var(--color-surface);
   color: var(--text);
 }
 
 .p-ring { flex-shrink: 0; }
 
-.p-ring-value { fill: var(--text); font-size: 26px; font-weight: 800; }
+.p-ring-value { fill: var(--text); font-size: 28px; font-weight: 700; }
 
-.p-ring-label { fill: var(--text-2); font-size: 12px; }
+.p-ring-label { fill: var(--muted); font-size: 11px; }
 
 .p-ring-arc { transition: stroke-dashoffset 200ms ease; }
 
@@ -1295,14 +1291,14 @@ a.p-logo { display: inline-flex; align-items: center; gap: 4px; min-height: 44px
 
 .p-hero-text p { margin: 0; }
 
-.p-hero-label { color: var(--text-2); font-size: 14px; }
+.p-hero-label { color: var(--muted); font-size: 13px; }
 
-.p-hero-points { height: 44px; color: var(--color-primary); font-size: 40px; font-weight: 800; line-height: 1.1; white-space: nowrap; }
+.p-hero-points { height: 52px; color: var(--color-primary-on-dark); font-size: 48px; font-weight: 700; line-height: 1.1; white-space: nowrap; }
 
 .p-hero-sub {
   height: 19px;
   overflow: hidden;
-  color: var(--text-2);
+  color: var(--muted);
   font-size: 13px;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1320,22 +1316,25 @@ a.p-logo { display: inline-flex; align-items: center; gap: 4px; min-height: 44px
   flex-direction: column;
   gap: 2px;
   padding: 12px;
+  border: 1px solid var(--color-line);
   border-radius: 16px;
   background: var(--color-surface);
 }
 
+/* Séries : tuiles sur le fond de l'application */
 .p-tile-soft { background: var(--color-dark); }
 
-.p-tile strong { height: 29px; font-size: 26px; font-weight: 800; line-height: 1.1; white-space: nowrap; }
+.p-tile strong { height: 31px; font-size: 28px; font-weight: 700; line-height: 1.1; white-space: nowrap; }
 
-.p-tile span { overflow: hidden; color: var(--muted); font-size: 12px; line-height: 1.25; text-overflow: ellipsis; white-space: nowrap; }
+/* Libellé sur 2 lignes réservées : jamais tronqué, et la tuile garde sa hauteur */
+.p-tile span { min-height: 2.5em; color: var(--muted); font-size: 12px; line-height: 1.25; overflow-wrap: anywhere; }
 
 .p-exact-text { color: var(--good); }
 
 /* 6. Répartition */
 .p-stack {
   display: flex;
-  height: 12px;
+  height: 10px;
   margin-top: 12px;
   overflow: hidden;
   border-radius: 999px;
@@ -1346,19 +1345,20 @@ a.p-logo { display: inline-flex; align-items: center; gap: 4px; min-height: 44px
 
 .p-stack .p-exact { background: var(--good); }
 
-.p-stack .p-good { background: var(--good); }
+.p-stack .p-good { background: rgba(61, 214, 140, 0.45); }  /* --good à 45 % */
 
-.p-legend { margin: 12px 0 0; padding: 0; list-style: none; }
+/* 3 colonnes : pastille + libellé, pourcentage en gros dessous */
+.p-legend { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 12px 0 0; padding: 0; list-style: none; }
 
-.p-legend li { display: flex; align-items: center; gap: 8px; padding: 4px 0; font-size: 14px; }
+.p-legend li { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 2px 6px; color: var(--muted); font-size: 12px; line-height: 1.25; }
 
-.p-legend strong { min-width: 5ch; margin-left: auto; text-align: right; }  /* « 100 % » */
+.p-legend strong { grid-column: 1 / -1; color: var(--text); font: 700 22px var(--font-num); }
 
 .p-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
 
 .p-dot.p-exact { background: var(--good); }
 
-.p-dot.p-good { background: var(--good); }
+.p-dot.p-good { background: rgba(61, 214, 140, 0.45); }
 
 .p-dot.p-miss { background: var(--color-line); }
 
@@ -1394,10 +1394,12 @@ a.p-logo { display: inline-flex; align-items: center; gap: 4px; min-height: 44px
 .p-down { color: var(--bad); font-size: 12px; font-weight: 700; white-space: nowrap; }
 
 /* 8. Forme */
+/* 10 cases de 30 px au plus */
 .p-form {
   display: grid;
-  grid-template-columns: repeat(10, 1fr);
-  gap: 4px;
+  grid-template-columns: repeat(10, minmax(0, 30px));
+  justify-content: space-between;
+  gap: 2px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -1420,6 +1422,8 @@ a.p-logo { display: inline-flex; align-items: center; gap: 4px; min-height: 44px
 .p-form-exact { background: var(--good); color: var(--color-dark); }
 
 .p-form-good { background: var(--good-tint); color: var(--good); }
+
+.p-form li { font-family: var(--font-num); font-weight: 700; font-size: 16px; }
 
 .p-form-miss { background: var(--bad-tint); color: var(--bad); }
 
@@ -1450,13 +1454,14 @@ a.p-logo { display: inline-flex; align-items: center; gap: 4px; min-height: 44px
 
 .p-badges li { display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; }
 
+/* Badges : carrés arrondis de 54 px, pointillés tant qu'ils sont verrouillés */
 .p-badge-circle {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
+  width: 54px;
+  height: 54px;
+  border-radius: 16px;
 }
 
 .unlocked .p-badge-circle { background: var(--color-primary); color: var(--color-on-primary); }
@@ -1486,7 +1491,7 @@ a.p-logo { display: inline-flex; align-items: center; gap: 4px; min-height: 44px
 
 .p-share { background: var(--color-primary); color: var(--color-on-primary); }
 
-.p-challenge { border: 1px solid var(--color-line-strong); background: var(--color-surface); color: var(--text); }
+.p-challenge { border: 1px solid var(--color-line-strong); background: transparent; color: var(--text); }
 
 .p-share-status { margin: 0; text-align: center; overflow-wrap: anywhere; }
 
