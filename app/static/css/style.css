@@ -1505,6 +1505,7 @@ a.p-logo { display: inline-flex; align-items: center; gap: 4px; min-height: 44px
 .lg-card {
   display: block;
   padding: 16px;
+  border: 1px solid var(--color-line);
   border-radius: 16px;
   background: var(--color-surface);
   color: var(--text);
@@ -1664,7 +1665,8 @@ a.p-logo { display: inline-flex; align-items: center; gap: 4px; min-height: 44px
   height: 40px;
   margin-bottom: 16px;
   border-radius: 12px;
-  background: rgba(0, 0, 0, 0.12);
+  background: var(--color-dark);
+  color: var(--text);
 }
 
 .lg-join { display: flex; flex-direction: column; gap: 8px; padding: 12px; }
@@ -1690,7 +1692,7 @@ a.p-logo { display: inline-flex; align-items: center; gap: 4px; min-height: 44px
 
 .lg-empty { text-align: center; }
 
-.lg-empty-art { display: block; margin: 4px auto 8px; }
+.lg-empty-art { display: block; margin: 4px auto 8px; color: var(--text-2); }
 
 .lg-empty h2 { margin-bottom: 4px; }
 
@@ -1699,8 +1701,9 @@ a.p-logo { display: inline-flex; align-items: center; gap: 4px; min-height: 44px
   align-items: center;
   gap: 12px;
   padding: 16px;
+  border: 1px solid var(--color-line);
   border-radius: 16px;
-  background: var(--color-dark);
+  background: var(--color-surface);
   color: var(--text);
 }
 
@@ -1732,17 +1735,18 @@ a.p-logo { display: inline-flex; align-items: center; gap: 4px; min-height: 44px
 
 .lg-league-main { display: flex; flex-direction: column; flex: 1; min-width: 0; }
 
-.lg-league-name { font-size: 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lg-league-name { font-size: 16px; line-height: 1.25; overflow-wrap: anywhere; }
 
-.lg-league-main .lg-small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lg-league-main .lg-small { line-height: 1.3; }
 
 .lg-league-rank { display: flex; flex-direction: column; align-items: flex-end; flex-shrink: 0; }
 
-.lg-league-rank strong { font-size: 24px; font-weight: 800; line-height: 1.1; }
+.lg-league-rank strong { font-size: 30px; line-height: 1; }
 
-.lg-league-foot { display: flex; align-items: center; gap: 10px; margin-top: 12px; }
+/* Séparateur, puis avatars et dernière activité */
+.lg-league-foot { display: flex; align-items: center; gap: 10px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--color-line); }
 
-.lg-activity { flex: 1; min-width: 0; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lg-activity { flex: 1; min-width: 0; color: var(--text-2); font-size: 13px; line-height: 1.3; }
 
 /* --- Écran 2 : détail --- */
 .lg-hero {
