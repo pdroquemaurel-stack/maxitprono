@@ -10,49 +10,14 @@
   "en": "Burkina Faso"
  },
  {
-  "code": "DZ",
-  "fr": "Algérie",
-  "en": "Algeria"
- },
- {
-  "code": "AO",
-  "fr": "Angola",
-  "en": "Angola"
- },
- {
-  "code": "BJ",
-  "fr": "Bénin",
-  "en": "Benin"
- },
- {
   "code": "BW",
   "fr": "Botswana",
   "en": "Botswana"
  },
  {
-  "code": "BI",
-  "fr": "Burundi",
-  "en": "Burundi"
- },
- {
-  "code": "CV",
-  "fr": "Cap-Vert",
-  "en": "Cape Verde"
- },
- {
   "code": "CF",
   "fr": "République centrafricaine",
   "en": "Central African Republic"
- },
- {
-  "code": "KM",
-  "fr": "Comores",
-  "en": "Comoros"
- },
- {
-  "code": "CG",
-  "fr": "Congo",
-  "en": "Congo"
  },
  {
   "code": "CD",
@@ -65,49 +30,9 @@
   "en": "Ivory Coast"
  },
  {
-  "code": "DJ",
-  "fr": "Djibouti",
-  "en": "Djibouti"
- },
- {
   "code": "EG",
   "fr": "Égypte",
   "en": "Egypt"
- },
- {
-  "code": "GQ",
-  "fr": "Guinée équatoriale",
-  "en": "Equatorial Guinea"
- },
- {
-  "code": "ER",
-  "fr": "Érythrée",
-  "en": "Eritrea"
- },
- {
-  "code": "SZ",
-  "fr": "Eswatini",
-  "en": "Eswatini"
- },
- {
-  "code": "ET",
-  "fr": "Éthiopie",
-  "en": "Ethiopia"
- },
- {
-  "code": "GA",
-  "fr": "Gabon",
-  "en": "Gabon"
- },
- {
-  "code": "GM",
-  "fr": "Gambie",
-  "en": "Gambia"
- },
- {
-  "code": "GH",
-  "fr": "Ghana",
-  "en": "Ghana"
  },
  {
   "code": "GN",
@@ -120,14 +45,9 @@
   "en": "Guinea-Bissau"
  },
  {
-  "code": "KE",
-  "fr": "Kenya",
-  "en": "Kenya"
- },
- {
-  "code": "LS",
-  "fr": "Lesotho",
-  "en": "Lesotho"
+  "code": "JO",
+  "fr": "Jordanie",
+  "en": "Jordan"
  },
  {
   "code": "LR",
@@ -135,19 +55,9 @@
   "en": "Liberia"
  },
  {
-  "code": "LY",
-  "fr": "Libye",
-  "en": "Libya"
- },
- {
   "code": "MG",
   "fr": "Madagascar",
   "en": "Madagascar"
- },
- {
-  "code": "MW",
-  "fr": "Malawi",
-  "en": "Malawi"
  },
  {
   "code": "ML",
@@ -155,49 +65,9 @@
   "en": "Mali"
  },
  {
-  "code": "MR",
-  "fr": "Mauritanie",
-  "en": "Mauritania"
- },
- {
-  "code": "MU",
-  "fr": "Maurice",
-  "en": "Mauritius"
- },
- {
   "code": "MA",
   "fr": "Maroc",
   "en": "Morocco"
- },
- {
-  "code": "MZ",
-  "fr": "Mozambique",
-  "en": "Mozambique"
- },
- {
-  "code": "NA",
-  "fr": "Namibie",
-  "en": "Namibia"
- },
- {
-  "code": "NE",
-  "fr": "Niger",
-  "en": "Niger"
- },
- {
-  "code": "NG",
-  "fr": "Nigeria",
-  "en": "Nigeria"
- },
- {
-  "code": "RW",
-  "fr": "Rwanda",
-  "en": "Rwanda"
- },
- {
-  "code": "ST",
-  "fr": "Sao Tomé-et-Principe",
-  "en": "Sao Tome and Principe"
  },
  {
   "code": "SN",
@@ -205,238 +75,13 @@
   "en": "Senegal"
  },
  {
-  "code": "SC",
-  "fr": "Seychelles",
-  "en": "Seychelles"
- },
- {
   "code": "SL",
   "fr": "Sierra Leone",
   "en": "Sierra Leone"
  },
  {
-  "code": "SO",
-  "fr": "Somalie",
-  "en": "Somalia"
- },
- {
-  "code": "ZA",
-  "fr": "Afrique du Sud",
-  "en": "South Africa"
- },
- {
-  "code": "SS",
-  "fr": "Soudan du Sud",
-  "en": "South Sudan"
- },
- {
-  "code": "SD",
-  "fr": "Soudan",
-  "en": "Sudan"
- },
- {
-  "code": "TZ",
-  "fr": "Tanzanie",
-  "en": "Tanzania"
- },
- {
-  "code": "TG",
-  "fr": "Togo",
-  "en": "Togo"
- },
- {
   "code": "TN",
   "fr": "Tunisie",
   "en": "Tunisia"
- },
- {
-  "code": "UG",
-  "fr": "Ouganda",
-  "en": "Uganda"
- },
- {
-  "code": "ZM",
-  "fr": "Zambie",
-  "en": "Zambia"
- },
- {
-  "code": "ZW",
-  "fr": "Zimbabwe",
-  "en": "Zimbabwe"
- },
- {
-  "code": "DE",
-  "fr": "Allemagne",
-  "en": "Germany"
- },
- {
-  "code": "AT",
-  "fr": "Autriche",
-  "en": "Austria"
- },
- {
-  "code": "BE",
-  "fr": "Belgique",
-  "en": "Belgium"
- },
- {
-  "code": "DK",
-  "fr": "Danemark",
-  "en": "Denmark"
- },
- {
-  "code": "ES",
-  "fr": "Espagne",
-  "en": "Spain"
- },
- {
-  "code": "FR",
-  "fr": "France",
-  "en": "France"
- },
- {
-  "code": "GB",
-  "fr": "Royaume-Uni",
-  "en": "United Kingdom"
- },
- {
-  "code": "GR",
-  "fr": "Grèce",
-  "en": "Greece"
- },
- {
-  "code": "IE",
-  "fr": "Irlande",
-  "en": "Ireland"
- },
- {
-  "code": "IT",
-  "fr": "Italie",
-  "en": "Italy"
- },
- {
-  "code": "LU",
-  "fr": "Luxembourg",
-  "en": "Luxembourg"
- },
- {
-  "code": "NL",
-  "fr": "Pays-Bas",
-  "en": "Netherlands"
- },
- {
-  "code": "NO",
-  "fr": "Norvège",
-  "en": "Norway"
- },
- {
-  "code": "PL",
-  "fr": "Pologne",
-  "en": "Poland"
- },
- {
-  "code": "PT",
-  "fr": "Portugal",
-  "en": "Portugal"
- },
- {
-  "code": "RO",
-  "fr": "Roumanie",
-  "en": "Romania"
- },
- {
-  "code": "RU",
-  "fr": "Russie",
-  "en": "Russia"
- },
- {
-  "code": "CH",
-  "fr": "Suisse",
-  "en": "Switzerland"
- },
- {
-  "code": "SE",
-  "fr": "Suède",
-  "en": "Sweden"
- },
- {
-  "code": "TR",
-  "fr": "Turquie",
-  "en": "Turkey"
- },
- {
-  "code": "UA",
-  "fr": "Ukraine",
-  "en": "Ukraine"
- },
- {
-  "code": "CA",
-  "fr": "Canada",
-  "en": "Canada"
- },
- {
-  "code": "US",
-  "fr": "États-Unis",
-  "en": "United States"
- },
- {
-  "code": "MX",
-  "fr": "Mexique",
-  "en": "Mexico"
- },
- {
-  "code": "BR",
-  "fr": "Brésil",
-  "en": "Brazil"
- },
- {
-  "code": "AR",
-  "fr": "Argentine",
-  "en": "Argentina"
- },
- {
-  "code": "CN",
-  "fr": "Chine",
-  "en": "China"
- },
- {
-  "code": "IN",
-  "fr": "Inde",
-  "en": "India"
- },
- {
-  "code": "JP",
-  "fr": "Japon",
-  "en": "Japan"
- },
- {
-  "code": "SA",
-  "fr": "Arabie saoudite",
-  "en": "Saudi Arabia"
- },
- {
-  "code": "AE",
-  "fr": "Émirats arabes unis",
-  "en": "United Arab Emirates"
- },
- {
-  "code": "QA",
-  "fr": "Qatar",
-  "en": "Qatar"
- },
- {
-  "code": "LB",
-  "fr": "Liban",
-  "en": "Lebanon"
- },
- {
-  "code": "HT",
-  "fr": "Haïti",
-  "en": "Haiti"
- },
- {
-  "code": "AU",
-  "fr": "Australie",
-  "en": "Australia"
  }
 ]
