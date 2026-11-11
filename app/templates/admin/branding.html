@@ -60,9 +60,12 @@
     <div class="bp-preview" data-brand-preview
          style="{% for name, value in palette.css_variables().items() %}{{ name }}:{{ value }};{% endfor %}">
       <div class="bp-logo">{{ logo() }}</div>
-      <div class="bp-row">
-        <span class="badge todo">{{ t('branding_preview_pill') }}</span>
-        <span class="score-box filled bp-score">2</span>
+      {# Mini carte de match : pastille « à faire », case vide à remplir, case remplie #}
+      <div class="card bp-card">
+        <span class="mc-pill todo">{{ t('branding_preview_pill') }}</span>
+        <span class="mc-boxes">
+          <span class="score-box bp-todo">–</span><span class="dash">:</span><span class="score-box filled">2</span>
+        </span>
       </div>
       {% set tagline_start, tagline_end = split_tagline(branding.tagline_fr if lang == 'fr' else branding.tagline_en) %}
       <div class="bp-hero">
