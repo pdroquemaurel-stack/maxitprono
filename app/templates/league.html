@@ -84,7 +84,7 @@
       {% if trend %}
         {% set labels = (t('league_trend_home'), t('league_trend_draw'), t('league_trend_away')) %}
         <div class="lg-trend" role="img" aria-label="{{ t('league_trend_label').format(home=trend[0], draw=trend[1], away=trend[2]) }}">
-          {% for share in trend %}{% if share %}<span class="lg-trend-{{ loop.index }}" style="width: {{ share }}%">{% if share >= 12 %}{{ share }} %{% endif %}</span>{% endif %}{% endfor %}
+          {% for share in trend %}<span class="lg-trend-{{ loop.index }}" style="width: {{ share }}%">{% if share >= 12 %}{{ share }} %{% endif %}</span>{% endfor %}
         </div>
         <ul class="lg-trend-legend">
           {% for label in labels %}<li><span class="lg-dot lg-trend-{{ loop.index }}"></span>{{ label }} · {{ trend[loop.index0] }} %</li>{% endfor %}
