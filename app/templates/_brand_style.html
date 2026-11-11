@@ -1,4 +1,6 @@
 {# Couleurs de la marque (admin → Personnalisation) en variables CSS, utilisées par style.css.
    Valeurs toujours au format #RRGGBB, contrôlées à l'enregistrement. #}
-<meta name="theme-color" content="{{ brand_palette.primary }}">
+{# Thème sombre : le navigateur (mode sombre forcé d'Android, Samsung Internet) ne retouche pas les couleurs #}
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="{{ brand_palette.dark }}">
 <style>:root{ {%- for name, value in brand_palette.css_variables().items() %}{{ name }}:{{ value }};{% endfor -%} }</style>

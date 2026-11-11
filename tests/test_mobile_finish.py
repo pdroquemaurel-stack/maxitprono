@@ -24,19 +24,19 @@ def test_versioned_static_files_are_cached_one_year(client):
     response = client.get(static_url("css/style.css"))
     assert response.headers["cache-control"] == "public, max-age=31536000, immutable"
     assert "immutable" not in client.get("/static/css/style.css").headers.get("cache-control", "")
-    assert "immutable" in client.get("/static/fonts/outfit.woff2").headers["cache-control"]
+    assert "immutable" in client.get("/static/fonts/barlow-condensed-700.woff2").headers["cache-control"]
 
 
 def test_pages_use_versioned_css_and_plain_font_urls(client):
     page = client.get("/").text
     assert static_url("css/style.css") in page
-    assert 'href="/static/fonts/outfit.woff2"' in page  # même adresse que dans le CSS
+    assert 'href="/static/fonts/barlow-condensed-700.woff2"' in page  # même adresse que dans le CSS
 
 
 def test_icons_and_theme_color(client):
     page = client.get("/").text
     assert 'rel="icon"' in page and 'rel="apple-touch-icon"' in page
-    assert '<meta name="theme-color" content="#FF7900">' in page  # couleur principale
+    assert '<meta name="theme-color" content="#0B0E13">' in page  # couleur de fond
     favicon = client.get("/favicon.ico")
     assert favicon.status_code == 200 and favicon.headers["content-type"] == "image/png"
 

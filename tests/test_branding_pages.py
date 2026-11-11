@@ -13,7 +13,7 @@ from tests.test_match_pages import add_match, db_session  # noqa: F401
 DEFAULT_FORM = {"app_name": "MaxitProno", "logo_part1": "Maxit", "logo_part2": "Prono",
                 "publisher_name": "Max it", "tagline_fr": "Pronostique les scores. Défie tes amis.",
                 "tagline_en": "Predict the scores. Challenge your friends.",
-                "color_primary": "#FF7900", "color_dark": "#111111"}
+                "color_primary": "#FF7900", "color_dark": "#0B0E13"}
 VESTIAIRE = DEFAULT_FORM | {"app_name": "Mon Vestiaire", "logo_part1": "Mon",
                             "logo_part2": "Vestiaire", "publisher_name": "Le Club"}
 LOGO = 'Mon <span class="p-logo-pill">Vestiaire</span>'
@@ -108,7 +108,8 @@ def test_blue_then_light_yellow_switch_button_text(admin):
     page = admin.get("/").text
     assert brand_variable(page, "--color-primary") == "#1F6FEB"
     assert brand_variable(page, "--color-on-primary") == "#FFFFFF"  # texte blanc sur le bleu
-    assert '<meta name="theme-color" content="#1F6FEB">' in page
+    assert '<meta name="theme-color" content="#0B0E13">' in page  # la couleur de fond
+    assert '<meta name="color-scheme" content="dark">' in page
     assert 'fill="#1F6FEB"' in admin.get("/icon.svg").text
 
     save(admin, color_primary="#FFF7B0")
@@ -121,7 +122,7 @@ def test_dark_color_too_light_is_refused(admin):
     response = save(admin, color_dark="#EEEEEE")
     assert response.status_code == 400
     assert "le texte blanc posé dessus serait illisible" in response.text
-    assert brand_variable(admin.get("/").text, "--color-dark") == "#111111"
+    assert brand_variable(admin.get("/").text, "--color-dark") == "#0B0E13"
 
 
 def test_no_brand_color_left_in_css():

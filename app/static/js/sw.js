@@ -1,9 +1,9 @@
 // Service worker : affiche notre page « Pas de connexion » quand le réseau ne répond pas.
 // Il ne garde que cette page et ce qu'il faut pour l'afficher : les données restent toujours à jour.
-const CACHE = "maxitprono-offline-v1";
+const CACHE = "maxitprono-offline-v2";
 const OFFLINE_URL = "/offline";
 const ASSETS = [OFFLINE_URL, "/static/css/style.css", "/static/fonts/dm-sans.woff2",
-                "/static/fonts/outfit.woff2"];
+                "/static/fonts/barlow-condensed-700.woff2"];
 
 self.addEventListener("install", function (event) {
   event.waitUntil(caches.open(CACHE).then(function (cache) { return cache.addAll(ASSETS); })

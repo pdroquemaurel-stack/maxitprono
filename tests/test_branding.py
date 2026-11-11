@@ -9,7 +9,7 @@ from app.services.branding import (BLACK, WHITE, Branding, changed_fields, clean
 def valid_form(**changes) -> dict:
     form = {"app_name": "Mon Vestiaire", "logo_part1": "Mon", "logo_part2": "Vestiaire",
             "publisher_name": "Max it", "tagline_fr": "Pronostique. Gagne.",
-            "tagline_en": "Predict. Win.", "color_primary": "#1F6FEB", "color_dark": "#111111"}
+            "tagline_en": "Predict. Win.", "color_primary": "#1F6FEB", "color_dark": "#101828"}
     return form | changes
 
 
@@ -22,14 +22,38 @@ def test_mix_with_white_and_black():
     assert mix("#000000", WHITE, 0.5) == "#808080"
 
 
-def test_default_palette_matches_current_look():
-    # Les teintes calculées retombent sur celles de la charte (à 1/255 près pour l'encre)
-    colors = palette("#FF7900", "#111111")
-    assert colors.primary_pale == "#FFF3E8"
-    assert colors.primary_soft == "#FFE7D1"
-    assert colors.primary_ink == "#7A3A00"  # charte : #7A3900
-    assert colors.on_primary == BLACK  # texte noir sur l'orange, comme aujourd'hui
-    assert colors.dark == "#111111"
+def test_default_palette_is_dark_theme():
+    colors = palette("#FF7900", "#0B0E13")
+    assert Branding().color_dark == "#0B0E13"
+    assert colors.dark == "#0B0E13"
+    assert colors.on_primary == BLACK  # texte noir sur l'orange
+    assert colors.primary_tint == "rgba(255,121,0,0.14)"
+
+
+def test_dark_shades_are_mixes_with_white():
+    colors = palette("#FF7900", "#0B0E13")
+    assert colors.surface == mix("#0B0E13", WHITE, 0.06)
+    assert colors.raised == mix("#0B0E13", WHITE, 0.10)
+    assert colors.line == mix("#0B0E13", WHITE, 0.14)
+    assert colors.line_strong == mix("#0B0E13", WHITE, 0.22)
+    assert colors.primary_deep == mix("#FF7900", "#0B0E13", 0.85)
+
+
+def test_shades_get_lighter_in_order():
+    from app.services.branding import luminance
+    colors = palette("#FF7900", "#0B0E13")
+    steps = [colors.dark, colors.surface, colors.raised, colors.line, colors.line_strong]
+    assert [luminance(color) for color in steps] == sorted(luminance(color) for color in steps)
+
+
+def test_primary_on_dark_is_lightened_orange():
+    colors = palette("#FF7900", "#0B0E13")
+    assert colors.primary_on_dark == mix("#FF7900", WHITE, 0.25)  # ≈ #FF9A3D, déjà lisible
+
+
+def test_transparent():
+    from app.services.branding import transparent
+    assert transparent("#1F6FEB", 0.14) == "rgba(31,111,235,0.14)"
 
 
 def test_contrast_ratio_extremes():
@@ -48,21 +72,22 @@ def test_text_color_on_picks_best_contrast(background, text):
     assert contrast_ratio(background, text) >= 4.5
 
 
-@pytest.mark.parametrize("primary", ["#FF7900", "#1F6FEB", "#FFF7B0", "#00FF00", "#777777"])
-def test_derived_text_colors_are_always_readable(primary):
-    colors = palette(primary, "#111111")
-    assert contrast_ratio(colors.primary_ink, colors.primary_soft) >= 4.5
-    assert contrast_ratio(colors.primary_ink, colors.primary_pale) >= 4.5
-    assert contrast_ratio(colors.primary_text, WHITE) >= 4.5
+@pytest.mark.parametrize("primary", ["#FF7900", "#1F6FEB", "#FFF7B0", "#00FF00", "#777777", "#3A0CA3"])
+@pytest.mark.parametrize("dark", ["#0B0E13", "#101828", "#2B2B2B"])
+def test_derived_text_colors_are_always_readable(primary, dark):
+    colors = palette(primary, dark)
+    for background in (colors.dark, colors.surface, colors.raised):
+        assert contrast_ratio(colors.primary_on_dark, background) >= 4.5
     assert contrast_ratio(colors.primary, colors.on_primary) >= 4.5
 
 
 def test_css_variables_names():
-    variables = palette("#FF7900", "#111111").css_variables()
+    variables = palette("#FF7900", "#0B0E13").css_variables()
     assert variables["--color-primary"] == "#FF7900"
-    assert set(variables) == {"--color-primary", "--color-primary-pale", "--color-primary-soft",
-                              "--color-primary-ink", "--color-primary-text", "--color-on-primary",
-                              "--color-dark", "--color-dark-2"}
+    assert set(variables) == {"--color-primary", "--color-primary-on-dark", "--color-primary-tint",
+                              "--color-primary-deep", "--color-on-primary", "--color-dark",
+                              "--color-surface", "--color-raised", "--color-line",
+                              "--color-line-strong"}
 
 
 @pytest.mark.parametrize("text, expected", [

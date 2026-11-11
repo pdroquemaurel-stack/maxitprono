@@ -57,23 +57,31 @@
     return contrastRatio(BLACK, background) >= contrastRatio(WHITE, background) ? BLACK : WHITE;
   }
 
-  function darkenUntilReadable(color, background, start) {
+  // Mêmes calculs que palette() dans app/services/branding.py
+  function lightenUntilReadable(color, background, start) {
     var ratio = start;
-    while (ratio < 1 && contrastRatio(mix(color, BLACK, ratio), background) < MIN_CONTRAST) ratio += 0.02;
-    return mix(color, BLACK, Math.min(ratio, 1));
+    while (ratio < 1 && contrastRatio(mix(color, WHITE, ratio), background) < MIN_CONTRAST) ratio += 0.02;
+    return mix(color, WHITE, Math.min(ratio, 1));
+  }
+
+  function transparent(color, opacity) {
+    var rgb = toRgb(color);
+    return "rgba(" + rgb.join(",") + "," + opacity + ")";
   }
 
   function palette(primary, dark) {
-    var soft = mix(primary, WHITE, 0.82);
+    var raised = mix(dark, WHITE, 0.10);
     return {
       "--color-primary": primary,
-      "--color-primary-pale": mix(primary, WHITE, 0.91),
-      "--color-primary-soft": soft,
-      "--color-primary-ink": darkenUntilReadable(primary, soft, 0.52),
-      "--color-primary-text": darkenUntilReadable(primary, WHITE, 0.30),
+      "--color-primary-on-dark": lightenUntilReadable(primary, raised, 0.25),
+      "--color-primary-tint": transparent(primary, 0.14),
+      "--color-primary-deep": mix(primary, dark, 0.85),
       "--color-on-primary": textColorOn(primary),
       "--color-dark": dark,
-      "--color-dark-2": mix(dark, WHITE, 0.08)
+      "--color-surface": mix(dark, WHITE, 0.06),
+      "--color-raised": raised,
+      "--color-line": mix(dark, WHITE, 0.14),
+      "--color-line-strong": mix(dark, WHITE, 0.22)
     };
   }
 

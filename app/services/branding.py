@@ -25,7 +25,7 @@ class Branding:
     tagline_fr: str = "Pronostique les scores. Défie tes amis."
     tagline_en: str = "Predict the scores. Challenge your friends."
     color_primary: str = "#FF7900"
-    color_dark: str = "#111111"
+    color_dark: str = "#0B0E13"
 
     def tagline(self, lang: str) -> str:
         return self.tagline_en if lang == "en" else self.tagline_fr
@@ -77,25 +77,37 @@ def text_color_on(background: str) -> str:
     return BLACK if contrast_ratio(BLACK, background) >= contrast_ratio(WHITE, background) else WHITE
 
 
-def darken_until_readable(color: str, background: str, start: float) -> str:
-    """Assombrit `color` (mélange avec du noir, à partir de `start`) jusqu'à être lisible sur `background`."""
+def lighten_until_readable(color: str, background: str, start: float) -> str:
+    """Éclaircit `color` (mélange avec du blanc, à partir de `start`) jusqu'à être lisible sur `background`."""
     ratio = start
-    while ratio < 1 and contrast_ratio(mix(color, BLACK, ratio), background) < MIN_CONTRAST:
+    while ratio < 1 and contrast_ratio(mix(color, WHITE, ratio), background) < MIN_CONTRAST:
         ratio += 0.02
-    return mix(color, BLACK, min(ratio, 1))
+    return mix(color, WHITE, min(ratio, 1))
+
+
+def transparent(color: str, opacity: float) -> str:
+    """« #FF7900 », 0.14 -> « rgba(255,121,0,0.14) » : teinte légère posée sur le fond sombre."""
+    red, green, blue = hex_to_rgb(color)
+    return f"rgba({red},{green},{blue},{opacity})"
 
 
 @dataclass(frozen=True)
 class Palette:
-    """Variables CSS de la marque, injectées dans <style>:root{…}</style> (voir _brand_style.html)."""
-    primary: str  # boutons principaux, onglet actif, pastilles, cases remplies
-    primary_pale: str  # fond très léger (≈ #FFF3E8)
-    primary_soft: str  # fond doux (≈ #FFE7D1)
-    primary_ink: str  # texte sur fond pâle ou doux (≈ #7A3900)
-    primary_text: str  # texte (liens) de la couleur principale sur fond blanc (≈ #B34F00)
+    """Variables CSS de la marque, injectées dans <style>:root{…}</style> (voir _brand_style.html).
+
+    Thème sombre : `dark` est le fond de l'application, les autres fonds en sont des
+    éclaircissements (mélange avec du blanc).
+    """
+    primary: str  # boutons principaux, onglet actif, cases à remplir
+    primary_on_dark: str  # liens et textes de la couleur principale sur le fond sombre (≈ #FF9A3D)
+    primary_tint: str  # couleur principale à 14 % (pastilles « à faire »), en rgba
+    primary_deep: str  # fond d'une case de score vide à remplir
     on_primary: str  # texte posé sur la couleur principale : noir ou blanc
-    dark: str  # cartes héro, en-têtes noirs, sélections actives
-    dark_2: str  # carte secondaire sur fond sombre, ballon du héro
+    dark: str  # fond de l'application
+    surface: str  # cartes (≈ #151A21)
+    raised: str  # carte mise en avant, case de score remplie (≈ #1A1F27)
+    line: str  # bordures, séparateurs (≈ #232A33)
+    line_strong: str  # bordures de champs, pointillés (≈ #3A4350)
 
     def css_variables(self) -> dict[str, str]:
         return {"--color-" + name.replace("_", "-"): value for name, value in asdict(self).items()}
@@ -103,15 +115,18 @@ class Palette:
 
 def palette(primary: str, dark: str) -> Palette:
     """Toutes les teintes calculées à partir des deux couleurs choisies dans l'admin."""
-    soft = mix(primary, WHITE, 0.82)
+    raised = mix(dark, WHITE, 0.10)
     return Palette(primary=primary,
-                   primary_pale=mix(primary, WHITE, 0.91),
-                   primary_soft=soft,
-                   primary_ink=darken_until_readable(primary, soft, 0.52),
-                   primary_text=darken_until_readable(primary, WHITE, 0.30),
+                   # lisible sur le fond le plus clair où il apparaît (donc aussi sur le fond et les cartes)
+                   primary_on_dark=lighten_until_readable(primary, raised, 0.25),
+                   primary_tint=transparent(primary, 0.14),
+                   primary_deep=mix(primary, dark, 0.85),
                    on_primary=text_color_on(primary),
                    dark=dark,
-                   dark_2=mix(dark, WHITE, 0.08))
+                   surface=mix(dark, WHITE, 0.06),
+                   raised=raised,
+                   line=mix(dark, WHITE, 0.14),
+                   line_strong=mix(dark, WHITE, 0.22))
 
 
 def contrast_errors(primary: str, dark: str) -> dict[str, str]:
