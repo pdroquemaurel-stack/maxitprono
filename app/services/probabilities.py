@@ -5,7 +5,7 @@ des joueurs. Fonctions pures : aucune base, aucun réseau.
 """
 from dataclasses import dataclass
 
-MIN_PREDICTIONS_FOR_TRENDS = 5  # en dessous, la tendance n'a pas de sens : rien n'est affiché
+MIN_PREDICTIONS_FOR_TRENDS = 1  # dès le premier prono ; sans prono, la carte montre une barre neutre
 
 
 @dataclass(frozen=True)

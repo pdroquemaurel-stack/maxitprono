@@ -36,13 +36,21 @@ def test_trend_uses_players_not_provider(client, db_session):
     assert "LIO 0 % · Nul 0 % · ÉTA 100 %" in page and "55 %" not in page
 
 
-def test_no_bar_below_threshold_but_place_kept(client, db_session):
+def test_neutral_bar_without_any_prediction(client, db_session):
+    login(client)  # page privée : joueur connecté
+    add_match(db_session, 24)
+    page = client.get("/matches").text
+    assert 'class="mc-trend-bar mc-trend-empty"' in page  # 3 parts égales
+    assert "Aucun prono pour l&#39;instant" in page
+    assert 'class="mc-trend-bar"' not in page
+
+
+def test_real_bar_from_first_prediction(client, db_session):
     login(client)  # page privée : joueur connecté
     match = add_match(db_session, 24)
-    add_predictions(db_session, match, [(2, 0)] * (MIN_PREDICTIONS_FOR_TRENDS - 1))
+    add_predictions(db_session, match, [(2, 0)] * MIN_PREDICTIONS_FOR_TRENDS)
     page = client.get("/matches").text
-    assert 'class="mc-trend"' in page  # ligne gardée : même hauteur
-    assert 'class="mc-trend-bar"' not in page
+    assert 'class="mc-trend-bar"' in page and "LIO 100 % · Nul 0 % · ÉTA 0 %" in page
 
 
 def test_no_trend_on_closed_match(client, db_session):

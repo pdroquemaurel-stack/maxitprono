@@ -570,5 +570,6 @@
   "leaderboard_hint_general": "Tous les joueurs, toutes compétitions confondues.",
   "leaderboard_hint_country": "Les joueurs d'un même pays.",
   "leaderboard_hint_competition": "Les points gagnés sur une seule compétition.",
-  "leaderboard_hint_week": "Les points gagnés du lundi au dimanche."
+  "leaderboard_hint_week": "Les points gagnés du lundi au dimanche.",
+  "trend_none": "Aucun prono pour l'instant"
 }

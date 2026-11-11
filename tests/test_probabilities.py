@@ -33,7 +33,13 @@ def test_trends_hidden_below_threshold():
 
 def test_trends_shown_from_threshold():
     scores = [(0, 0)] * MIN_PREDICTIONS_FOR_TRENDS
-    assert player_trends(scores) == Probabilities(0, 100, 0, source="players", count=5)
+    assert player_trends(scores) == Probabilities(0, 100, 0, source="players",
+                                                  count=MIN_PREDICTIONS_FOR_TRENDS)
+
+
+def test_trends_shown_from_first_prediction():
+    assert player_trends([(2, 1)]) == Probabilities(100, 0, 0, source="players", count=1)
+    assert player_trends([]) is None
 
 
 def test_provider_probabilities_come_first():
@@ -46,4 +52,4 @@ def test_trends_used_without_provider_probabilities():
 
 
 def test_nothing_without_provider_or_enough_predictions():
-    assert match_probabilities(None, None, None, [(0, 1)]) is None
+    assert match_probabilities(None, None, None, []) is None

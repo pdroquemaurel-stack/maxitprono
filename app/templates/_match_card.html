@@ -83,13 +83,16 @@
   </div>
 
   {% if is_open %}
-    {# Tendance des joueurs ; la place est gardée même sans barre (moins de 5 pronos) #}
+    {# Tendance des joueurs ; sans aucun prono, barre neutre en 3 parts égales #}
     {% set trend = trends.get(match.id) %}
     <div class="mc-trend">
       {% if trend %}
         <span class="mc-trend-bar" aria-hidden="true"><span class="home" style="width: {{ trend.home }}%"></span><span class="draw" style="width: {{ trend.draw }}%"></span><span class="away" style="width: {{ trend.away }}%"></span></span>
         <span class="mc-trend-text" aria-hidden="true">{{ team_initials(match.home_team) }} {{ trend.home }} % · {{ t('trend_draw_short') }} {{ trend.draw }} % · {{ team_initials(match.away_team) }} {{ trend.away }} %</span>
         <span class="visually-hidden">{{ t('trend_label').format(home=match.home_team, away=match.away_team, h=trend.home, d=trend.draw, a=trend.away) }}</span>
+      {% else %}
+        <span class="mc-trend-bar mc-trend-empty" aria-hidden="true"><span class="home"></span><span class="draw"></span><span class="away"></span></span>
+        <span class="mc-trend-text">{{ t('trend_none') }}</span>
       {% endif %}
     </div>
   {% endif %}

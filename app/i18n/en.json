@@ -570,5 +570,6 @@
   "leaderboard_hint_general": "All players, all competitions.",
   "leaderboard_hint_country": "Players from the same country.",
   "leaderboard_hint_competition": "Points earned in a single competition.",
-  "leaderboard_hint_week": "Points earned from Monday to Sunday."
+  "leaderboard_hint_week": "Points earned from Monday to Sunday.",
+  "trend_none": "No picks yet"
 }

@@ -122,7 +122,7 @@ Un seul jeu de variables : n'en recréez pas de locales à une page.
      `--color-primary`, case remplie `--color-raised` + bordure `--color-line-strong`. Match en cours ou terminé :
      score réel, « Ton prono X : Y », pastille de points. Dessous, pour un match ouvert : tendance des joueurs
      (barre de 6 px domicile `--text` / nul `--color-line-strong` / extérieur `--color-primary`,
-     puis « FCB 78 % · Nul 12 % · KOE 10 % »), place gardée sous 5 pronos.
+     puis « FCB 78 % · Nul 12 % · KOE 10 % »), dès le premier prono ; sans aucun prono, barre neutre en 3 parts égales et « Aucun prono pour l'instant ».
    - Barre de validation : carte claire (`--text`, texte `--color-dark`) au-dessus de la navigation,
      « N pronos à faire », « Modifiable jusqu'à 10 min avant », bouton orange « Valider ».
 2. **Accueil joueur** : « Salut pseudo » 26 px, la veille (gains en `--good`), 3 tuiles (place, points en orange,

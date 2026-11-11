@@ -712,6 +712,9 @@ body.no-tabbar { padding-bottom: 0; }
 .mc-trend-bar .draw { background: var(--color-line-strong); }
 .mc-trend-bar .away { background: var(--color-primary); }
 
+/* Aucun prono : 3 parts égales */
+.mc-trend-empty > span { flex: 1; }
+
 .mc-trend-text { color: var(--muted); font-size: 12px; text-align: center; }
 
 /* Écusson : logo par-dessus les initiales, qui restent visibles s'il manque */
