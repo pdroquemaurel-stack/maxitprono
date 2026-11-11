@@ -6,7 +6,7 @@
 {% block content %}
   {% set base_url = '/leagues/%d' % league.id %}
 
-  {# 1. En-tête noir #}
+  {# 1. En-tête : retour, menu, icône, nom, 3 tuiles #}
   <section class="lg-hero">
     <div class="lg-hero-bar">
       <a class="lg-icon-btn" href="/leagues" aria-label="{{ t('leagues_title') }}">{{ icon('back') }}</a>
@@ -46,16 +46,17 @@
 
   {# 2. Invitation #}
   <section class="lg-card lg-invite">
+    {# Ligne du code : code, copier, « Inviter » (WhatsApp) #}
     <div class="lg-invite-code">
-      <span>
+      <span class="lg-invite-text">
         <span class="lg-label">{{ t('league_invite_code') }}</span>
         <strong class="lg-code">{{ format_code(league.code) }}</strong>
       </span>
       <button type="button" class="lg-icon-btn lg-copy" data-copy="{{ format_code(league.code) }}"
               data-copied="{{ t('league_code_copied') }}" aria-label="{{ t('league_copy_code') }}">{{ icon('copy', 22) }}</button>
+      <a class="lg-btn lg-btn-orange lg-invite-btn" href="{{ whatsapp_url }}" target="_blank" rel="noopener"
+         data-whatsapp data-share-text="{{ share_text }}" aria-label="{{ t('league_invite_whatsapp_short') }}">{{ icon('message', 18) }}<span>{{ t('league_invite_short') }}</span></a>
     </div>
-    <a class="lg-btn lg-btn-orange" href="{{ whatsapp_url }}" target="_blank" rel="noopener"
-       data-whatsapp data-share-text="{{ share_text }}">{{ icon('message', 20) }}<span>{{ t('league_invite_whatsapp_short') }}</span></a>
     <p class="lg-copy-status lg-small lg-muted" role="status" hidden></p>
   </section>
 

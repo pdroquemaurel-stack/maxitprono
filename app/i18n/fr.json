@@ -558,5 +558,6 @@
   "matchday_short": "J{number}",
   "card_your_pick": "Ton prono {home} : {away}",
   "trend_draw_short": "Nul",
-  "home_play_now": "À jouer maintenant"
+  "home_play_now": "À jouer maintenant",
+  "league_invite_short": "Inviter"
 }

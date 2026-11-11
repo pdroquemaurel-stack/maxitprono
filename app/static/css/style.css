@@ -408,7 +408,7 @@ body.no-tabbar { padding-bottom: 0; }
 
 
 /* Score coloré « x – y » (chiffres en Outfit) */
-.score-digits { font-family: var(--font-num); font-weight: 800; white-space: nowrap; }
+.score-digits { font-family: var(--font-num); font-weight: 700; white-space: nowrap; }
 
 .score-digits .dash { color: var(--faint); margin: 0 4px; }
 
@@ -1749,13 +1749,7 @@ a.p-logo { display: inline-flex; align-items: center; gap: 4px; min-height: 44px
 .lg-activity { flex: 1; min-width: 0; color: var(--text-2); font-size: 13px; line-height: 1.3; }
 
 /* --- Écran 2 : détail --- */
-.lg-hero {
-  padding: 8px 16px 16px;
-  border-radius: 20px;
-  background: var(--color-dark);
-  color: var(--text);
-  text-align: center;
-}
+.lg-hero { color: var(--text); text-align: center; }
 
 .lg-hero-bar { display: flex; justify-content: space-between; margin: 0 -8px 4px; }
 
@@ -1763,24 +1757,25 @@ a.p-logo { display: inline-flex; align-items: center; gap: 4px; min-height: 44px
 
 .lg-hero-sub { margin: 0; color: var(--muted); font-size: 13px; }
 
-.lg-hero-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 16px; }
+.lg-hero-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 16px; text-align: left; }
 
+/* Tuiles : libellé sur 2 lignes au besoin, gros chiffre en bas */
 .lg-stat {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  padding: 10px 6px;
-  border-radius: 12px;
-  background: var(--color-raised);
+  gap: 4px;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid var(--color-line);
+  border-radius: 16px;
+  background: var(--color-surface);
 }
 
-.lg-stat span { color: var(--muted); font-size: 11px; line-height: 1.2; }
+.lg-stat span { color: var(--muted); font-size: 12px; font-weight: 600; line-height: 1.25; overflow-wrap: anywhere; }
 
-.lg-stat strong { font-size: 20px; font-weight: 800; }
+.lg-stat strong { margin-top: auto; font-size: 28px; line-height: 1.1; white-space: nowrap; }
 
-.lg-stat-me { background: var(--color-primary); }
-
-.lg-stat-me span, .lg-stat-me strong { color: var(--color-on-primary); }
+.lg-stat-me strong { color: var(--color-primary-on-dark); }
 
 .lg-menu { position: relative; }
 
@@ -1814,11 +1809,17 @@ a.p-logo { display: inline-flex; align-items: center; gap: 4px; min-height: 44px
 
 .lg-menu-list .lg-menu-danger { color: var(--bad); }
 
-.lg-invite-code { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.lg-invite { padding: 12px 12px 12px 16px; }
 
-.lg-code { font-size: 22px; font-weight: 800; letter-spacing: 0.04em; }
+.lg-invite-code { display: flex; align-items: center; gap: 8px; }
 
-.lg-copy { background: var(--color-dark); }
+.lg-invite-text { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+
+.lg-code { font-size: 24px; letter-spacing: 0.04em; white-space: nowrap; }
+
+.lg-copy { border: 1px solid var(--color-line-strong); color: var(--text); }
+
+.lg-invite-btn { flex: none; width: auto; min-height: 44px; margin: 0; padding: 0 14px; }
 
 .lg-copy-status { margin: 8px 0 0; text-align: center; overflow-wrap: anywhere; }
 
@@ -1849,8 +1850,8 @@ a.p-logo { display: inline-flex; align-items: center; gap: 4px; min-height: 44px
 
 .lg-trend span { display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; white-space: nowrap; }
 
-.lg-trend-1 { background: var(--color-dark); color: var(--text); }
-.lg-trend-2 { background: var(--muted); color: var(--text); }
+.lg-trend-1 { background: var(--text); color: var(--color-dark); }
+.lg-trend-2 { background: var(--color-line-strong); color: var(--text); }
 .lg-trend-3 { background: var(--color-primary); color: var(--color-on-primary); }
 
 .lg-trend-legend { display: flex; flex-wrap: wrap; gap: 4px 12px; margin: 8px 0 0; padding: 0; list-style: none; color: var(--muted); font-size: 12px; }
@@ -1861,13 +1862,16 @@ a.p-logo { display: inline-flex; align-items: center; gap: 4px; min-height: 44px
 
 .lg-played { display: flex; align-items: center; gap: 10px; margin-top: 12px; }
 
+/* Sélecteur segmenté : onglets de largeur fixe, actif clair */
 .lg-segments {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-auto-columns: minmax(0, 1fr);
+  grid-auto-flow: column;
   gap: 4px;
   padding: 4px;
+  border: 1px solid var(--color-line);
   border-radius: 14px;
-  background: var(--color-line);
+  background: var(--color-surface);
 }
 
 .lg-segments a {
@@ -1882,7 +1886,7 @@ a.p-logo { display: inline-flex; align-items: center; gap: 4px; min-height: 44px
   text-decoration: none;
 }
 
-.lg-segments a.active { background: var(--color-surface); color: var(--text); font-weight: 700; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5); }
+.lg-segments a.active { background: var(--text); color: var(--color-dark); font-weight: 800; }
 
 /* Podium 2 – 1 – 3 */
 .lg-podium { display: flex; align-items: flex-end; justify-content: center; gap: 8px; margin: 0; padding: 0; list-style: none; }
@@ -1891,9 +1895,11 @@ a.p-logo { display: inline-flex; align-items: center; gap: 4px; min-height: 44px
 
 .lg-crown { color: var(--color-primary); }
 
-.lg-podium-name { max-width: 100%; font-size: 14px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lg-podium-card { padding-bottom: 0; overflow: hidden; }
 
-.lg-podium-points { color: var(--muted); font-size: 13px; font-weight: 700; }
+.lg-podium-name { max-width: 100%; font-size: 14px; font-weight: 700; line-height: 1.25; text-align: center; overflow-wrap: anywhere; }
+
+.lg-podium-points { color: var(--muted); font-size: 15px; }
 
 .lg-step-block {
   display: flex;
@@ -1902,13 +1908,13 @@ a.p-logo { display: inline-flex; align-items: center; gap: 4px; min-height: 44px
   width: 100%;
   padding-top: 8px;
   border-radius: 12px 12px 0 0;
-  font-size: 22px;
-  font-weight: 800;
+  font-size: 26px;
 }
 
-.lg-step-1 .lg-step-block { height: 84px; background: var(--color-primary); color: var(--color-on-primary); }
-.lg-step-2 .lg-step-block { height: 60px; background: var(--color-line); }
-.lg-step-3 .lg-step-block { height: 44px; background: var(--color-primary-tint); color: var(--color-primary-on-dark); }
+/* Marches : 1er orange (88 px), 2e filet, 3e surélevé */
+.lg-step-1 .lg-step-block { height: 88px; background: var(--color-primary); color: var(--color-on-primary); }
+.lg-step-2 .lg-step-block { height: 64px; background: var(--color-line); color: var(--text); }
+.lg-step-3 .lg-step-block { height: 48px; background: var(--color-raised); color: var(--text); }
 
 /* Liste à partir du 4e */
 .lg-rows { margin: 12px 0 0; padding: 4px 8px; list-style: none; }
@@ -1919,15 +1925,15 @@ a.p-logo { display: inline-flex; align-items: center; gap: 4px; min-height: 44px
 
 .lg-row.me { background: var(--color-primary-tint); border-top-color: transparent; }
 
-.lg-row-rank { width: 22px; flex-shrink: 0; color: var(--muted); font-weight: 700; text-align: center; }
+.lg-row-rank { width: 24px; flex-shrink: 0; color: var(--muted); font: 700 20px var(--font-num); text-align: center; }
 
 .lg-row-player { display: flex; flex-direction: column; flex: 1; min-width: 0; }
 
-.lg-row-player strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lg-row-player strong { line-height: 1.25; overflow-wrap: anywhere; }
 
 .lg-row-player small { color: var(--muted); font-size: 12px; }
 
-.lg-row-points { min-width: 32px; font-size: 17px; font-weight: 800; text-align: right; }
+.lg-row-points { min-width: 36px; font-size: 22px; text-align: right; }
 
 .lg-more { display: flex; align-items: center; justify-content: center; min-height: 44px; font-size: 14px; }
 
@@ -1956,9 +1962,11 @@ a.p-logo { display: inline-flex; align-items: center; gap: 4px; min-height: 44px
 
 .lg-picks li + li { border-top: 1px solid var(--color-line); }
 
-.lg-picks-name { flex: 1; min-width: 0; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lg-picks-name { flex: 1; min-width: 0; font-weight: 600; overflow-wrap: anywhere; }
 
-.lg-picks-score .score-digits { font-size: 17px; }
+.lg-picks-score .score-digits { font-size: 22px; }
+
+.lg-final-score .score-digits { font-weight: 700; }
 
 .lg-pts { min-width: 36px; padding: 2px 8px; border-radius: 999px; font: 700 15px var(--font-num); text-align: center; }
 
