@@ -20,7 +20,9 @@ dans `docs/design/v2/` font foi. L'ancienne charte (thème clair) est archivée 
 ### Couleurs de la marque : réglées dans l'admin, jamais en dur
 Admin → Personnalisation enregistre deux couleurs. `palette()` (`app/services/branding.py`, testée dans
 `tests/test_branding.py`) en calcule toutes les teintes, injectées dans `<head>` par `_brand_style.html`.
-Le même calcul existe en JS (`app/static/js/branding.js`) pour l'aperçu en direct : les deux doivent rester identiques.
+Les ratios ont été choisis pour retomber au plus près des valeurs de la maquette
+(≈ #151A21, #1A1F27, #232A33, #3A4350, #1C1510) : avec un fond neutre, le résultat est gris, le léger bleuté
+de la maquette ne vient que d'un fond lui-même bleuté. Le même calcul existe en JS (`app/static/js/branding.js`) pour l'aperçu en direct : les deux doivent rester identiques.
 
 | Variable | Défaut | Calcul | Rôle |
 |---|---|---|---|
@@ -28,12 +30,12 @@ Le même calcul existe en JS (`app/static/js/branding.js`) pour l'aperçu en dir
 | `--color-on-primary` | `#000000` | noir ou blanc, le plus contrasté | texte posé sur `--color-primary` |
 | `--color-primary-on-dark` | `#FF9A40` | principale + 25 % de blanc, puis plus si contraste < 4.5:1 sur `--color-raised` | liens, textes et chiffres de la couleur principale sur fond sombre |
 | `--color-primary-tint` | `rgba(255,121,0,0.14)` | principale à 14 % | pastilles « à faire », fond de ma ligne |
-| `--color-primary-deep` | `#301E10` | `mix(primary, dark, 0.85)` | fond d'une case de score vide à remplir |
+| `--color-primary-deep` | `#1C1512` | `mix(primary, dark, 0.93)` | fond d'une case de score vide à remplir |
 | `--color-dark` | `#0B0E13` | choisie (texte blanc lisible dessus, contrôlé) | **fond de l'application**, barre de navigation, champs |
-| `--color-surface` | `#1A1C21` | `mix(dark, blanc, 0.06)` | cartes |
-| `--color-raised` | `#23262B` | `mix(dark, blanc, 0.10)` | carte mise en avant, case remplie, avatars aux initiales |
-| `--color-line` | `#2D3034` | `mix(dark, blanc, 0.14)` | bordures de cartes, séparateurs, pistes de barres |
-| `--color-line-strong` | `#414347` | `mix(dark, blanc, 0.22)` | bordures de champs et de boutons secondaires, pointillés |
+| `--color-surface` | `#16191E` | `mix(dark, blanc, 0.045)` | cartes |
+| `--color-raised` | `#1B1E22` | `mix(dark, blanc, 0.065)` | carte mise en avant, case remplie, avatars aux initiales |
+| `--color-line` | `#26292D` | `mix(dark, blanc, 0.11)` | bordures de cartes, séparateurs, pistes de barres |
+| `--color-line-strong` | `#3C3E42` | `mix(dark, blanc, 0.20)` | bordures de champs et de boutons secondaires, pointillés |
 
 ### Couleurs fixes (`:root` de `app/static/css/style.css`)
 ```css
@@ -51,11 +53,11 @@ Un seul jeu de variables : n'en recréez pas de locales à une page.
 ### Contrastes (défauts)
 | Texte | sur `--color-dark` | sur `--color-surface` | sur `--color-raised` |
 |---|---|---|---|
-| `--text` | 17.5:1 | 15.5:1 | 13.8:1 |
-| `--text-2` | 12.5:1 | 11.1:1 | 9.9:1 |
-| `--muted` | 7.7:1 | 6.8:1 | 6.0:1 |
-| `--color-primary-on-dark` | 9.2:1 | 8.1:1 | ≥ 4.5:1 (garanti par le calcul) |
-| `--faint` | 3.3:1 | 2.9:1 | — réservé au décoratif |
+| `--text` | 17.5:1 | 16.0:1 | 15.2:1 |
+| `--text-2` | 12.5:1 | 11.4:1 | 10.9:1 |
+| `--muted` | 7.7:1 | 7.0:1 | 6.6:1 |
+| `--color-primary-on-dark` | 9.2:1 | 8.3:1 | 7.9:1 (≥ 4.5:1 garanti par le calcul) |
+| `--faint` | 3.3:1 | 3.0:1 | — réservé au décoratif |
 
 ### Règles
 - Texte sur `--color-primary` : toujours `--color-on-primary`.

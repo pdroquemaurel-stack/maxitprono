@@ -70,18 +70,18 @@
   }
 
   function palette(primary, dark) {
-    var raised = mix(dark, WHITE, 0.10);
+    var raised = mix(dark, WHITE, 0.065);
     return {
       "--color-primary": primary,
       "--color-primary-on-dark": lightenUntilReadable(primary, raised, 0.25),
       "--color-primary-tint": transparent(primary, 0.14),
-      "--color-primary-deep": mix(primary, dark, 0.85),
+      "--color-primary-deep": mix(primary, dark, 0.93),
       "--color-on-primary": textColorOn(primary),
       "--color-dark": dark,
-      "--color-surface": mix(dark, WHITE, 0.06),
+      "--color-surface": mix(dark, WHITE, 0.045),
       "--color-raised": raised,
-      "--color-line": mix(dark, WHITE, 0.14),
-      "--color-line-strong": mix(dark, WHITE, 0.22)
+      "--color-line": mix(dark, WHITE, 0.11),
+      "--color-line-strong": mix(dark, WHITE, 0.20)
     };
   }
 

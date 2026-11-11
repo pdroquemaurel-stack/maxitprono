@@ -32,11 +32,12 @@ def test_default_palette_is_dark_theme():
 
 def test_dark_shades_are_mixes_with_white():
     colors = palette("#FF7900", "#0B0E13")
-    assert colors.surface == mix("#0B0E13", WHITE, 0.06)
-    assert colors.raised == mix("#0B0E13", WHITE, 0.10)
-    assert colors.line == mix("#0B0E13", WHITE, 0.14)
-    assert colors.line_strong == mix("#0B0E13", WHITE, 0.22)
-    assert colors.primary_deep == mix("#FF7900", "#0B0E13", 0.85)
+    # Au plus près des valeurs de la charte (≈ #151A21, #1A1F27, #232A33, #3A4350, #1C1510)
+    assert colors.surface == "#16191E"
+    assert colors.raised == "#1B1E22"
+    assert colors.line == "#26292D"
+    assert colors.line_strong == "#3C3E42"
+    assert colors.primary_deep == "#1C1512"
 
 
 def test_shades_get_lighter_in_order():

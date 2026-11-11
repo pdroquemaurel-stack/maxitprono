@@ -101,13 +101,13 @@ class Palette:
     primary: str  # boutons principaux, onglet actif, cases à remplir
     primary_on_dark: str  # liens et textes de la couleur principale sur le fond sombre (≈ #FF9A3D)
     primary_tint: str  # couleur principale à 14 % (pastilles « à faire »), en rgba
-    primary_deep: str  # fond d'une case de score vide à remplir
+    primary_deep: str  # fond d'une case de score vide à remplir (#1C1512, ≈ #1C1510)
     on_primary: str  # texte posé sur la couleur principale : noir ou blanc
     dark: str  # fond de l'application
-    surface: str  # cartes (≈ #151A21)
-    raised: str  # carte mise en avant, case de score remplie (≈ #1A1F27)
-    line: str  # bordures, séparateurs (≈ #232A33)
-    line_strong: str  # bordures de champs, pointillés (≈ #3A4350)
+    surface: str  # cartes (#16191E par défaut, charte ≈ #151A21)
+    raised: str  # carte mise en avant, case de score remplie (#1B1E22, ≈ #1A1F27)
+    line: str  # bordures, séparateurs (#26292D, ≈ #232A33)
+    line_strong: str  # bordures de champs, pointillés (#3C3E42, ≈ #3A4350)
 
     def css_variables(self) -> dict[str, str]:
         return {"--color-" + name.replace("_", "-"): value for name, value in asdict(self).items()}
@@ -115,18 +115,18 @@ class Palette:
 
 def palette(primary: str, dark: str) -> Palette:
     """Toutes les teintes calculées à partir des deux couleurs choisies dans l'admin."""
-    raised = mix(dark, WHITE, 0.10)
+    raised = mix(dark, WHITE, 0.065)
     return Palette(primary=primary,
                    # lisible sur le fond le plus clair où il apparaît (donc aussi sur le fond et les cartes)
                    primary_on_dark=lighten_until_readable(primary, raised, 0.25),
                    primary_tint=transparent(primary, 0.14),
-                   primary_deep=mix(primary, dark, 0.85),
+                   primary_deep=mix(primary, dark, 0.93),
                    on_primary=text_color_on(primary),
                    dark=dark,
-                   surface=mix(dark, WHITE, 0.06),
+                   surface=mix(dark, WHITE, 0.045),
                    raised=raised,
-                   line=mix(dark, WHITE, 0.14),
-                   line_strong=mix(dark, WHITE, 0.22))
+                   line=mix(dark, WHITE, 0.11),
+                   line_strong=mix(dark, WHITE, 0.20))
 
 
 def contrast_errors(primary: str, dark: str) -> dict[str, str]:
